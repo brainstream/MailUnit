@@ -76,6 +76,7 @@ void Session::read()
 //            std::string str;
 //            std::getline(is, str);
 
+
             size_t size = m_buffer.size();
             char * str_data = new char[size + 1];
             memset(str_data, 0, size + 1);

@@ -37,6 +37,8 @@ set(SRC
     src/Smtp/Server.cpp
     src/Smtp/SessionProvider.h
     src/Smtp/SessionProvider.cpp
+    src/Smtp/SessionStateMachine.h
+    src/Smtp/SessionStateMachine.cpp
     src/Smtp/Message.h
 )
 
