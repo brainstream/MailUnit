@@ -17,12 +17,16 @@ public:
     {
         bool ready;
         std::string message;
-    };
+    }; // struct Response
 
 public:
     SessionStateMachine();
     ~SessionStateMachine();
+    Response start();
     Response pushRequest(const std::string & _string);
+
+private:
+    Response getResponse();
 
 private:
     Private * mp_private;

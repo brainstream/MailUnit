@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 #include "SessionProvider.h"
+#include "SessionStateMachine.h"
 
 using namespace StubMTP::Smtp;
 
@@ -10,6 +11,7 @@ class Session : public std::enable_shared_from_this<Session>
 {
 public:
     Session(boost::asio::ip::tcp::socket _socket, std::shared_ptr<SessionProvider> _provider);
+    ~Session();
     void start();
 
 private:
@@ -20,6 +22,7 @@ private:
     boost::asio::ip::tcp::socket m_socket;
     std::shared_ptr<SessionProvider> m_provider_ptr;
     boost::asio::streambuf m_buffer; // TODO: move to the using point!
+    SessionStateMachine * mp_state_machine;
 }; // class Session
 
 } // namespace
@@ -40,13 +43,23 @@ void SessionProvider::startNewSession(boost::asio::ip::tcp::socket _socket)
 
 Session::Session(boost::asio::ip::tcp::socket _socket, std::shared_ptr<SessionProvider> _provider) :
     m_socket(std::move(_socket)),
-    m_provider_ptr(_provider)
+    m_provider_ptr(_provider),
+    mp_state_machine(new SessionStateMachine())
 {
+}
+
+Session::~Session()
+{
+    delete mp_state_machine;
 }
 
 void Session::start()
 {
-    write("220 [127.0.0.1] Stub Mail Transfer Service Ready\n");
+    SessionStateMachine::Response response = mp_state_machine->start();
+    if(response.ready)
+        write(response.message);
+    else
+        read();
 }
 
 void Session::write(const std::string & _message)
@@ -84,18 +97,10 @@ void Session::read()
             std::string str(str_data);
             delete [] str_data;
 
-            std::cout << "data: " << str << std::endl;
-            std::cout.flush();
-            m_buffer.consume(m_buffer.size());
-            if(::strncmp(str.c_str(), "DATA", 4) == 0)
-            {
-                until = "\r\n.\r\n";
-                write("354 Intermediate\n");
-                return;
-            } else if(until.size() > 2)
-            {
-                until = "\r\n";
-            }
-            write("250 OK\n");
+            SessionStateMachine::Response respoinse = mp_state_machine->pushRequest(str);
+            if(respoinse.ready)
+                write(respoinse.message);
+            else
+                read();
         });
 }
