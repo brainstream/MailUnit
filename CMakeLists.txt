@@ -35,11 +35,19 @@ set(SRC
     src/SmtpController.cpp
     src/Smtp/Server.h
     src/Smtp/Server.cpp
+    src/Smtp/ResponseCode.h
+    src/Smtp/ResponseCode.cpp
     src/Smtp/SessionProvider.h
     src/Smtp/SessionProvider.cpp
-    src/Smtp/SessionStateMachine.h
-    src/Smtp/SessionStateMachine.cpp
     src/Smtp/Message.h
+    src/Smtp/StateMachine/StateMachine.h
+    src/Smtp/StateMachine/StateBase.h
+    src/Smtp/StateMachine/StartState.h
+    src/Smtp/StateMachine/EhloState.h
+    src/Smtp/StateMachine/MailFromState.h
+    src/Smtp/StateMachine/RcptToState.h
+    src/Smtp/StateMachine/DataState.h
+    src/Smtp/StateMachine/QuitState.h
 )
 
 set(LIBS
