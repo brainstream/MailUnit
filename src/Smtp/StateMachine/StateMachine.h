@@ -56,7 +56,8 @@ public:
         _row< MailFromState, RcptToEvent,   RcptToState   >,
         _row< RcptToState,   RcptToEvent,   RcptToState   >,
         _row< RcptToState,   DataEvent,     DataState     >,
-        _row< RcptToState,   QuitEvent,     QuitState     >
+        _row< RcptToState,   QuitEvent,     QuitState     >,
+        _row< DataState,     QuitEvent,     QuitState     >
     > { };
 }; // class StateMachineDef
 

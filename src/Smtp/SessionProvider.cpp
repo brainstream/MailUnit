@@ -28,10 +28,11 @@ private:
     void processInput(const std::string & _input);
 
 private:
+    static const size_t s_buffer_size = 1024;
     boost::asio::ip::tcp::socket m_socket;
     std::shared_ptr<SessionProvider> m_provider_ptr;
-    boost::asio::streambuf m_buffer; // TODO: move to the using point!
     StateMachine * mp_state_machine;
+    char * m_buffer;
 }; // class Session
 
 } // namespace
@@ -55,13 +56,15 @@ void SessionProvider::startNewSession(boost::asio::ip::tcp::socket _socket)
 Session::Session(boost::asio::ip::tcp::socket _socket, std::shared_ptr<SessionProvider> _provider) :
     m_socket(std::move(_socket)),
     m_provider_ptr(_provider),
-    mp_state_machine(new StateMachine())
+    mp_state_machine(new StateMachine()),
+    m_buffer(new char[s_buffer_size])
 {
 }
 
 Session::~Session()
 {
     delete mp_state_machine;
+    delete [] m_buffer;
 }
 
 void Session::start()
@@ -74,6 +77,8 @@ void Session::performNextAction()
     int state_id = mp_state_machine->current_state()[0];
     StateBase * state = mp_state_machine->get_state_by_id(state_id);
     ResponseCode response;
+    if(state->isProtocolProcessingCompleted())
+        return;
     if(state->response(&response))
         write(translateResponseCode(response));
     else
@@ -92,30 +97,19 @@ void Session::write(const std::string & _message)
 
 void Session::read()
 {
-    static std::string until("\r\n");
-    m_buffer.prepare(1024);
-
     auto self(shared_from_this());
-    boost::asio::async_read_until(m_socket, m_buffer, '\n',
+    m_socket.async_receive(boost::asio::buffer(m_buffer, s_buffer_size - 1),
         [this, self](const boost::system::error_code & ec, std::size_t length)
         {
-            if(ec) return;
-            m_buffer.commit(length);
-            std::istream is(&m_buffer);
-            size_t size = m_buffer.size();
-            char * str_data = new char[size + 1];
-            memset(str_data, 0, size + 1);
-            is.readsome(str_data, size);
-            std::string str(str_data);
-            delete [] str_data;
-            processInput(str);
+            if(ec) return; // TODO: log
+            m_buffer[length] = '\0';
+            processInput(m_buffer);
             performNextAction();
         });
 }
 
 void Session::processInput(const std::string & _input)
 {
-    std::cout << _input;
     int state_id = mp_state_machine->current_state()[0];
     StateBase * state = mp_state_machine->get_state_by_id(state_id);
     if(!state->isInutProcessingCompleted())
