@@ -4,13 +4,12 @@
 #include <boost/msm/front/state_machine_def.hpp>
 #include <boost/msm/back/state_machine.hpp>
 #include <boost/mpl/vector.hpp>
-
-#include "StartState.h"
-#include "EhloState.h"
-#include "MailFromState.h"
-#include "RcptToState.h"
-#include "DataState.h"
-#include "QuitState.h"
+#include <StubMTP/Smtp/StateMachine/StartState.h>
+#include <StubMTP/Smtp/StateMachine/EhloState.h>
+#include <StubMTP/Smtp/StateMachine/MailFromState.h>
+#include <StubMTP/Smtp/StateMachine/RcptToState.h>
+#include <StubMTP/Smtp/StateMachine/DataState.h>
+#include <StubMTP/Smtp/StateMachine/QuitState.h>
 
 namespace StubMTP {
 namespace Smtp {

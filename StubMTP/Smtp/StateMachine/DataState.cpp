@@ -1,5 +1,5 @@
-#include "DataState.h"
-#include "../ProtocolDef.h"
+#include <StubMTP/Smtp/StateMachine/DataState.h>
+#include <StubMTP/Smtp/ProtocolDef.h>
 
 #define COMMAND SMTP_CMD_DATA SMTP_NEWLINE
 

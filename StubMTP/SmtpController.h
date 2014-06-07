@@ -1,7 +1,7 @@
 #ifndef __STUBMTP_SMTPCONTROLLER_H__
 #define __STUBMTP_SMTPCONTROLLER_H__
 
-#include "Smtp/SessionProvider.h"
+#include <StubMTP/Smtp/SessionProvider.h>
 
 namespace StubMTP {
 

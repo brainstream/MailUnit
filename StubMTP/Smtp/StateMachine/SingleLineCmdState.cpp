@@ -1,5 +1,5 @@
-#include "SingleLineCmdState.h"
-#include "../ProtocolDef.h"
+#include <StubMTP/Smtp/StateMachine/SingleLineCmdState.h>
+#include <StubMTP/Smtp/ProtocolDef.h>
 
 using namespace StubMTP::Smtp;
 

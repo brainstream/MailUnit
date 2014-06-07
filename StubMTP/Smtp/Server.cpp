@@ -1,5 +1,5 @@
 #include <iostream>
-#include "Server.h"
+#include <StubMTP/Smtp/Server.h>
 
 using namespace StubMTP::Smtp;
 

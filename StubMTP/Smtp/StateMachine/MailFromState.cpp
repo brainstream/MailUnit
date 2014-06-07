@@ -1,26 +1,22 @@
-#include "RcptToState.h"
-#include "../ProtocolDef.h"
+#include <StubMTP/Smtp/StateMachine/MailFromState.h>
+#include <StubMTP/Smtp/ProtocolDef.h>
 
-#define COMMAND SMTP_CMD_RCPT " TO:"
+#define COMMAND SMTP_CMD_MAIL " FROM:"
 
 using namespace StubMTP::Smtp;
 
-RcptToState::RcptToState() :
+MailFromState::MailFromState() :
     SingleLineCmdState(sizeof(COMMAND) - 1)
 {
 }
 
-void RcptToState::processInput(const std::string & _input, Message & _message)
+void MailFromState::processInput(const std::string & _input, Message & _message)
 {
     if(internalProcessInput(_input) == ProcessResult::Success)
-    {
-        std::string to;
-        if(commandArgString(to))
-            _message.to.push_back(to);
-    }
+        commandArgString(_message.from);
 }
 
-bool RcptToState::response(ResponseCode * _response) const
+bool MailFromState::response(ResponseCode * _response) const
 {
     switch(currentState())
     {

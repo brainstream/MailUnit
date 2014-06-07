@@ -1,5 +1,5 @@
-#include "ResponseCode.h"
-#include "ProtocolDef.h"
+#include <StubMTP/Smtp/ResponseCode.h>
+#include <StubMTP/Smtp/ProtocolDef.h>
 
 using namespace StubMTP::Smtp;
 

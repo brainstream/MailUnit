@@ -1,6 +1,6 @@
 #include <boost/asio.hpp>
-#include "Smtp/Server.h"
-#include "SmtpController.h"
+#include <StubMTP/Smtp/Server.h>
+#include <StubMTP/SmtpController.h>
 
 using namespace StubMTP;
 using namespace StubMTP::Smtp;

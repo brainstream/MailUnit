@@ -1,7 +1,7 @@
 #ifndef __STUBMTP_SMTP_STATEMACHINE_MAILFROMSTATE_H__
 #define __STUBMTP_SMTP_STATEMACHINE_MAILFROMSTATE_H__
 
-#include "SingleLineCmdState.h"
+#include <StubMTP/Smtp/StateMachine/SingleLineCmdState.h>
 
 namespace StubMTP {
 namespace Smtp {

@@ -1,13 +1,13 @@
-#ifndef __STUBMTP_SMTP_STATEMACHINE_STARTSTATE_H__
-#define __STUBMTP_SMTP_STATEMACHINE_STARTSTATE_H__
+#ifndef __STUBMTP_SMTP_STATEMACHINE_QUITSTATE_H__
+#define __STUBMTP_SMTP_STATEMACHINE_QUITSTATE_H__
 
-#include "StateBase.h"
+#include <StubMTP/Smtp/StateMachine/StateBase.h>
 
 namespace StubMTP {
 namespace Smtp {
 
 
-class StartState : public State
+class QuitState : public State
 {
 public:
     void processInput(const std::string & _input, Message & _message)  override
@@ -23,22 +23,22 @@ public:
 
     bool isProtocolProcessingCompleted() const  override
     {
-        return false;
+        return true;
     }
 
     bool response(ResponseCode * _response) const override
     {
-        *_response = ResponseCode::Ready;
+        *_response = ResponseCode::Closing;
         return true;
     }
 
     void reset() override
     {
     }
-}; // class StartState
+}; // class QuitState
 
 
 } // namespace Smtp
 } // namespace StubMTP
 
-#endif // __STUBMTP_SMTP_STATEMACHINE_STARTSTATE_H__
+#endif // __STUBMTP_SMTP_STATEMACHINE_QUITSTATE_H__

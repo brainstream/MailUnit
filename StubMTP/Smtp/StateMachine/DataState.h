@@ -1,7 +1,7 @@
 #ifndef __STUBMTP_SMTP_STATEMACHINE_DATASTATE_H__
 #define __STUBMTP_SMTP_STATEMACHINE_DATASTATE_H__
 
-#include "StateBase.h"
+#include <StubMTP/Smtp/StateMachine/StartState.h>
 
 namespace StubMTP {
 namespace Smtp {

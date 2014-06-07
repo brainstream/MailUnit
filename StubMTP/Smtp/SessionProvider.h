@@ -3,7 +3,7 @@
 
 #include <memory>
 #include <boost/asio.hpp>
-#include "Message.h"
+#include <StubMTP/Smtp/Message.h>
 
 namespace StubMTP {
 namespace Smtp {

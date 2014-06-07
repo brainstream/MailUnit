@@ -1,5 +1,5 @@
 #include <iostream>
-#include "SmtpController.h"
+#include <StubMTP/SmtpController.h>
 
 using namespace StubMTP;
 

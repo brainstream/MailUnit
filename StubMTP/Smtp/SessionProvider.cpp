@@ -1,7 +1,7 @@
 #include <iostream>
-#include "SessionProvider.h"
-#include "StateMachine/StateMachine.h"
-#include "ProtocolDef.h"
+#include <StubMTP/Smtp/SessionProvider.h>
+#include <StubMTP/Smtp/ProtocolDef.h>
+#include <StubMTP/Smtp/StateMachine/StateMachine.h>
 
 using namespace StubMTP::Smtp;
 

@@ -22,38 +22,40 @@ else()
 endif()
 
 find_package(Threads REQUIRED)
-find_package(Boost REQUIRED COMPONENTS system)
+find_package(Boost REQUIRED COMPONENTS system log filesystem)
 
 include_directories(
+    ${CMAKE_CURRENT_LIST_DIR}
     ${Boost_INCLUDE_DIRS}
 )
 
 set(SRC
-    src/Main.cpp
-    src/Aux.h
-    src/SmtpController.h
-    src/SmtpController.cpp
-    src/Smtp/ProtocolDef.h
-    src/Smtp/Server.h
-    src/Smtp/Server.cpp
-    src/Smtp/ResponseCode.h
-    src/Smtp/ResponseCode.cpp
-    src/Smtp/SessionProvider.h
-    src/Smtp/SessionProvider.cpp
-    src/Smtp/Message.h
-    src/Smtp/StateMachine/StateMachine.h
-    src/Smtp/StateMachine/StateBase.h
-    src/Smtp/StateMachine/SingleLineCmdState.h
-    src/Smtp/StateMachine/SingleLineCmdState.cpp
-    src/Smtp/StateMachine/StartState.h
-    src/Smtp/StateMachine/EhloState.h
-    src/Smtp/StateMachine/MailFromState.h
-    src/Smtp/StateMachine/MailFromState.cpp
-    src/Smtp/StateMachine/RcptToState.h
-    src/Smtp/StateMachine/RcptToState.cpp
-    src/Smtp/StateMachine/DataState.h
-    src/Smtp/StateMachine/DataState.cpp
-    src/Smtp/StateMachine/QuitState.h
+    StubMTP/Main.cpp
+    StubMTP/Aux.h
+    StubMTP/Exception.h
+    StubMTP/SmtpController.h
+    StubMTP/SmtpController.cpp
+    StubMTP/Smtp/ProtocolDef.h
+    StubMTP/Smtp/Server.h
+    StubMTP/Smtp/Server.cpp
+    StubMTP/Smtp/ResponseCode.h
+    StubMTP/Smtp/ResponseCode.cpp
+    StubMTP/Smtp/SessionProvider.h
+    StubMTP/Smtp/SessionProvider.cpp
+    StubMTP/Smtp/Message.h
+    StubMTP/Smtp/StateMachine/StateMachine.h
+    StubMTP/Smtp/StateMachine/StateBase.h
+    StubMTP/Smtp/StateMachine/SingleLineCmdState.h
+    StubMTP/Smtp/StateMachine/SingleLineCmdState.cpp
+    StubMTP/Smtp/StateMachine/StartState.h
+    StubMTP/Smtp/StateMachine/EhloState.h
+    StubMTP/Smtp/StateMachine/MailFromState.h
+    StubMTP/Smtp/StateMachine/MailFromState.cpp
+    StubMTP/Smtp/StateMachine/RcptToState.h
+    StubMTP/Smtp/StateMachine/RcptToState.cpp
+    StubMTP/Smtp/StateMachine/DataState.h
+    StubMTP/Smtp/StateMachine/DataState.cpp
+    StubMTP/Smtp/StateMachine/QuitState.h
 )
 
 set(LIBS

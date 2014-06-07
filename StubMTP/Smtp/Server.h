@@ -5,8 +5,8 @@
 #include <memory>
 #include <atomic>
 #include <boost/asio.hpp>
-#include "../Aux.h"
-#include "SessionProvider.h"
+#include <StubMTP/Aux.h>
+#include <StubMTP/Smtp/SessionProvider.h>
 
 namespace StubMTP {
 namespace Smtp {

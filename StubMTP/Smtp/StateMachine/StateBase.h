@@ -3,9 +3,9 @@
 
 #include <string>
 #include <boost/msm/front/states.hpp>
-#include "../../Aux.h"
-#include "../Message.h"
-#include "../ResponseCode.h"
+#include <StubMTP/Aux.h>
+#include <StubMTP/Smtp/Message.h>
+#include <StubMTP/Smtp/ResponseCode.h>
 
 namespace StubMTP {
 namespace Smtp {
