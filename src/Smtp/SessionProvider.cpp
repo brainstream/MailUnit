@@ -1,14 +1,7 @@
 #include <iostream>
 #include "SessionProvider.h"
 #include "StateMachine/StateMachine.h"
-
-// TODO: move to a separate file!
-#define SMTP_CMDLEN   4
-#define SMTP_CMD_EHLO "EHLO"
-#define SMTP_CMD_MAIL "MAIL"
-#define SMTP_CMD_RCPT "RCPT"
-#define SMTP_CMD_DATA "DATA"
-#define SMTP_CMD_QUIT "QUIT"
+#include "ProtocolDef.h"
 
 using namespace StubMTP::Smtp;
 
@@ -32,6 +25,7 @@ private:
     boost::asio::ip::tcp::socket m_socket;
     std::shared_ptr<SessionProvider> m_provider_ptr;
     StateMachine * mp_state_machine;
+    Message * mp_message;
     char * m_buffer;
 }; // class Session
 
@@ -57,6 +51,7 @@ Session::Session(boost::asio::ip::tcp::socket _socket, std::shared_ptr<SessionPr
     m_socket(std::move(_socket)),
     m_provider_ptr(_provider),
     mp_state_machine(new StateMachine()),
+    mp_message(new Message()),
     m_buffer(new char[s_buffer_size])
 {
 }
@@ -64,6 +59,7 @@ Session::Session(boost::asio::ip::tcp::socket _socket, std::shared_ptr<SessionPr
 Session::~Session()
 {
     delete mp_state_machine;
+    delete mp_message;
     delete [] m_buffer;
 }
 
@@ -78,7 +74,7 @@ void Session::performNextAction()
     StateBase * state = mp_state_machine->get_state_by_id(state_id);
     ResponseCode response;
     if(state->isProtocolProcessingCompleted())
-        return;
+        m_provider_ptr->onMessageRecieved(*mp_message);
     if(state->response(&response))
         write(translateResponseCode(response));
     else
@@ -114,39 +110,33 @@ void Session::processInput(const std::string & _input)
     StateBase * state = mp_state_machine->get_state_by_id(state_id);
     if(!state->isInutProcessingCompleted())
     {
-        state->processInput(_input);
+        state->processInput(_input, *mp_message);
         return;
-    }
-    if(_input.length() < SMTP_CMDLEN)
-    {
-        // TODO: set _input to mp_machine->current_state()[0];
     }
     else if(_input.compare(0, SMTP_CMDLEN, SMTP_CMD_EHLO) == 0)
     {
-        mp_state_machine->process_event(EhloEvent(_input));
+        mp_state_machine->process_event(EhloEvent(_input, *mp_message));
     }
     else if(_input.compare(0, SMTP_CMDLEN, SMTP_CMD_MAIL) == 0)
     {
-        mp_state_machine->process_event(MailFromEvent(_input));
+        mp_state_machine->process_event(MailFromEvent(_input, *mp_message));
     }
     else if(_input.compare(0, SMTP_CMDLEN, SMTP_CMD_RCPT) == 0)
     {
-        mp_state_machine->process_event(RcptToEvent(_input));
+        mp_state_machine->process_event(RcptToEvent(_input, *mp_message));
     }
     else if(_input.compare(0, SMTP_CMDLEN, SMTP_CMD_DATA) == 0)
     {
-        mp_state_machine->process_event(DataEvent(_input));
+        mp_state_machine->process_event(DataEvent(_input, *mp_message));
     }
     else if(_input.compare(0, SMTP_CMDLEN, SMTP_CMD_QUIT) == 0)
     {
-        mp_state_machine->process_event(QuitEvent(_input));
+        mp_state_machine->process_event(QuitEvent(_input, *mp_message));
     }
     else
     {
-        // TODO: set _input to mp_machine->current_state()[0];
+        // TODO: error!
+        return;
     }
-    state_id = mp_state_machine->current_state()[0];
-    state = mp_state_machine->get_state_by_id(state_id);
-    state->processInput(_input);
 }
 

@@ -1,25 +1,22 @@
 #ifndef __STUBMTP_SMTP_STATEMACHINE_MAILFROMSTATE_H__
 #define __STUBMTP_SMTP_STATEMACHINE_MAILFROMSTATE_H__
 
-#include "StateBase.h"
+#include "SingleLineCmdState.h"
 
 namespace StubMTP {
 namespace Smtp {
 
 
-class MailFromState : public State
+class MailFromState : public SingleLineCmdState
 {
 public:
-    void processInput(const std::string & _input)  override
-    {
-        // TODO: implement!
-        STUBMTP_UNUSED(_input);
-    }
+    MailFromState();
+
+    void processInput(const std::string & _input, Message & _message)  override;
 
     bool isInutProcessingCompleted() const  override
     {
-        // TODO: implement!
-        return true;
+        return currentState() != ProcessResult::Incomplete;
     }
 
     bool isProtocolProcessingCompleted() const  override
@@ -27,18 +24,7 @@ public:
         return false;
     }
 
-    void apply(Message & _message) const  override
-    {
-        // TODO: implement!
-        STUBMTP_UNUSED(_message);
-    }
-
-    bool response(ResponseCode * _response) const override
-    {
-        // TODO: implement!
-        *_response = ResponseCode::Ok;
-        return true;
-    }
+    bool response(ResponseCode * _response) const override;
 }; // class MailFromState
 
 

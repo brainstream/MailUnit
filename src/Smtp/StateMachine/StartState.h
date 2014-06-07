@@ -10,9 +10,10 @@ namespace Smtp {
 class StartState : public State
 {
 public:
-    void processInput(const std::string & _input)  override
+    void processInput(const std::string & _input, Message & _message)  override
     {
         STUBMTP_UNUSED(_input);
+        STUBMTP_UNUSED(_message);
     }
 
     bool isInutProcessingCompleted() const  override
@@ -25,15 +26,14 @@ public:
         return false;
     }
 
-    void apply(Message & _message) const  override
-    {
-        STUBMTP_UNUSED(_message);
-    }
-
     bool response(ResponseCode * _response) const override
     {
         *_response = ResponseCode::Ready;
         return true;
+    }
+
+    void reset() override
+    {
     }
 }; // class StartState
 

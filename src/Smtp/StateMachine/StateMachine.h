@@ -18,20 +18,35 @@ namespace Smtp {
 class Event
 {
 public:
-    Event(const std::string & _data) : m_data(_data) { }
-    const std::string & data() const { return m_data; }
+    Event(const std::string & _data, Message & _message) :
+        m_data(_data),
+        mr_message(_message)
+    {
+    }
+
+    const std::string & data() const
+    {
+        return m_data;
+    }
+
+    Message & message() const
+    {
+        return mr_message;
+    }
+
 private:
     std::string m_data;
+    Message & mr_message;
 }; // class Event
 
-#define EVENT(name)                       \
-    class name : public Event             \
-    {                                     \
-    public:                               \
-        name(const std::string & _data) : \
-            Event(_data)                  \
-        {                                 \
-        }                                 \
+#define EVENT(name)                                           \
+    class name : public Event                                 \
+    {                                                         \
+    public:                                                   \
+        name(const std::string & _data, Message & _message) : \
+            Event(_data, _message)                            \
+        {                                                     \
+        }                                                     \
     };
 
 EVENT(EhloEvent)

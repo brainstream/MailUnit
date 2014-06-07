@@ -10,26 +10,13 @@ namespace Smtp {
 class DataState : public State
 {
 public:
-    DataState() :
-        m_header_accepted(false),
-        m_data_accepted(false)
-    {
-    }
+    DataState();
 
-    void processInput(const std::string & _input)  override
-    {
-        // TODO: implement!
-        STUBMTP_UNUSED(_input);
-        if(m_header_accepted)
-            m_data_accepted = true;
-        else
-            m_header_accepted = true;
-    }
+    void processInput(const std::string & _input, Message & _message)  override;
 
     bool isInutProcessingCompleted() const  override
     {
-        // TODO: implement!
-        return m_header_accepted && m_data_accepted;
+        return m_complete;
     }
 
     bool isProtocolProcessingCompleted() const  override
@@ -37,22 +24,18 @@ public:
         return false;
     }
 
-    void apply(Message & _message) const  override
-    {
-        // TODO: implement!
-        STUBMTP_UNUSED(_message);
-    }
+    bool response(ResponseCode * _response) const override;
+    void reset() override;
 
-    bool response(ResponseCode * _response) const override
-    {
-        // TODO: implement!
-        *_response = m_data_accepted ? ResponseCode::Ok : ResponseCode::Intermediate;
-        return true;
-    }
+private:
+    void processHeader(const std::string & _input);
+    void processData(const std::string & _input, Message & _message);
 
 private:
     bool m_header_accepted;
-    bool m_data_accepted;
+    bool m_complete;
+    bool m_error;
+    std::string m_data;
 }; // class DataState
 
 

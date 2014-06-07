@@ -33,6 +33,7 @@ set(SRC
     src/Aux.h
     src/SmtpController.h
     src/SmtpController.cpp
+    src/Smtp/ProtocolDef.h
     src/Smtp/Server.h
     src/Smtp/Server.cpp
     src/Smtp/ResponseCode.h
@@ -42,11 +43,16 @@ set(SRC
     src/Smtp/Message.h
     src/Smtp/StateMachine/StateMachine.h
     src/Smtp/StateMachine/StateBase.h
+    src/Smtp/StateMachine/SingleLineCmdState.h
+    src/Smtp/StateMachine/SingleLineCmdState.cpp
     src/Smtp/StateMachine/StartState.h
     src/Smtp/StateMachine/EhloState.h
     src/Smtp/StateMachine/MailFromState.h
+    src/Smtp/StateMachine/MailFromState.cpp
     src/Smtp/StateMachine/RcptToState.h
+    src/Smtp/StateMachine/RcptToState.cpp
     src/Smtp/StateMachine/DataState.h
+    src/Smtp/StateMachine/DataState.cpp
     src/Smtp/StateMachine/QuitState.h
 )
 

@@ -16,18 +16,38 @@ class StateBase
     STUBMTP_DISABLE_COPY(StateBase)
 
 public:
-    StateBase() { }
-    virtual ~StateBase() { }
-    virtual void processInput(const std::string & _input) = 0;
-    virtual bool isInutProcessingCompleted() const        = 0;
-    virtual bool isProtocolProcessingCompleted() const    = 0;
-    virtual void apply(Message & _message) const          = 0;
-    virtual bool response(ResponseCode * _response) const = 0;
+    StateBase()
+    {
+    }
+
+    virtual ~StateBase()
+    {
+    }
+
+    virtual void processInput(const std::string & _input, Message & _message) = 0;
+    virtual bool isInutProcessingCompleted() const                            = 0;
+    virtual bool isProtocolProcessingCompleted() const                        = 0;
+    virtual bool response(ResponseCode * _response) const                     = 0;
 }; // class StateBase
 
 
 class State : public boost::msm::front::state<StateBase>
 {
+public:
+    template <typename EventT, typename FsmT>
+    void on_entry(const EventT & _event, FsmT &)
+    {
+        processInput(_event.data(), _event.message());
+    }
+
+    template <typename EventT, typename FsmT>
+    void on_exit(const EventT & _event, FsmT &)
+    {
+        reset();
+    }
+
+protected:
+    virtual void reset() = 0;
 }; // class State
 
 
