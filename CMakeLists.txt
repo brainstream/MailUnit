@@ -22,7 +22,13 @@ else()
 endif()
 
 find_package(Threads REQUIRED)
-find_package(Boost REQUIRED COMPONENTS system log filesystem)
+
+set(Boost_USE_MULTITHREADED ON)
+set(Boost_USE_STATIC_LIBS OFF)
+set(Boost_USE_STATIC_RUNTIME OFF)
+find_package(Boost REQUIRED COMPONENTS system filesystem date_time)
+
+add_definitions(-DBOOST_LOG_DYN_LINK)
 
 include_directories(
     ${CMAKE_CURRENT_LIST_DIR}
@@ -32,6 +38,8 @@ include_directories(
 set(SRC
     StubMTP/Main.cpp
     StubMTP/Aux.h
+    StubMTP/Logger.h
+    StubMTP/Logger.cpp
     StubMTP/Exception.h
     StubMTP/SmtpController.h
     StubMTP/SmtpController.cpp
@@ -58,8 +66,11 @@ set(SRC
     StubMTP/Smtp/StateMachine/QuitState.h
 )
 
+message(STATUS "THREADS: " ${CMAKE_THREAD_LIBS_INIT})
+
 set(LIBS
     ${Boost_LIBRARIES}
+    ${CMAKE_THREAD_LIBS_INIT}
 )
 
 string(TOLOWER ${PROJECT_NAME} TARGETNAME)

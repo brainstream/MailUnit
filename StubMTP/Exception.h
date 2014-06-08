@@ -21,6 +21,8 @@ public:
     public:                                  \
         name(const std::string & _message) : \
             Excpetion(_message)              \
+        {                                    \
+        }                                    \
     };
 
 } // namespace StubMTP
