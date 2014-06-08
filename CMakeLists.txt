@@ -28,8 +28,6 @@ set(Boost_USE_STATIC_LIBS OFF)
 set(Boost_USE_STATIC_RUNTIME OFF)
 find_package(Boost REQUIRED COMPONENTS system filesystem date_time)
 
-add_definitions(-DBOOST_LOG_DYN_LINK)
-
 include_directories(
     ${CMAKE_CURRENT_LIST_DIR}
     ${Boost_INCLUDE_DIRS}
@@ -65,8 +63,6 @@ set(SRC
     StubMTP/Smtp/StateMachine/DataState.cpp
     StubMTP/Smtp/StateMachine/QuitState.h
 )
-
-message(STATUS "THREADS: " ${CMAKE_THREAD_LIBS_INIT})
 
 set(LIBS
     ${Boost_LIBRARIES}

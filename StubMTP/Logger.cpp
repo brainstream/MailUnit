@@ -98,7 +98,6 @@ void Logger::warning(const std::string & _message, const std::exception & _excep
     write(LogLevel::Warning, [_message, _exception](std::fstream & _stream)
     {
         _stream << _message << std::endl << "Exception message: " << _exception.what();
-
     });
 }
 
@@ -107,7 +106,6 @@ void Logger::error(const std::string & _message)
     write(LogLevel::Error, [_message](std::fstream & _stream)
     {
         _stream << _message;
-
     });
 }
 
@@ -124,7 +122,6 @@ void Logger::error(const std::string & _message, const std::exception & _excepti
     write(LogLevel::Error, [_message, _exception](std::fstream & _stream)
     {
         _stream << _message << std::endl << "Exception message: " << _exception.what();
-
     });
 }
 
