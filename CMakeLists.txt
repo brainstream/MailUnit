@@ -26,7 +26,7 @@ find_package(Threads REQUIRED)
 set(Boost_USE_MULTITHREADED ON)
 set(Boost_USE_STATIC_LIBS OFF)
 set(Boost_USE_STATIC_RUNTIME OFF)
-find_package(Boost REQUIRED COMPONENTS system filesystem date_time)
+find_package(Boost REQUIRED COMPONENTS system filesystem date_time program_options)
 
 include_directories(
     ${CMAKE_CURRENT_LIST_DIR}
@@ -36,6 +36,8 @@ include_directories(
 set(SRC
     StubMTP/Main.cpp
     StubMTP/Aux.h
+    StubMTP/Config.h
+    StubMTP/Config.cpp
     StubMTP/Logger.h
     StubMTP/Logger.cpp
     StubMTP/Exception.h
