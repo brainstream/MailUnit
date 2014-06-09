@@ -2,6 +2,8 @@
 
 #define LOPT_HELP             "help"
 #define SOPT_HELP             "h"
+#define LOPT_PORT             "port"
+#define SOPT_PORT             "p"
 #define LOPT_LOGSIZE           "lsize"
 #define LOPT_LOGFILE           "lfile"
 #define LOPT_LOGSTDOUT         "lstdout"
@@ -13,11 +15,16 @@
 using namespace StubMTP;
 namespace bpo = boost::program_options;
 
-Config::Config(int argc, const char ** argv)
+Config::Config(int argc, const char ** argv) :
+    m_log_max_size(Logger::s_defult_max_filesize),
+    m_port_number(5870),
+    m_thread_count(1),
+    m_log_level(LogLevel::Info)
 {
     mp_description = new bpo::options_description("Options");
     mp_description->add_options()
         (LOPT_HELP "," SOPT_HELP, "Print this help")
+        (LOPT_PORT "," SOPT_PORT, bpo::value<uint16_t>(), "Port number")
         (LOPT_LOGSIZE, bpo::value<boost::uintmax_t>(), "Maximum size of each log file")
         (LOPT_LOGFILE, bpo::value<std::string>(), "Log filename")
         (LOPT_LOGSTDOUT, "Use stdout for logging")
@@ -41,6 +48,10 @@ Config::Config(int argc, const char ** argv)
         if(m_thread_count == 0)
             m_thread_count = 1;
     }
+    if(var_map.count(LOPT_PORT) > 0)
+    {
+        m_port_number = var_map[LOPT_PORT].as<uint16_t>();
+    }
     if(var_map.count(LOPT_LOGSIZE) > 0)
     {
         m_log_max_size = var_map[LOPT_LOGSIZE].as<boost::uintmax_t>();
@@ -51,7 +62,6 @@ Config::Config(int argc, const char ** argv)
     {
         m_log_filename = var_map[LOPT_LOGFILE].as<std::string>();
     }
-
 }
 
 Config::~Config()

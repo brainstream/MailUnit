@@ -28,12 +28,40 @@ public:
     Config(int argc, const char ** argv);
     ~Config();
 
-    bool showHelp() { return m_show_help; }
-    bool logToStdout() { return m_log_to_stdout; }
-    boost::uintmax_t logMaxSize() { return m_log_max_size; }
-    std::string logFilename() { return m_log_filename; }
-    uint16_t threadCount() { return m_thread_count; }
-    LogLevel logLevel() { return m_log_level; }
+    bool showHelp() const
+    {
+        return m_show_help;
+    }
+
+    uint16_t portNumber() const
+    {
+        return m_port_number;
+    }
+
+    bool logToStdout() const
+    {
+        return m_log_to_stdout;
+    }
+
+    boost::uintmax_t logMaxSize() const
+    {
+        return m_log_max_size;
+    }
+
+    std::string logFilename() const
+    {
+        return m_log_filename;
+    }
+
+    uint16_t threadCount() const
+    {
+        return m_thread_count;
+    }
+
+    LogLevel logLevel() const
+    {
+        return m_log_level;
+    }
 
 private:
     boost::program_options::options_description * mp_description;
@@ -41,6 +69,7 @@ private:
     bool m_log_to_stdout;
     boost::uintmax_t m_log_max_size;
     std::string m_log_filename;
+    uint16_t m_port_number;
     uint16_t m_thread_count;
     LogLevel m_log_level;
 }; // class Config

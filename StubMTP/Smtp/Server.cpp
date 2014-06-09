@@ -1,5 +1,6 @@
 #include <iostream>
 #include <StubMTP/Smtp/Server.h>
+#include <StubMTP/Logger.h>
 
 using namespace StubMTP::Smtp;
 
@@ -15,6 +16,9 @@ void Server::startNew(boost::asio::io_service & _io_service, uint16_t _port, std
     ServerHolder * holder = new ServerHolder();
     holder->server = ptr;
     server->m_holder = holder;
+    std::stringstream log_message;
+    log_message << "Starting the server on port " << _port;
+    log().info(log_message.str());
     server->accept();
 }
 

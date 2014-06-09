@@ -28,7 +28,7 @@ int main(int argc, const char ** argv)
     Logger::initSingleton("StubMTP.log", LogLevel::Info);
     log().info("Application started");
     boost::asio::io_service service;
-    Server::startNew(service, 17444, std::make_shared<SmtpController>(service));
+    Server::startNew(service, config->portNumber(), std::make_shared<SmtpController>(service));
     service.run();
 
     // TODO: to the program final
