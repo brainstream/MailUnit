@@ -59,7 +59,7 @@ PrivateApplication::~PrivateApplication()
 
 void PrivateApplication::start()
 {
-    log().info("Application started");
+    app().log().info("Application started");
     boost::asio::io_service service;
     Server::startNew(service, mp_config->portNumber(), std::make_shared<SmtpController>(service));
     service.run();
@@ -70,7 +70,7 @@ Application & PrivateApplication::application() const
     return *mp_application;
 }
 
-Application & StubMTP::application()
+Application & StubMTP::app()
 {
     if(nullptr == global_app)
         throw ApplicationException("Application wasn't instanced");
@@ -82,8 +82,8 @@ int main(int _argc, const char ** _argv)
     try
     {
         global_app = new PrivateApplication(_argc, _argv);
-        if(config().showHelp())
-            std::cout << config() << std::endl;
+        if(app().config().showHelp())
+            std::cout << app().config() << std::endl;
         else
             global_app->start();
         delete global_app;

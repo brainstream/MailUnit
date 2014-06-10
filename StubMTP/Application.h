@@ -26,7 +26,7 @@ public:
         return mr_config;
     }
 
-    Logger & logger()
+    Logger & log()
     {
         return mr_logger;
     }
@@ -36,17 +36,7 @@ private:
     Logger & mr_logger;
 }; // class Application
 
-Application & application();
-
-inline Logger & log()
-{
-    return application().logger();
-}
-
-inline const Config & config()
-{
-    return application().config();
-}
+Application & app();
 
 } // namespace StubMTP
 
