@@ -24,15 +24,9 @@ class Logger final
 {
     STUBMTP_DISABLE_COPY(Logger)
 
-private:
+public:
     Logger(const boost::filesystem::path & _filepath, LogLevel _min_level,
         boost::uintmax_t _max_filesize = s_defult_max_filesize);
-
-public:
-    static void initSingleton(const boost::filesystem::path & _filepath, LogLevel _min_level,
-        boost::uintmax_t _max_filesize = s_defult_max_filesize);
-    static Logger & instance();
-
     void info(const std::string & _message);
     void warning(const std::string & _message);
     void warning(const std::exception & _exception);
@@ -55,12 +49,6 @@ private:
     boost::filesystem::path m_filepath;
     boost::uintmax_t m_max_file_size;
 }; // class Logger
-
-
-inline Logger & log()
-{
-    return Logger::instance();
-}
 
 
 } // namespace StubMTP

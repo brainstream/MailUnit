@@ -1,4 +1,3 @@
-#include <atomic>
 #include <mutex>
 #include <fstream>
 #include <algorithm>
@@ -10,7 +9,6 @@ using namespace StubMTP;
 
 namespace {
 
-std::atomic<Logger *> logger_instance(nullptr);
 std::mutex log_mutex;
 
 } // namespace
@@ -40,33 +38,6 @@ Logger::Logger(const boost::filesystem::path & _filepath, LogLevel _min_level,
     m_filepath(_filepath),
     m_max_file_size(_max_filesize < s_min_filesize ? s_min_filesize : _max_filesize)
 {
-}
-
-void Logger::initSingleton(const boost::filesystem::path & _filepath, LogLevel _min_level,
-    boost::uintmax_t _max_filesize /*= s_defult_max_filesize*/)
-{
-    if(nullptr != logger_instance)
-    {
-        throw LoggerException("Logger already initialized");
-    }
-    Logger * new_logger = new Logger(_filepath, _min_level, _max_filesize);
-    Logger * old_logger = logger_instance.exchange(new_logger);
-    if(nullptr != old_logger)
-    {
-        logger_instance.exchange(old_logger);
-        delete new_logger;
-        throw LoggerException("Loger has been initialized by another thread during initialization");
-    }
-}
-
-Logger & Logger::instance()
-{
-    Logger * logger = logger_instance;
-    if(nullptr == logger)
-    {
-        throw LoggerException("Logger was not initialized");
-    }
-    return *logger;
 }
 
 void Logger::info(const std::string & _message)
@@ -127,7 +98,7 @@ void Logger::error(const std::string & _message, const std::exception & _excepti
 
 void Logger::write(LogLevel _level, std::function<void(std::fstream &)> _callback)
 {
-    if(_level < m_min_level)
+    if(m_filepath.empty() || _level < m_min_level)
     {
         return;
     }

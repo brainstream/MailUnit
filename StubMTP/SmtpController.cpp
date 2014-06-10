@@ -1,6 +1,6 @@
 #include <iostream>
 #include <StubMTP/SmtpController.h>
-#include <StubMTP/Logger.h>
+#include <StubMTP/Application.h>
 
 using namespace StubMTP;
 

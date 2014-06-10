@@ -34,7 +34,8 @@ include_directories(
 )
 
 set(SRC
-    StubMTP/Main.cpp
+    StubMTP/Application.h
+    StubMTP/Application.cpp
     StubMTP/Aux.h
     StubMTP/Config.h
     StubMTP/Config.cpp
