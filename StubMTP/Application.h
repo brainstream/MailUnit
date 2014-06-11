@@ -1,6 +1,7 @@
 #ifndef __STUBMTP_APPLICATION_H__
 #define __STUBMTP_APPLICATION_H__
 
+#include <boost/filesystem.hpp>
 #include <StubMTP/Aux.h>
 #include <StubMTP/Config.h>
 #include <StubMTP/Logger.h>
@@ -10,30 +11,33 @@ namespace StubMTP {
 
 STUBMTP_EXCEPTION(ApplicationException)
 
-class Application final
+class Application
 {
     STUBMTP_DISABLE_COPY(Application)
 
 public:
-    Application(const Config & _config, Logger & _logger) :
-        mr_config(_config),
-        mr_logger(_logger)
-    {
-    }
+    Application(int _argc, const char **_argv);
+    ~Application();
 
     const Config & config() const
     {
-        return mr_config;
+        return *mp_config;
     }
 
     Logger & log()
     {
-        return mr_logger;
+        return *mp_logger;
+    }
+
+    const boost::filesystem::path & startDir() const
+    {
+        return mr_start_dir;
     }
 
 private:
-    const Config & mr_config;
-    Logger & mr_logger;
+    Config * mp_config;
+    Logger * mp_logger;
+    const boost::filesystem::path & mr_start_dir;
 }; // class Application
 
 Application & app();

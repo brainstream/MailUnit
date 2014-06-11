@@ -9,18 +9,11 @@ using namespace StubMTP::Smtp;
 
 namespace {
 
-class PrivateApplication
+class PrivateApplication : public Application
 {
 public:
-    PrivateApplication(int argc, const char ** argv);
-    ~PrivateApplication();
+    inline PrivateApplication(int _argc, const char ** _argv);
     void start();
-    inline Application & application() const;
-
-private:
-    Config * mp_config;
-    Logger * mp_logger;
-    Application * mp_application;
 }; // class PrivateApplication
 
 PrivateApplication * global_app = nullptr;
@@ -28,10 +21,10 @@ PrivateApplication * global_app = nullptr;
 } // namespace
 
 
-PrivateApplication::PrivateApplication(int _argc, const char ** _argv) :
+Application::Application(int _argc, const char ** _argv) :
     mp_config(nullptr),
     mp_logger(nullptr),
-    mp_application(nullptr)
+    mr_start_dir(boost::filesystem::initial_path())
 {
     try
     {
@@ -39,42 +32,41 @@ PrivateApplication::PrivateApplication(int _argc, const char ** _argv) :
         // TODO: use config isntead.
         // TODO: log to stdout
         mp_logger = new Logger(mp_config->logFilename(), mp_config->logLevel(), mp_config->logMaxSize());
-        mp_application = new Application(*mp_config, *mp_logger);
     }
     catch(std::exception & err)
     {
         delete mp_config;
         delete mp_logger;
-        delete mp_application;
         throw ApplicationException(err.what());
     }
 }
 
-PrivateApplication::~PrivateApplication()
+Application::~Application()
 {
-    delete mp_application;
     delete mp_config;
     delete mp_logger;
+}
+
+PrivateApplication::PrivateApplication(int _argc, const char ** _argv) :
+    Application(_argc, _argv)
+{
 }
 
 void PrivateApplication::start()
 {
     app().log().info("Application started");
     boost::asio::io_service service;
-    Server::startNew(service, mp_config->portNumber(), std::make_shared<SmtpController>(service));
+    Server::startNew(service, config().portNumber(), std::make_shared<SmtpController>(service));
     service.run();
 }
 
-Application & PrivateApplication::application() const
-{
-    return *mp_application;
-}
+
 
 Application & StubMTP::app()
 {
     if(nullptr == global_app)
         throw ApplicationException("Application wasn't instanced");
-    return global_app->application();
+    return *global_app;
 }
 
 int main(int _argc, const char ** _argv)

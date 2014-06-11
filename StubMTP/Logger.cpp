@@ -127,6 +127,15 @@ void Logger::prepareFile()
         return;
     }
     boost::system::error_code error;
+    boost::filesystem::path parent_dir = m_filepath.parent_path();
+    if(!boost::filesystem::exists(parent_dir))
+    {
+        boost::filesystem::create_directories(parent_dir, error);
+        if(error)
+        {
+            throw LoggerException(error.message());
+        }
+    }
     boost::uintmax_t size = boost::filesystem::file_size(m_filepath, error);
     if(error)
     {
