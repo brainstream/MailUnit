@@ -44,6 +44,10 @@ set(SRC
     StubMTP/Exception.h
     StubMTP/SmtpController.h
     StubMTP/SmtpController.cpp
+    StubMTP/Email/Mime.h
+    StubMTP/Email/Mime.cpp
+    StubMTP/Email/Address.h
+    StubMTP/Email/Address.cpp
     StubMTP/Smtp/ProtocolDef.h
     StubMTP/Smtp/Server.h
     StubMTP/Smtp/Server.cpp

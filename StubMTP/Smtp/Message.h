@@ -11,8 +11,7 @@ struct Message
 {
     std::string from;
     std::vector<std::string> to;
-    std::vector<std::string> cc;
-    std::string body;
+    std::string data;
 }; // struct Message
 
 } // namespace Smtp

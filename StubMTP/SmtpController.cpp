@@ -1,5 +1,6 @@
 #include <iostream>
 #include <StubMTP/SmtpController.h>
+#include <StubMTP/Email/Mime.h>
 #include <StubMTP/Application.h>
 
 using namespace StubMTP;
@@ -13,15 +14,22 @@ SmtpController::SmtpController(boost::asio::io_service &_io_service) :
 
 void SmtpController::onMessageRecieved(const Smtp::Message & _message)
 {
+    std::shared_ptr<Email::Mime> mime = Email::parseMime(_message);
+    // TODO: get data from mime
     std::cout << "Message has been recived: \n" <<
-                 "\tFrom: " << _message.from << std::endl;
-    for(const std::string & to: _message.to)
-        std::cout << "\tTo: " << to << std::endl;
-    for(const std::string & cc: _message.cc)
-        std::cout << "\tCC: " << cc << std::endl;
-    std::cout << std::endl << _message.body << std::endl << std::endl;
+                 "\tFrom: " << mime->from << std::endl <<
+                 "\tTo: " << mime->to << std::endl;
+    if(!mime->cc.empty())
+    {
+        std::cout << "\tCC: " << mime->cc << std::endl;
+    }
+    if(!mime->bcc.empty())
+    {
+        std::cout << "\tBCC: " << mime->bcc << std::endl;
+    }
+    std::cout << std::endl << _message.data << std::endl << std::endl;
     std::cout.flush();
-    app().log().info("Message received"); // TODO: info
+    app().log().info("Message received"); // TODO: more details
 }
 
 void SmtpController::onFail()

@@ -74,8 +74,8 @@ int main(int _argc, const char ** _argv)
     try
     {
         global_app = new PrivateApplication(_argc, _argv);
-        if(app().config().showHelp())
-            std::cout << app().config() << std::endl;
+        if(global_app->config().showHelp())
+            std::cout << global_app->config() << std::endl;
         else
             global_app->start();
         delete global_app;

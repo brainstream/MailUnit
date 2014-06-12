@@ -44,7 +44,7 @@ void DataState::processData(const std::string & _input, Message & _message)
     }
     m_data += _input.substr(0, end_pos);
     m_complete = true;
-    _message.body = m_data.substr(sizeof(COMMAND) - 1);
+    _message.data = m_data.substr(sizeof(COMMAND) - 1);
 }
 
 bool DataState::response(ResponseCode * _response) const
