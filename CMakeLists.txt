@@ -26,7 +26,7 @@ find_package(Threads REQUIRED)
 set(Boost_USE_MULTITHREADED ON)
 set(Boost_USE_STATIC_LIBS OFF)
 set(Boost_USE_STATIC_RUNTIME OFF)
-find_package(Boost REQUIRED COMPONENTS system filesystem date_time program_options)
+find_package(Boost REQUIRED COMPONENTS system filesystem date_time program_options regex)
 
 include_directories(
     ${CMAKE_CURRENT_LIST_DIR}
@@ -46,8 +46,12 @@ set(SRC
     StubMTP/SmtpController.cpp
     StubMTP/Email/Mime.h
     StubMTP/Email/Mime.cpp
+    StubMTP/Email/Header.h
+    StubMTP/Email/Header.cpp
     StubMTP/Email/Address.h
     StubMTP/Email/Address.cpp
+    StubMTP/Email/DateTime.h
+    StubMTP/Email/DateTime.cpp
     StubMTP/Smtp/ProtocolDef.h
     StubMTP/Smtp/Server.h
     StubMTP/Smtp/Server.cpp

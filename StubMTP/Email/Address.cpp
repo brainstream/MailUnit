@@ -1,6 +1,20 @@
 #include <boost/algorithm/string.hpp>
 #include <StubMTP/Email/Address.h>
 
+/*
+ * RFC 2822 3.4 - http://tools.ietf.org/html/rfc2822#section-3.4
+ *
+ * address         =       mailbox / group
+ * mailbox         =       name-addr / addr-spec
+ * name-addr       =       [display-name] angle-addr
+ * angle-addr      =       [CFWS] "<" addr-spec ">" [CFWS] / obs-angle-addr
+ * group           =       display-name ":" [mailbox-list / CFWS] ";"
+ *                         [CFWS]
+ * display-name    =       phrase
+ * mailbox-list    =       (mailbox *("," mailbox)) / obs-mbox-list
+ * address-list    =       (address *("," address)) / obs-addr-list
+*/
+
 using namespace StubMTP::Email;
 
 bool StubMTP::Email::parseAddressGroup(const std::string & _input, AddressGroup & _output)

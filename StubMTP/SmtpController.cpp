@@ -17,6 +17,8 @@ void SmtpController::onMessageRecieved(const Smtp::Message & _message)
     std::shared_ptr<Email::Mime> mime = Email::parseMime(_message);
     // TODO: get data from mime
     std::cout << "Message has been recived: \n" <<
+                 "\tID: " << mime->message_id << std::endl <<
+                 "\tDate: " << *mime->date << std::endl <<
                  "\tFrom: " << mime->from << std::endl <<
                  "\tTo: " << mime->to << std::endl;
     if(!mime->cc.empty())
