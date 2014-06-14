@@ -21,19 +21,35 @@ struct MailContent
     std::string content;
 }; // struct MailContent
 
+
+// RFC 5322 3.6 - http://tools.ietf.org/html/rfc5322#section-3.6
+// RFC 6854 - http://tools.ietf.org/html/rfc6854
 struct Mime
 {
-    std::string message_id;
+    // TODO: return         http://tools.ietf.org/html/rfc5322#section-3.6.7
+    // TODO: received       http://tools.ietf.org/html/rfc5322#section-3.6.7
+    // TODO: resent-date    http://tools.ietf.org/html/rfc5322#section-3.6.6
+    // TODO: resent-from    http://tools.ietf.org/html/rfc5322#section-3.6.6
+    // TODO: resent-sender  http://tools.ietf.org/html/rfc5322#section-3.6.6
+    // TODO: resent-to      http://tools.ietf.org/html/rfc5322#section-3.6.6
+    // TODO: resent-cc      http://tools.ietf.org/html/rfc5322#section-3.6.6
+    // TODO: resent-bcc     http://tools.ietf.org/html/rfc5322#section-3.6.6
+    // TODO: resent-msg-id  http://tools.ietf.org/html/rfc5322#section-3.6.6
+    // TODO: in-reply-to    http://tools.ietf.org/html/rfc5322#section-3.6.4
+    // TODO: references     http://tools.ietf.org/html/rfc5322#section-3.6.4
+    // TODO: comments       http://tools.ietf.org/html/rfc5322#section-3.6.5
+    // TODO: keywords       http://tools.ietf.org/html/rfc5322#section-3.6.5
+    std::string message_id; // TODO: parse? http://tools.ietf.org/html/rfc5322#section-3.6.4
     DateTimePtr date;
     std::string user_agent;
     std::string mime_version;
     std::string subject;
-    Address sender;
-    AddressGroup from;
-    AddressGroup to;
-    AddressGroup cc;
-    AddressGroup bcc;
-    AddressGroup reply_to;
+    AddressGroupPtr sender;
+    AddressGroupPtr from;
+    AddressGroupPtr to;
+    AddressGroupPtr cc;
+    AddressGroupPtr bcc;
+    AddressGroupPtr reply_to;
     HeaderMap all_headers;
     std::vector<MailContent> contents;
 }; // struct Mime

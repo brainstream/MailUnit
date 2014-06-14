@@ -21,11 +21,11 @@ void SmtpController::onMessageRecieved(const Smtp::Message & _message)
                  "\tDate: " << *mime->date << std::endl <<
                  "\tFrom: " << mime->from << std::endl <<
                  "\tTo: " << mime->to << std::endl;
-    if(!mime->cc.empty())
+    if(mime->cc)
     {
         std::cout << "\tCC: " << mime->cc << std::endl;
     }
-    if(!mime->bcc.empty())
+    if(mime->bcc)
     {
         std::cout << "\tBCC: " << mime->bcc << std::endl;
     }

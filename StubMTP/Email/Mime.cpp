@@ -22,16 +22,10 @@ namespace {
         inline bool convert(const std::string & _string, std::string & _result) const override;
     }; // class StringExtractor
 
-    class AddressExtractor : public ValueExtractor<Address>
+    class AddressGroupExtractor : public ValueExtractor<AddressGroupPtr>
     {
     protected:
-        inline bool convert(const std::string & _string, Address & _result) const override;
-    }; // class AddressExtractor
-
-    class AddressGroupExtractor : public ValueExtractor<AddressGroup>
-    {
-    protected:
-        inline bool convert(const std::string & _string, AddressGroup & _result) const override;
+        inline bool convert(const std::string & _string, AddressGroupPtr & _result) const override;
     }; // class AddressGroupExtractor
 
     class DateTimeExtractor : public ValueExtractor<DateTimePtr>
@@ -61,14 +55,10 @@ bool StringExtractor::convert(const std::string & _string, std::string & _result
     return true;
 }
 
-bool AddressExtractor::convert(const std::string & _string, Address & _result) const
+bool AddressGroupExtractor::convert(const std::string & _string, AddressGroupPtr & _result) const
 {
-    return parseAddress(_string, _result);
-}
-
-bool AddressGroupExtractor::convert(const std::string & _string, AddressGroup & _result) const
-{
-    return parseAddressGroup(_string, _result);
+    _result = AddressGroup::parse(_string);
+    return nullptr != _result;
 }
 
 bool DateTimeExtractor::convert(const std::string & _string, DateTimePtr & _result) const
@@ -86,11 +76,12 @@ std::shared_ptr<Mime> StubMTP::Email::parseMime(const Smtp::Message & _message)
         parseHeaders(data_stream, result->all_headers);
     }
     StringExtractor string_extractor;
-    AddressExtractor address_extractor;
     AddressGroupExtractor address_group_extractor;
     DateTimeExtractor date_time_extractor;
     string_extractor.extract(result->all_headers, HeaderKey::message_id, result->message_id);
-    address_extractor.extract(result->all_headers, HeaderKey::sender, result->sender);
+    string_extractor.extract(result->all_headers, HeaderKey::subject, result->subject);
+    string_extractor.extract(result->all_headers, HeaderKey::mime_version, result->mime_version);
+    address_group_extractor.extract(result->all_headers, HeaderKey::sender, result->sender);
     address_group_extractor.extract(result->all_headers, HeaderKey::from, result->from);
     address_group_extractor.extract(result->all_headers, HeaderKey::to, result->to);
     address_group_extractor.extract(result->all_headers, HeaderKey::cc, result->cc);
@@ -98,8 +89,24 @@ std::shared_ptr<Mime> StubMTP::Email::parseMime(const Smtp::Message & _message)
     address_group_extractor.extract(result->all_headers, HeaderKey::reply_to, result->reply_to);
     date_time_extractor.extract(result->all_headers, HeaderKey::date, result->date);
     // TODO: other headers
-    // TODO: bcc from _message
-    // TODO: interpret headers
+
+    if(nullptr == result->sender) result->sender = makeEmptyAddressGroupPtr();
+    if(nullptr == result->from)   result->from = makeEmptyAddressGroupPtr();
+    if(nullptr == result->to)     result->to = makeEmptyAddressGroupPtr();
+    if(nullptr == result->cc)     result->cc = makeEmptyAddressGroupPtr();
+    if(nullptr == result->bcc)    result->bcc = makeEmptyAddressGroupPtr();
+
+    for(const std::string & raw_to: _message.to)
+    {
+        AddressPtr address = Address::parse(raw_to);
+        if(address &&
+           !result->to->containsMailbox(address->mailbox()) &&
+           !result->cc->containsMailbox(address->mailbox()) &&
+           !result->bcc->containsMailbox(address->mailbox()))
+        {
+            result->bcc->append(address);
+        }
+    }
     // TODO: contents
     return result;
 }

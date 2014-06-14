@@ -3,7 +3,7 @@
 #include <StubMTP/Email/DateTime.h>
 
 /*
- * RFC 2822 3.3 - http://tools.ietf.org/html/rfc2822#section-3.3
+ * RFC 5322 3.3 - http://tools.ietf.org/html/rfc5322#section-3.3
  *
  * date-time       =       [ day-of-week "," ] date FWS time [CFWS]
  * day-of-week     =       ([FWS] day-name) / obs-day-of-week
@@ -67,7 +67,7 @@ boost::date_time::months_of_year parseMonth(const std::string & _month_string)
 }
 
 /*
- * RFC 2822 3.3 - http://tools.ietf.org/html/rfc2822#page-15
+ * RFC 5322 3.3 - http://tools.ietf.org/html/rfc5322#page-15
  *
  * The zone specifies the offset from Coordinated Universal Time (UTC,
  * formerly referred to as "Greenwich Mean Time") that the date and
