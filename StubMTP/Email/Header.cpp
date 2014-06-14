@@ -1,25 +1,6 @@
 #include <StubMTP/Email/Header.h>
 
-/*
- * RFC 2822 2.2   - http://tools.ietf.org/html/rfc2822#section-2.2
- * RFC 2822 2.2.1 - http://tools.ietf.org/html/rfc2822#section-2.2.1
- * RFC 2822 2.2.2 - http://tools.ietf.org/html/rfc2822#section-2.2.2
-*/
-
 using namespace StubMTP::Email;
-
-const char * const HeaderKey::message_id   = "Message-ID";
-const char * const HeaderKey::sender       = "Sender";
-const char * const HeaderKey::from         = "From";
-const char * const HeaderKey::to           = "To";
-const char * const HeaderKey::cc           = "Cc";
-const char * const HeaderKey::bcc          = "Bcc";
-const char * const HeaderKey::reply_to     = "Reply-To";
-const char * const HeaderKey::date         = "Date";
-const char * const HeaderKey::subject      = "Subject";
-const char * const HeaderKey::user_agent   = "User-Agent";
-const char * const HeaderKey::mime_version = "MIME-Version";
-
 
 namespace {
 

@@ -1,6 +1,13 @@
 #ifndef __STUBMPT_EMAIL_HEADER_H__
 #define __STUBMPT_EMAIL_HEADER_H__
 
+/*
++------------------------------------+-------------------------------------------------+
+| RFC 5322 - Internet Message Format | http://tools.ietf.org/html/rfc5322#section-2.2  |
+|     section 2.2 - Header Fields    |                                                 |
++------------------------------------+-------------------------------------------------+
+*/
+
 #include <map>
 #include <string>
 #include <istream>
