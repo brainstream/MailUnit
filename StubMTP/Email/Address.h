@@ -24,8 +24,6 @@ private:
 public:
     STUBMTP_DEFAULT_COPY(Address)
 
-    static AddressPtr parse(const std::string & _input);
-
     const std::string & name() const
     {
         return m_name;
@@ -36,6 +34,8 @@ public:
         return m_mailbox;
     }
 
+public:
+    static AddressPtr parse(const std::string & _input);
     bool compareMailbox(const std::string & _mailbox) const;
 
 private:
@@ -47,13 +47,16 @@ private:
 class AddressGroup
 {
 public:
+    STUBMTP_DEFAULT_COPY(AddressGroup)
+
     AddressGroup()
     {
     }
 
-    STUBMTP_DEFAULT_COPY(AddressGroup)
-
-    static AddressGroupPtr parse(const std::string & _input);
+    explicit AddressGroup(const std::string & _name) :
+        m_name(_name)
+    {
+    }
 
     const std::string & name() const
     {
@@ -73,6 +76,13 @@ public:
         return true;
     }
 
+    bool empty() const
+    {
+        return m_addresses.empty();
+    }
+
+public:
+    static AddressGroupPtr parse(const std::string & _input);
     bool containsMailbox(const std::string & _mailbox) const;
 
 private:
@@ -83,6 +93,11 @@ private:
 inline AddressGroupPtr makeEmptyAddressGroupPtr()
 {
     return std::make_shared<AddressGroup>();
+}
+
+inline AddressGroupPtr makeEmptyAddressGroupPtr(const std::string & _name)
+{
+    return std::make_shared<AddressGroup>(_name);
 }
 
 } // namespace Email

@@ -1,9 +1,21 @@
 #ifndef __STUBMTP_EMAIL_MIME_H__
 #define __STUBMTP_EMAIL_MIME_H__
 
+/*
++-----------------------------------------+-------------------------------------------------+
+| RFC 5322 - Internet Message Format      |  http://tools.ietf.org/html/rfc5322             |
+|     section 3.6 - Field Definitions     |  http://tools.ietf.org/html/rfc5322#section-3.6 |
++-----------------------------------------+-------------------------------------------------+
+| RFC 6854 - Update to Internet Message   |  http://tools.ietf.org/html/rfc6854             |
+|     Format to Allow Group Syntax in the |                                                 |
+|     "From:" and "Sender:" Header Fields |                                                 |
++-----------------------------------------+-------------------------------------------------+
+*/
+
 #include <memory>
 #include <string>
 #include <vector>
+#include <StubMTP/Aux.h>
 #include <StubMTP/Smtp/Message.h>
 #include <StubMTP/Email/Header.h>
 #include <StubMTP/Email/Address.h>
@@ -13,6 +25,7 @@
 namespace StubMTP {
 namespace Email {
 
+// TODO: move to the separate class
 struct MailContent
 {
     std::string type;
@@ -22,10 +35,111 @@ struct MailContent
 }; // struct MailContent
 
 
-// RFC 5322 3.6 - http://tools.ietf.org/html/rfc5322#section-3.6
-// RFC 6854 - http://tools.ietf.org/html/rfc6854
-struct Mime
+struct HeaderKey
 {
+    static const char * const message_id;
+    static const char * const sender;
+    static const char * const from;
+    static const char * const to;
+    static const char * const cc;
+    static const char * const bcc;
+    static const char * const reply_to;
+    static const char * const date;
+    static const char * const subject;
+    static const char * const user_agent;
+    static const char * const mime_version;
+}; // struct HeaderKey
+
+
+class Mime
+{
+    STUBMTP_DISABLE_COPY(Mime)
+
+public:
+    explicit Mime(const Smtp::Message & _message);
+
+public:
+    const std::string & messageId() const
+    {
+        return m_message_id;
+    }
+
+    const DateTimePtr & date() const
+    {
+        return m_date;
+    }
+
+    const std::string & userAgent() const
+    {
+        return m_user_agent;
+    }
+
+    const std::string & mimeVersion() const
+    {
+        return m_mime_version;
+    }
+
+    const std::string & subject() const
+    {
+        return m_subject;
+    }
+
+    const AddressGroupPtr & sender() const
+    {
+        return m_sender;
+    }
+
+    const AddressGroupPtr & from() const
+    {
+        return m_from;
+    }
+
+    const AddressGroupPtr & to() const
+    {
+        return m_to;
+    }
+
+    const AddressGroupPtr & cc() const
+    {
+        return m_cc;
+    }
+
+    const AddressGroupPtr & bcc() const
+    {
+        return m_bcc;
+    }
+
+    const AddressGroupPtr & replyTo() const
+    {
+        return m_reply_to;
+    }
+
+    const HeaderMap & allHeaders() const
+    {
+        return m_header_map;
+    }
+
+private:
+    void initHeaderMap(const Smtp::Message & _message);
+    void initFromHeaderMap(DateTimePtr & _date_time, const char * _key);
+    void initFromHeaderMap(AddressGroupPtr & _address_group, const char * _key);
+    void initFromHeaderMap(std::string & _string, const char * _key);
+    bool findHeaderValue(const char * _key, std::string & _result);
+    void appendBccFromSmtpMessage(const Smtp::Message & _message);
+
+private:
+    std::string m_message_id; // TODO: parse? http://tools.ietf.org/html/rfc5322#section-3.6.4
+    DateTimePtr m_date;
+    std::string m_user_agent;
+    std::string m_mime_version;
+    std::string m_subject;
+    AddressGroupPtr m_sender;
+    AddressGroupPtr m_from;
+    AddressGroupPtr m_to;
+    AddressGroupPtr m_cc;
+    AddressGroupPtr m_bcc;
+    AddressGroupPtr m_reply_to;
+    HeaderMap m_header_map;
     // TODO: return         http://tools.ietf.org/html/rfc5322#section-3.6.7
     // TODO: received       http://tools.ietf.org/html/rfc5322#section-3.6.7
     // TODO: resent-date    http://tools.ietf.org/html/rfc5322#section-3.6.6
@@ -39,22 +153,8 @@ struct Mime
     // TODO: references     http://tools.ietf.org/html/rfc5322#section-3.6.4
     // TODO: comments       http://tools.ietf.org/html/rfc5322#section-3.6.5
     // TODO: keywords       http://tools.ietf.org/html/rfc5322#section-3.6.5
-    std::string message_id; // TODO: parse? http://tools.ietf.org/html/rfc5322#section-3.6.4
-    DateTimePtr date;
-    std::string user_agent;
-    std::string mime_version;
-    std::string subject;
-    AddressGroupPtr sender;
-    AddressGroupPtr from;
-    AddressGroupPtr to;
-    AddressGroupPtr cc;
-    AddressGroupPtr bcc;
-    AddressGroupPtr reply_to;
-    HeaderMap all_headers;
-    std::vector<MailContent> contents;
-}; // struct Mime
-
-std::shared_ptr<Mime> parseMime(const Smtp::Message & _message);
+    // TODO: std::vector<MailContent> m_contents;
+}; // class Mime
 
 } // namespace Email
 } // namespace StubMTP

@@ -4,109 +4,73 @@
 using namespace StubMTP;
 using namespace StubMTP::Email;
 
-namespace {
-
-    template<typename ResultT>
-    class ValueExtractor
-    {
-    public:
-        bool extract(const HeaderMap & _headers, const char * _key, ResultT & _result) const;
-
-    protected:
-        virtual bool convert(const std::string & _string, ResultT & _result) const = 0;
-    }; // class ValueExtractor
-
-    class StringExtractor : public ValueExtractor<std::string>
-    {
-    protected:
-        inline bool convert(const std::string & _string, std::string & _result) const override;
-    }; // class StringExtractor
-
-    class AddressGroupExtractor : public ValueExtractor<AddressGroupPtr>
-    {
-    protected:
-        inline bool convert(const std::string & _string, AddressGroupPtr & _result) const override;
-    }; // class AddressGroupExtractor
-
-    class DateTimeExtractor : public ValueExtractor<DateTimePtr>
-    {
-    protected:
-        inline bool convert(const std::string & _string, DateTimePtr & _result) const override;
-    }; // class DateTimeExtractor
-
-} // namespace
-
-
-template<typename ResultT>
-bool ValueExtractor<ResultT>::extract(const HeaderMap & _headers,
-    const char * _key, ResultT & _result) const
+Mime::Mime(const Smtp::Message & _message)
 {
-    HeaderMap::const_iterator it = _headers.find(_key);
-    if(_headers.end() != it)
+    initHeaderMap(_message);
+    initFromHeaderMap(m_message_id, HeaderKey::message_id);
+    initFromHeaderMap(m_subject, HeaderKey::subject);
+    initFromHeaderMap(m_mime_version, HeaderKey::mime_version);
+    initFromHeaderMap(m_sender, HeaderKey::sender);
+    initFromHeaderMap(m_from, HeaderKey::from);
+    initFromHeaderMap(m_to, HeaderKey::to);
+    initFromHeaderMap(m_cc, HeaderKey::cc);
+    initFromHeaderMap(m_bcc, HeaderKey::bcc);
+    initFromHeaderMap(m_reply_to, HeaderKey::reply_to);
+    initFromHeaderMap(m_date, HeaderKey::date);
+    // TODO: other headers
+    appendBccFromSmtpMessage(_message);
+    // TODO: contents
+}
+
+void Mime::initHeaderMap(const Smtp::Message & _message)
+{
+    std::stringstream data_stream(_message.data);
+    parseHeaders(data_stream, m_header_map);
+}
+
+void Mime::initFromHeaderMap(DateTimePtr & _date_time, const char * _key)
+{
+    std::string value;
+    if(findHeaderValue(_key, value))
+        _date_time = parseDateTime(value);
+}
+
+void Mime::initFromHeaderMap(AddressGroupPtr & _address_group, const char * _key)
+{
+    std::string value;
+    if(findHeaderValue(_key, value))
+        _address_group = AddressGroup::parse(value);
+    if(nullptr == _address_group)
+        _address_group = makeEmptyAddressGroupPtr();
+}
+
+void Mime::initFromHeaderMap(std::string & _string, const char * _key)
+{
+    findHeaderValue(_key, _string);
+}
+
+bool Mime::findHeaderValue(const char * _key, std::string & _result)
+{
+    HeaderMap::const_iterator it = m_header_map.find(_key);
+    if(m_header_map.end() != it)
     {
-        return convert(it->second, _result);
+        _result = it->second;
+        return true;
     }
     return false;
 }
 
-bool StringExtractor::convert(const std::string & _string, std::string & _result) const
+void Mime::appendBccFromSmtpMessage(const Smtp::Message & _message)
 {
-    _result = _string;
-    return true;
-}
-
-bool AddressGroupExtractor::convert(const std::string & _string, AddressGroupPtr & _result) const
-{
-    _result = AddressGroup::parse(_string);
-    return nullptr != _result;
-}
-
-bool DateTimeExtractor::convert(const std::string & _string, DateTimePtr & _result) const
-{
-    _result = parseDateTime(_string);
-    return nullptr != _result;
-}
-
-
-std::shared_ptr<Mime> StubMTP::Email::parseMime(const Smtp::Message & _message)
-{
-    std::shared_ptr<Mime> result = std::make_shared<Mime>();
-    {
-        std::stringstream data_stream(_message.data);
-        parseHeaders(data_stream, result->all_headers);
-    }
-    StringExtractor string_extractor;
-    AddressGroupExtractor address_group_extractor;
-    DateTimeExtractor date_time_extractor;
-    string_extractor.extract(result->all_headers, HeaderKey::message_id, result->message_id);
-    string_extractor.extract(result->all_headers, HeaderKey::subject, result->subject);
-    string_extractor.extract(result->all_headers, HeaderKey::mime_version, result->mime_version);
-    address_group_extractor.extract(result->all_headers, HeaderKey::sender, result->sender);
-    address_group_extractor.extract(result->all_headers, HeaderKey::from, result->from);
-    address_group_extractor.extract(result->all_headers, HeaderKey::to, result->to);
-    address_group_extractor.extract(result->all_headers, HeaderKey::cc, result->cc);
-    address_group_extractor.extract(result->all_headers, HeaderKey::bcc, result->bcc);
-    address_group_extractor.extract(result->all_headers, HeaderKey::reply_to, result->reply_to);
-    date_time_extractor.extract(result->all_headers, HeaderKey::date, result->date);
-    // TODO: other headers
-
-    if(nullptr == result->sender) result->sender = makeEmptyAddressGroupPtr();
-    if(nullptr == result->from)   result->from = makeEmptyAddressGroupPtr();
-    if(nullptr == result->to)     result->to = makeEmptyAddressGroupPtr();
-    if(nullptr == result->cc)     result->cc = makeEmptyAddressGroupPtr();
-    if(nullptr == result->bcc)    result->bcc = makeEmptyAddressGroupPtr();
-
     for(const std::string & raw_to: _message.to)
     {
         AddressPtr address = Address::parse(raw_to);
         if(address &&
-           !result->to->containsMailbox(address->mailbox()) &&
-           !result->cc->containsMailbox(address->mailbox()) &&
-           !result->bcc->containsMailbox(address->mailbox()))
+           !m_to->containsMailbox(address->mailbox()) &&
+           !m_cc->containsMailbox(address->mailbox()) &&
+           !m_bcc->containsMailbox(address->mailbox()))
         {
-            result->bcc->append(address);
+            m_bcc->append(address);
         }
     }
-    // TODO: contents
-    return result;
 }
