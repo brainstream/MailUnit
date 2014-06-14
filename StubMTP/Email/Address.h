@@ -1,12 +1,3 @@
-#ifndef __STUBMPT_EMAIL_ADDRESS_H__
-#define __STUBMPT_EMAIL_ADDRESS_H__
-
-#include <memory>
-#include <string>
-#include <vector>
-#include <ostream>
-#include <StubMTP/Aux.h>
-
 /***********************************************************************************************
  *                                                                                             *
  * This file is part of StubMTP.                                                               *
@@ -23,6 +14,15 @@
  * If not, see <http://www.gnu.org/licenses/>.                                                 *
  *                                                                                             *
  ***********************************************************************************************/
+
+#ifndef __STUBMPT_EMAIL_ADDRESS_H__
+#define __STUBMPT_EMAIL_ADDRESS_H__
+
+#include <memory>
+#include <string>
+#include <vector>
+#include <ostream>
+#include <StubMTP/Aux.h>
 
 namespace StubMTP {
 namespace Email {
