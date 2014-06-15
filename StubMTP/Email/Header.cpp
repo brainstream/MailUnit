@@ -32,6 +32,7 @@ public:
 private:
     void parse();
     bool parseLine(const std::string & _line);
+    inline bool isWhiteSpaceSymbol(char _symbol) const;
     void pushPair();
     void cleanUp();
 
@@ -79,7 +80,7 @@ bool HeaderParser::parseLine(const std::string & _line)
         pushPair();
         return false;
     }
-    if(' ' == _line[0] || '\t' == _line[0])
+    if(isWhiteSpaceSymbol(_line[0]))
     {
         if(!m_current_key.empty())
             m_current_value += _line;
@@ -95,6 +96,11 @@ bool HeaderParser::parseLine(const std::string & _line)
         }
     }
     return true;
+}
+
+bool HeaderParser::isWhiteSpaceSymbol(char _symbol) const
+{
+    return ' ' == _symbol || '\t' == _symbol;
 }
 
 void HeaderParser::pushPair()
