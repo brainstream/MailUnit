@@ -24,6 +24,13 @@
 #include <ostream>
 #include <StubMTP/Aux.h>
 
+/*
+ * Most important RFC parts:
+ *
+ * RFC 5322 - Internet Message Format. Section 3.4 - Address Specification
+ *     http://tools.ietf.org/html/rfc5322#section-3.4
+ */
+
 namespace StubMTP {
 namespace Email {
 
@@ -31,7 +38,6 @@ class Address;
 class AddressGroup;
 typedef std::shared_ptr<Address>      AddressPtr;
 typedef std::shared_ptr<AddressGroup> AddressGroupPtr;
-
 
 class Address
 {

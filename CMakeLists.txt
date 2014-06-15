@@ -69,6 +69,8 @@ set(SRC
     StubMTP/Email/Address.cpp
     StubMTP/Email/DateTime.h
     StubMTP/Email/DateTime.cpp
+    StubMTP/Email/MessageId.h
+    StubMTP/Email/MessageId.cpp
     StubMTP/Smtp/ProtocolDef.h
     StubMTP/Smtp/Server.h
     StubMTP/Smtp/Server.cpp

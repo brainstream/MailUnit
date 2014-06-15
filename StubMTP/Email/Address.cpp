@@ -18,6 +18,8 @@
 #include <boost/algorithm/string.hpp>
 #include <StubMTP/Email/Address.h>
 
+using namespace StubMTP::Email;
+
 /*
  * RFC 5322 3.4 - http://tools.ietf.org/html/rfc5322#section-3.4
  *
@@ -30,9 +32,7 @@
  * display-name    =       phrase
  * mailbox-list    =       (mailbox *("," mailbox)) / obs-mbox-list
  * address-list    =       (address *("," address)) / obs-addr-list
-*/
-
-using namespace StubMTP::Email;
+ */
 
 AddressPtr Address::parse(const std::string & _input)
 {

@@ -32,16 +32,23 @@ SmtpController::SmtpController(boost::asio::io_service &_io_service) :
 void SmtpController::onMessageRecieved(const Smtp::Message & _message)
 {
     Email::Mime * mime = new Email::Mime(_message);
-    // TODO: get data from mime
-    std::cout << "Message has been recived: \n" <<
-                 "\tID: " << mime->messageId() << std::endl <<
-                 "\tSubject: " << mime->subject() << std::endl <<
+    std::cout << "Message has been recived: \n";
+    {
+        std::cout << "\tID: ";
+        Email::MessageIdPtr message_id = mime->messageId();
+        if(nullptr != message_id)
+        {
+            std::cout << message_id << " (left: " << message_id->left() <<
+                         ", right: " << message_id->right() << ")";
+        }
+        std::cout << std::endl;
+    }
+    std::cout << "\tSubject: " << mime->subject() << std::endl <<
                  "\tDate: " << *mime->date() << std::endl <<
                  "\tFrom: " << mime->from() << std::endl <<
-                 "\tTo: " << mime->to() << std::endl;
-
-    std::cout << "\tCC: " << mime->cc() << std::endl;
-    std::cout << "\tBCC: " << mime->bcc() << std::endl;
+                 "\tTo: " << mime->to() << std::endl <<
+                 "\tCC: " << mime->cc() << std::endl <<
+                 "\tBCC: " << mime->bcc() << std::endl;
     delete mime;
     std::cout << std::endl << _message.data << std::endl << std::endl;
     std::cout.flush();

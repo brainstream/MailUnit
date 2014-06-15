@@ -18,15 +18,6 @@
 #ifndef __STUBMTP_EMAIL_MIME_H__
 #define __STUBMTP_EMAIL_MIME_H__
 
-/*-------------------------------------------+-------------------------------------------------+
- | RFC 5322 - Internet Message Format        |  http://tools.ietf.org/html/rfc5322             |
- |     section 3.6 - Field Definitions       |  http://tools.ietf.org/html/rfc5322#section-3.6 |
- +-------------------------------------------+-------------------------------------------------+
- | RFC 6854 - Update to Internet Message     |  http://tools.ietf.org/html/rfc6854             |
- |     Format to Allow Group Syntax in the   |                                                 |
- |     "From:" and "Sender:" Header Fields   |                                                 |
- +-------------------------------------------+-------------------------------------------------*/
-
 #include <memory>
 #include <string>
 #include <vector>
@@ -36,7 +27,17 @@
 #include <StubMTP/Email/Header.h>
 #include <StubMTP/Email/Address.h>
 #include <StubMTP/Email/DateTime.h>
+#include <StubMTP/Email/MessageId.h>
 
+/*
+ * Most important RFC parts:
+ *
+ * RFC 5322 - Internet Message Format. Section 3.6 - Field Definitions
+ *     http://tools.ietf.org/html/rfc5322#section-3.6
+ * RFC 6854 - Update to Internet Message Format to Allow Group Syntax
+ * in the "From:" and "Sender:" Header Fields
+ *     http://tools.ietf.org/html/rfc6854
+ */
 
 namespace StubMTP {
 namespace Email {
@@ -75,12 +76,12 @@ public:
     explicit Mime(const Smtp::Message & _message);
 
 public:
-    const std::string & messageId() const
+    const MessageIdPtr messageId() const
     {
         return m_message_id;
     }
 
-    const DateTimePtr & date() const
+    const DateTimePtr date() const
     {
         return m_date;
     }
@@ -100,32 +101,32 @@ public:
         return m_subject;
     }
 
-    const AddressGroupPtr & sender() const
+    const AddressGroupPtr sender() const
     {
         return m_sender;
     }
 
-    const AddressGroupPtr & from() const
+    const AddressGroupPtr from() const
     {
         return m_from;
     }
 
-    const AddressGroupPtr & to() const
+    const AddressGroupPtr to() const
     {
         return m_to;
     }
 
-    const AddressGroupPtr & cc() const
+    const AddressGroupPtr cc() const
     {
         return m_cc;
     }
 
-    const AddressGroupPtr & bcc() const
+    const AddressGroupPtr bcc() const
     {
         return m_bcc;
     }
 
-    const AddressGroupPtr & replyTo() const
+    const AddressGroupPtr replyTo() const
     {
         return m_reply_to;
     }
@@ -139,12 +140,13 @@ private:
     void initHeaderMap(const Smtp::Message & _message);
     void initFromHeaderMap(DateTimePtr & _date_time, const char * _key);
     void initFromHeaderMap(AddressGroupPtr & _address_group, const char * _key);
+    void initFromHeaderMap(MessageIdPtr & _message_id, const char * _key);
     void initFromHeaderMap(std::string & _string, const char * _key);
     bool findFirstHeaderValue(const char * _key,  std::string & _result);
     void appendBccFromSmtpMessage(const Smtp::Message & _message);
 
 private:
-    std::string m_message_id; // TODO: parse? http://tools.ietf.org/html/rfc5322#section-3.6.4
+    MessageIdPtr m_message_id;
     DateTimePtr m_date;
     std::string m_user_agent;
     std::string m_mime_version;

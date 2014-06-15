@@ -15,40 +15,34 @@
  *                                                                                             *
  ***********************************************************************************************/
 
-#ifndef __STUBMPT_EMAIL_HEADER_H__
-#define __STUBMPT_EMAIL_HEADER_H__
+#include <StubMTP/Email/MessageId.h>
 
-#include <map>
-#include <vector>
-#include <string>
-#include <istream>
-#include <boost/algorithm/string.hpp>
+using namespace StubMTP::Email;
 
 /*
- * Most important RFC parts:
+ * RFC 5322 3.6.4 - http://tools.ietf.org/html/rfc5322#section-3.6.4
  *
- * RFC 5322 - Internet Message Format. Section 2.2 - Header Fields
- *     http://tools.ietf.org/html/rfc5322#section-2.2
- * RFC 5322 - Internet Message Format. Section 2.2.3 - Long Header Fields
- *     http://tools.ietf.org/html/rfc5322#section-2.2.3
+ * message-id      =   "Message-ID:" msg-id CRLF
+ * in-reply-to     =   "In-Reply-To:" 1*msg-id CRLF
+ * references      =   "References:" 1*msg-id CRLF
+ * msg-id          =   [CFWS] "<" id-left "@" id-right ">" [CFWS]
+ * id-left         =   dot-atom-text / obs-id-left
+ * id-right        =   dot-atom-text / no-fold-literal / obs-id-right
+ * no-fold-literal =   "[" *dtext "]"
  */
 
-namespace StubMTP {
-namespace Email {
-
-struct HeaderKeyComparer
+MessageId::MessageId(const std::string & _id_string) :
+    m_id_string(_id_string)
 {
-    bool operator ()(const std::string & _left, const std::string & _right) const
+    size_t at_pos = m_id_string.find("@");
+    if(std::string::npos != at_pos)
     {
-        return boost::algorithm::ilexicographical_compare(_left, _right);
+        size_t left_pos = '<' == _id_string[0] ? 1 : 0;
+        size_t left_len = left_pos ? at_pos - 1 : at_pos;
+        size_t right_pos = at_pos + 1;
+        size_t right_len = '>' == _id_string[_id_string.length() - 1] ?
+            _id_string.length() - right_pos - 1 : std::string::npos;
+        m_left = m_id_string.substr(left_pos, left_len);
+        m_right = m_id_string.substr(right_pos, right_len);
     }
-}; // struct HeaderKeyComparer
-
-typedef std::map<std::string, std::vector<std::string>, struct HeaderKeyComparer> HeaderMap;
-
-void parseHeaders(std::istream & _input, HeaderMap & _output);
-
-} // namespace Email
-} // namespace StubMTP
-
-#endif // __STUBMPT_EMAIL_HEADER_H__
+}

@@ -73,6 +73,13 @@ void Mime::initFromHeaderMap(AddressGroupPtr & _address_group, const char * _key
         _address_group = makeEmptyAddressGroupPtr();
 }
 
+void Mime::initFromHeaderMap(MessageIdPtr & _message_id, const char * _key)
+{
+    std::string value;
+    if(findFirstHeaderValue(_key, value))
+        _message_id = MessageIdPtr(new MessageId(value));
+}
+
 void Mime::initFromHeaderMap(std::string & _string, const char * _key)
 {
     findFirstHeaderValue(_key, _string);

@@ -22,6 +22,13 @@
 #include <string>
 #include <boost/date_time.hpp>
 
+/*
+ * Most important RFC parts:
+ *
+ * RFC 5322 - Internet Message Format. Section 3.3 - Date and Time Specification
+ *     http://tools.ietf.org/html/rfc5322#section-3.3
+ */
+
 namespace StubMTP {
 namespace Email {
 

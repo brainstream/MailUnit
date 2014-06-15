@@ -15,40 +15,68 @@
  *                                                                                             *
  ***********************************************************************************************/
 
-#ifndef __STUBMPT_EMAIL_HEADER_H__
-#define __STUBMPT_EMAIL_HEADER_H__
+#ifndef __STUBMTP_EMAIL_MESSAGEID_H__
+#define __STUBMTP_EMAIL_MESSAGEID_H__
 
-#include <map>
-#include <vector>
+#include <memory>
 #include <string>
-#include <istream>
-#include <boost/algorithm/string.hpp>
+#include <ostream>
+#include <StubMTP/Aux.h>
 
 /*
  * Most important RFC parts:
  *
- * RFC 5322 - Internet Message Format. Section 2.2 - Header Fields
- *     http://tools.ietf.org/html/rfc5322#section-2.2
- * RFC 5322 - Internet Message Format. Section 2.2.3 - Long Header Fields
- *     http://tools.ietf.org/html/rfc5322#section-2.2.3
+ * RFC 5322 - Internet Message Format. Section 3.6.4 - Identification Fields
+ *     http://tools.ietf.org/html/rfc5322#section-3.6.4
  */
 
 namespace StubMTP {
 namespace Email {
 
-struct HeaderKeyComparer
+class MessageId
 {
-    bool operator ()(const std::string & _left, const std::string & _right) const
+public:
+    STUBMTP_DEFAULT_COPY(MessageId)
+    explicit MessageId(const std::string & _id_string);
+
+public:
+    const std::string & full() const
     {
-        return boost::algorithm::ilexicographical_compare(_left, _right);
+        return m_id_string;
     }
-}; // struct HeaderKeyComparer
 
-typedef std::map<std::string, std::vector<std::string>, struct HeaderKeyComparer> HeaderMap;
+    const std::string & left() const
+    {
+        return m_left;
+    }
 
-void parseHeaders(std::istream & _input, HeaderMap & _output);
+    const std::string & right() const
+    {
+        return m_right;
+    }
+
+private:
+    std::string m_id_string;
+    std::string m_left;
+    std::string m_right;
+}; // class MessageId
+
+typedef std::shared_ptr<MessageId> MessageIdPtr;
 
 } // namespace Email
 } // namespace StubMTP
 
-#endif // __STUBMPT_EMAIL_HEADER_H__
+inline std::ostream & operator << (std::ostream & _stream, const StubMTP::Email::MessageId & _message_id)
+{
+    _stream << _message_id.full();
+    return _stream;
+}
+
+inline std::ostream & operator << (std::ostream & _stream, const StubMTP::Email::MessageIdPtr & _message_id)
+{
+    if(nullptr != _message_id)
+        _stream << _message_id->full();
+    return _stream;
+}
+
+#endif // __STUBMTP_EMAIL_MESSAGEID_H__
