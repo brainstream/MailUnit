@@ -26,14 +26,29 @@ namespace Smtp {
 
 class DataState : public State
 {
-public:
-    DataState();
+private:
+    struct ReadState
+    {
+        ReadState() :
+            error(0),
+            header_accepted(0),
+            data_accepting(0),
+            data_accepted(0)
+        {
+        }
 
+        uint8_t error           : 1;
+        uint8_t header_accepted : 1;
+        uint8_t data_accepting  : 1;
+        uint8_t data_accepted   : 1;
+    }; // struct ReadState
+
+public:
     void processInput(const std::string & _input, Message & _message)  override;
 
-    bool isInutProcessingCompleted() const  override
+    bool isInputProcessingCompleted() const  override
     {
-        return m_complete;
+        return m_read_state.data_accepted;
     }
 
     bool isProtocolProcessingCompleted() const  override
@@ -49,9 +64,7 @@ private:
     void processData(const std::string & _input, Message & _message);
 
 private:
-    bool m_header_accepted;
-    bool m_complete;
-    bool m_error;
+    ReadState m_read_state;
     std::string m_data;
 }; // class DataState
 

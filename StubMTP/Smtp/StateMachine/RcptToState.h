@@ -31,7 +31,7 @@ public:
 
     void processInput(const std::string & _input, Message & _message)  override;
 
-    bool isInutProcessingCompleted() const  override
+    bool isInputProcessingCompleted() const  override
     {
         return currentState() != ProcessResult::Incomplete;
     }

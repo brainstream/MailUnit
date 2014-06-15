@@ -60,14 +60,14 @@ void Mime::initHeaderMap(const Smtp::Message & _message)
 void Mime::initFromHeaderMap(DateTimePtr & _date_time, const char * _key)
 {
     std::string value;
-    if(findHeaderValue(_key, value))
+    if(findFirstHeaderValue(_key, value))
         _date_time = parseDateTime(value);
 }
 
 void Mime::initFromHeaderMap(AddressGroupPtr & _address_group, const char * _key)
 {
     std::string value;
-    if(findHeaderValue(_key, value))
+    if(findFirstHeaderValue(_key, value))
         _address_group = AddressGroup::parse(value);
     if(nullptr == _address_group)
         _address_group = makeEmptyAddressGroupPtr();
@@ -75,15 +75,15 @@ void Mime::initFromHeaderMap(AddressGroupPtr & _address_group, const char * _key
 
 void Mime::initFromHeaderMap(std::string & _string, const char * _key)
 {
-    findHeaderValue(_key, _string);
+    findFirstHeaderValue(_key, _string);
 }
 
-bool Mime::findHeaderValue(const char * _key, std::string & _result)
+bool Mime::findFirstHeaderValue(const char * _key, std::string & _result)
 {
     HeaderMap::const_iterator it = m_header_map.find(_key);
     if(m_header_map.end() != it)
     {
-        _result = it->second;
+        _result = it->second[0];
         return true;
     }
     return false;

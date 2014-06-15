@@ -79,7 +79,7 @@ bool HeaderParser::parseLine(const std::string & _line)
         pushPair();
         return false;
     }
-    if(' ' == _line[0])
+    if(' ' == _line[0] || '\t' == _line[0])
     {
         if(!m_current_key.empty())
             m_current_value += _line;
@@ -100,7 +100,17 @@ bool HeaderParser::parseLine(const std::string & _line)
 void HeaderParser::pushPair()
 {
     if(!m_current_key.empty() && !m_current_value.empty())
-        mr_output[m_current_key] = m_current_value;
+    {
+        HeaderMap::iterator it = mr_output.find(m_current_key);
+        if(mr_output.end() == it)
+        {
+            mr_output[m_current_key] = std::vector<std::string>({ m_current_value });
+        }
+        else
+        {
+            it->second.push_back(m_current_value);
+        }
+    }
     cleanUp();
 }
 

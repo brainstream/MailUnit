@@ -15,6 +15,7 @@
  *                                                                                             *
  ***********************************************************************************************/
 
+#include <cstring>
 #include <StubMTP/Smtp/StateMachine/DataState.h>
 #include <StubMTP/Smtp/ProtocolDef.h>
 
@@ -22,18 +23,11 @@
 
 using namespace StubMTP::Smtp;
 
-DataState::DataState() :
-    m_header_accepted(false),
-    m_complete(false),
-    m_error(false)
-{
-}
-
 void DataState::processInput(const std::string & _input, Message & _message)
 {
-    if(m_error)
+    if(m_read_state.error || m_read_state.data_accepted)
         return;
-    if(m_header_accepted)
+    if(m_read_state.header_accepted)
         processData(_input, _message);
     else
         processHeader(_input);
@@ -46,13 +40,14 @@ void DataState::processHeader(const std::string & _input)
     if(m_data.length() < cmd_len)
         return;
     if(m_data.compare(0, cmd_len, COMMAND) == 0)
-        m_header_accepted = true;
+        m_read_state.header_accepted = 1;
     else
-        m_error = true;
+        m_read_state.error = 1;
 }
 
 void DataState::processData(const std::string & _input, Message & _message)
 {
+    m_read_state.data_accepting = 1;
     size_t end_pos = _input.find(SMTP_DATA_END);
     if(std::string::npos == end_pos)
     {
@@ -60,37 +55,37 @@ void DataState::processData(const std::string & _input, Message & _message)
         return;
     }
     m_data += _input.substr(0, end_pos);
-    m_complete = true;
+    m_read_state.data_accepted = 1;
     _message.data = m_data.substr(sizeof(COMMAND) - 1);
 }
 
 bool DataState::response(ResponseCode * _response) const
 {
-    if(m_error)
+    if(m_read_state.error)
     {
         *_response = ResponseCode::InternalError;
         return true;
     }
-    if(m_complete)
+    if(m_read_state.data_accepted)
     {
         *_response = ResponseCode::Ok;
         return true;
     }
-    else if(m_header_accepted)
+    else if(m_read_state.data_accepting)
+    {
+        return false;
+    }
+    else if(m_read_state.header_accepted)
     {
         *_response = ResponseCode::Intermediate;
         return true;
     }
-    else
-    {
-        return false;
-    }
+    *_response = ResponseCode::InternalError;
+    return true;
 }
 
 void DataState::reset()
 {
-    m_complete = false;
-    m_header_accepted = false;
-    m_error = false;
+    std::memset(&m_read_state, 0, sizeof(ReadState));
     m_data.clear();
 }

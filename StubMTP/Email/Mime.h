@@ -18,20 +18,19 @@
 #ifndef __STUBMTP_EMAIL_MIME_H__
 #define __STUBMTP_EMAIL_MIME_H__
 
-/*
-+-----------------------------------------+-------------------------------------------------+
-| RFC 5322 - Internet Message Format      |  http://tools.ietf.org/html/rfc5322             |
-|     section 3.6 - Field Definitions     |  http://tools.ietf.org/html/rfc5322#section-3.6 |
-+-----------------------------------------+-------------------------------------------------+
-| RFC 6854 - Update to Internet Message   |  http://tools.ietf.org/html/rfc6854             |
-|     Format to Allow Group Syntax in the |                                                 |
-|     "From:" and "Sender:" Header Fields |                                                 |
-+-----------------------------------------+-------------------------------------------------+
-*/
+/*-------------------------------------------+-------------------------------------------------+
+ | RFC 5322 - Internet Message Format        |  http://tools.ietf.org/html/rfc5322             |
+ |     section 3.6 - Field Definitions       |  http://tools.ietf.org/html/rfc5322#section-3.6 |
+ +-------------------------------------------+-------------------------------------------------+
+ | RFC 6854 - Update to Internet Message     |  http://tools.ietf.org/html/rfc6854             |
+ |     Format to Allow Group Syntax in the   |                                                 |
+ |     "From:" and "Sender:" Header Fields   |                                                 |
+ +-------------------------------------------+-------------------------------------------------*/
 
 #include <memory>
 #include <string>
 #include <vector>
+#include <functional>
 #include <StubMTP/Aux.h>
 #include <StubMTP/Smtp/Message.h>
 #include <StubMTP/Email/Header.h>
@@ -141,7 +140,7 @@ private:
     void initFromHeaderMap(DateTimePtr & _date_time, const char * _key);
     void initFromHeaderMap(AddressGroupPtr & _address_group, const char * _key);
     void initFromHeaderMap(std::string & _string, const char * _key);
-    bool findHeaderValue(const char * _key, std::string & _result);
+    bool findFirstHeaderValue(const char * _key,  std::string & _result);
     void appendBccFromSmtpMessage(const Smtp::Message & _message);
 
 private:

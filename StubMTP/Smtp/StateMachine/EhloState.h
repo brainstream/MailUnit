@@ -33,7 +33,7 @@ public:
         STUBMTP_UNUSED(_message);
     }
 
-    bool isInutProcessingCompleted() const  override
+    bool isInputProcessingCompleted() const  override
     {
         return true;
     }

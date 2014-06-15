@@ -18,14 +18,13 @@
 #ifndef __STUBMPT_EMAIL_HEADER_H__
 #define __STUBMPT_EMAIL_HEADER_H__
 
-/*
-+------------------------------------+-------------------------------------------------+
-| RFC 5322 - Internet Message Format | http://tools.ietf.org/html/rfc5322#section-2.2  |
-|     section 2.2 - Header Fields    |                                                 |
-+------------------------------------+-------------------------------------------------+
-*/
+/*----------------------------------------+----------------------------------------------------+
+ | RFC 5322 - Internet Message Format     | http://tools.ietf.org/html/rfc5322#section-2.2     |
+ |     section 2.2 - Header Fields        |                                                    |
+ +----------------------------------------+----------------------------------------------------*/
 
 #include <map>
+#include <vector>
 #include <string>
 #include <istream>
 #include <boost/algorithm/string.hpp>
@@ -41,7 +40,7 @@ struct HeaderKeyComparer
     }
 }; // struct HeaderKeyComparer
 
-typedef std::map<std::string, std::string, struct HeaderKeyComparer> HeaderMap;
+typedef std::map<std::string, std::vector<std::string>, struct HeaderKeyComparer> HeaderMap;
 
 void parseHeaders(std::istream & _input, HeaderMap & _output);
 

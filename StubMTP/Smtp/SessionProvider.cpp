@@ -15,7 +15,6 @@
  *                                                                                             *
  ***********************************************************************************************/
 
-#include <iostream>
 #include <StubMTP/Smtp/SessionProvider.h>
 #include <StubMTP/Smtp/ProtocolDef.h>
 #include <StubMTP/Smtp/StateMachine/StateMachine.h>
@@ -125,7 +124,7 @@ void Session::processInput(const std::string & _input)
 {
     int state_id = mp_state_machine->current_state()[0];
     StateBase * state = mp_state_machine->get_state_by_id(state_id);
-    if(!state->isInutProcessingCompleted())
+    if(!state->isInputProcessingCompleted())
     {
         state->processInput(_input, *mp_message);
         return;

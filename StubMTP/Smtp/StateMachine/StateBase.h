@@ -42,7 +42,7 @@ public:
     }
 
     virtual void processInput(const std::string & _input, Message & _message) = 0;
-    virtual bool isInutProcessingCompleted() const                            = 0;
+    virtual bool isInputProcessingCompleted() const                            = 0;
     virtual bool isProtocolProcessingCompleted() const                        = 0;
     virtual bool response(ResponseCode * _response) const                     = 0;
 }; // class StateBase
