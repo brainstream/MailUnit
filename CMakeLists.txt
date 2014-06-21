@@ -18,6 +18,10 @@
 cmake_minimum_required(VERSION 2.8)
 
 project(StubMTP)
+set(BINARY_NAME    stubmtp)
+set(TARGET_SERVER  stubmtp-server)
+set(TARGET_CLIENT  stubmtp-client)
+set(TARGET_COMMON  stubmtp-common)
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     message(STATUS "Application will be built in the Debug configuration")
@@ -47,52 +51,74 @@ find_package(Boost REQUIRED COMPONENTS system filesystem date_time program_optio
 
 include_directories(
     ${CMAKE_CURRENT_LIST_DIR}
-    ${Boost_INCLUDE_DIRS}
+    ${Boost_INCLUDE_DIRS}/StubMTP
 )
 
-set(SRC
-    StubMTP/Application.h
-    StubMTP/Application.cpp
-    StubMTP/Aux.h
-    StubMTP/Config.h
-    StubMTP/Config.cpp
-    StubMTP/Logger.h
-    StubMTP/Logger.cpp
-    StubMTP/Exception.h
-    StubMTP/SmtpController.h
-    StubMTP/SmtpController.cpp
-    StubMTP/Email/Mime.h
-    StubMTP/Email/Mime.cpp
-    StubMTP/Email/Header.h
-    StubMTP/Email/Header.cpp
-    StubMTP/Email/Address.h
-    StubMTP/Email/Address.cpp
-    StubMTP/Email/DateTime.h
-    StubMTP/Email/DateTime.cpp
-    StubMTP/Email/MessageId.h
-    StubMTP/Email/MessageId.cpp
-    StubMTP/Smtp/ProtocolDef.h
-    StubMTP/Smtp/Server.h
-    StubMTP/Smtp/Server.cpp
-    StubMTP/Smtp/ResponseCode.h
-    StubMTP/Smtp/ResponseCode.cpp
-    StubMTP/Smtp/SessionProvider.h
-    StubMTP/Smtp/SessionProvider.cpp
-    StubMTP/Smtp/Message.h
-    StubMTP/Smtp/StateMachine/StateMachine.h
-    StubMTP/Smtp/StateMachine/StateBase.h
-    StubMTP/Smtp/StateMachine/SingleLineCmdState.h
-    StubMTP/Smtp/StateMachine/SingleLineCmdState.cpp
-    StubMTP/Smtp/StateMachine/StartState.h
-    StubMTP/Smtp/StateMachine/EhloState.h
-    StubMTP/Smtp/StateMachine/MailFromState.h
-    StubMTP/Smtp/StateMachine/MailFromState.cpp
-    StubMTP/Smtp/StateMachine/RcptToState.h
-    StubMTP/Smtp/StateMachine/RcptToState.cpp
-    StubMTP/Smtp/StateMachine/DataState.h
-    StubMTP/Smtp/StateMachine/DataState.cpp
-    StubMTP/Smtp/StateMachine/QuitState.h
-    StubMTP/Database/Sql.h
+set(HDR_COMMON
+    StubMTP/Common/Email/Address.h
+    StubMTP/Common/Email/DateTime.h
+    StubMTP/Common/Email/Header.h
+    StubMTP/Common/Email/MessageId.h
+    StubMTP/Common/Email.h
+)
+
+set(SRC_COMMON
+    ${HDR_COMMON}
+    StubMTP/Common/Email/Address.cpp
+    StubMTP/Common/Email/DateTime.cpp
+    StubMTP/Common/Email/Header.cpp
+    StubMTP/Common/Email/MessageId.cpp
+)
+
+set(SRC_SERVER
+    ${HDR_COMMON}
+    StubMTP/Server/Application.h
+    StubMTP/Server/Application.cpp
+    StubMTP/Server/Aux.h
+    StubMTP/Server/Config.h
+    StubMTP/Server/Config.cpp
+    StubMTP/Server/Logger.h
+    StubMTP/Server/Logger.cpp
+    StubMTP/Server/Exception.h
+    StubMTP/Server/SmtpController.h
+    StubMTP/Server/SmtpController.cpp
+    StubMTP/Server/Email/Mime.h
+    StubMTP/Server/Email/Mime.cpp
+    StubMTP/Server/Email/Header.h
+    StubMTP/Server/Email/Header.cpp
+    StubMTP/Server/Email/Address.h
+    StubMTP/Server/Email/Address.cpp
+    StubMTP/Server/Email/DateTime.h
+    StubMTP/Server/Email/DateTime.cpp
+    StubMTP/Server/Email/MessageId.h
+    StubMTP/Server/Email/MessageId.cpp
+    StubMTP/Server/Smtp/ProtocolDef.h
+    StubMTP/Server/Smtp/Server.h
+    StubMTP/Server/Smtp/Server.cpp
+    StubMTP/Server/Smtp/ResponseCode.h
+    StubMTP/Server/Smtp/ResponseCode.cpp
+    StubMTP/Server/Smtp/SessionProvider.h
+    StubMTP/Server/Smtp/SessionProvider.cpp
+    StubMTP/Server/Smtp/Message.h
+    StubMTP/Server/Smtp/StateMachine/StateMachine.h
+    StubMTP/Server/Smtp/StateMachine/StateBase.h
+    StubMTP/Server/Smtp/StateMachine/SingleLineCmdState.h
+    StubMTP/Server/Smtp/StateMachine/SingleLineCmdState.cpp
+    StubMTP/Server/Smtp/StateMachine/StartState.h
+    StubMTP/Server/Smtp/StateMachine/EhloState.h
+    StubMTP/Server/Smtp/StateMachine/MailFromState.h
+    StubMTP/Server/Smtp/StateMachine/MailFromState.cpp
+    StubMTP/Server/Smtp/StateMachine/RcptToState.h
+    StubMTP/Server/Smtp/StateMachine/RcptToState.cpp
+    StubMTP/Server/Smtp/StateMachine/DataState.h
+    StubMTP/Server/Smtp/StateMachine/DataState.cpp
+    StubMTP/Server/Smtp/StateMachine/QuitState.h
+    StubMTP/Server/Database/Sql.h
+)
+
+set(SRC_CLIENT
+    ${HDR_COMMON}
+    StubMTP/Client/Temp.cpp
 )
 
 set(LIBS
@@ -100,6 +126,17 @@ set(LIBS
     ${CMAKE_THREAD_LIBS_INIT}
 )
 
-string(TOLOWER ${PROJECT_NAME} TARGETNAME)
-add_executable(${TARGETNAME} ${SRC})
-target_link_libraries(${TARGETNAME} ${LIBS})
+
+add_library(${TARGET_COMMON} STATIC ${SRC_COMMON})
+
+add_library(${TARGET_CLIENT} SHARED ${SRC_CLIENT})
+target_link_libraries(${TARGET_CLIENT} ${LIBS} ${TARGET_COMMON})
+set_target_properties(${TARGET_CLIENT} PROPERTIES
+    OUTPUT_NAME ${BINARY_NAME})
+
+add_executable(${TARGET_SERVER} ${SRC_SERVER})
+target_link_libraries(${TARGET_SERVER} ${LIBS} ${TARGET_COMMON})
+set_target_properties(${TARGET_SERVER} PROPERTIES
+    OUTPUT_NAME ${BINARY_NAME})
+
+
