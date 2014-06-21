@@ -92,6 +92,7 @@ set(SRC
     StubMTP/Smtp/StateMachine/DataState.h
     StubMTP/Smtp/StateMachine/DataState.cpp
     StubMTP/Smtp/StateMachine/QuitState.h
+    StubMTP/Database/Sql.h
 )
 
 set(LIBS
