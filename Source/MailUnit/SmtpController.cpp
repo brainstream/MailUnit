@@ -34,13 +34,6 @@ void SmtpController::onMessageRecieved(const Smtp::Message & _message)
     Email::Mime * mime = new Email::Mime(_message);
     std::cout << "Message has been recived: \n";
     {
-        std::cout << "\tID: ";
-        Email::MessageIdPtr message_id = mime->messageId();
-        if(nullptr != message_id)
-        {
-            std::cout << message_id << " (left: " << message_id->left() <<
-                         ", right: " << message_id->right() << ")";
-        }
         std::cout << std::endl;
     }
     std::cout << "\tSubject: " << mime->subject() << std::endl <<

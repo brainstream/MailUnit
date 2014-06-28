@@ -55,15 +55,18 @@ include_directories(
 )
 
 set(SRC_LIB
-    Source/LibMailUnit/MailUnit.cpp
     Include/LibMailUnit/MailUnit.h
     Include/LibMailUnit/Def.h
+    Include/LibMailUnit/Memory.h
+    Source/LibMailUnit/InternalMemory.h
+    Source/LibMailUnit/Memory.cpp
+    Include/LibMailUnit/Mime/MessageId.h
+    Source/LibMailUnit/Mime/MessageId.cpp
 )
 
 set(SRC_SERVER
     Source/MailUnit/Application.h
     Source/MailUnit/Application.cpp
-    Source/MailUnit/Aux.h
     Source/MailUnit/Config.h
     Source/MailUnit/Config.cpp
     Source/MailUnit/Logger.h
@@ -79,8 +82,6 @@ set(SRC_SERVER
     Source/MailUnit/Email/Address.cpp
     Source/MailUnit/Email/DateTime.h
     Source/MailUnit/Email/DateTime.cpp
-    Source/MailUnit/Email/MessageId.h
-    Source/MailUnit/Email/MessageId.cpp
     Source/MailUnit/Smtp/ProtocolDef.h
     Source/MailUnit/Smtp/Server.h
     Source/MailUnit/Smtp/Server.cpp
@@ -110,15 +111,13 @@ set(LIBS
     ${CMAKE_THREAD_LIBS_INIT}
 )
 
-add_definitions(-DMU_LIB)
+
 add_library(${TARGET_LIB} SHARED ${SRC_LIB})
 target_link_libraries(${TARGET_LIB} ${LIBS})
+target_compile_definitions(${TARGET_LIB} PRIVATE -D_MU_LIB)
 set_target_properties(${TARGET_LIB} PROPERTIES OUTPUT_NAME ${BINARY_NAME})
-remove_definitions(-DMU_LIB)
 
-add_definitions(-DMU_SERVER)
 add_executable(${TARGET_SERVER} ${SRC_SERVER})
+target_compile_definitions(${TARGET_SERVER} PRIVATE -D_MU_SERVER)
 target_link_libraries(${TARGET_SERVER} ${LIBS} ${TARGET_LIB})
 set_target_properties(${TARGET_SERVER} PROPERTIES OUTPUT_NAME ${BINARY_NAME})
-remove_definitions(-DMU_SERVER)
-

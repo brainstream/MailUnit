@@ -22,12 +22,11 @@
 #include <string>
 #include <vector>
 #include <functional>
-#include <MailUnit/Aux.h>
+#include <LibMailUnit/Def.h>
 #include <MailUnit/Smtp/Message.h>
 #include <MailUnit/Email/Header.h>
 #include <MailUnit/Email/Address.h>
 #include <MailUnit/Email/DateTime.h>
-#include <MailUnit/Email/MessageId.h>
 
 /*
  * Most important RFC parts:
@@ -76,11 +75,6 @@ public:
     explicit Mime(const Smtp::Message & _message);
 
 public:
-    const MessageIdPtr messageId() const
-    {
-        return m_message_id;
-    }
-
     const DateTimePtr date() const
     {
         return m_date;
@@ -140,13 +134,11 @@ private:
     void initHeaderMap(const Smtp::Message & _message);
     void initFromHeaderMap(DateTimePtr & _date_time, const char * _key);
     void initFromHeaderMap(AddressGroupPtr & _address_group, const char * _key);
-    void initFromHeaderMap(MessageIdPtr & _message_id, const char * _key);
     void initFromHeaderMap(std::string & _string, const char * _key);
     bool findFirstHeaderValue(const char * _key,  std::string & _result);
     void appendBccFromSmtpMessage(const Smtp::Message & _message);
 
 private:
-    MessageIdPtr m_message_id;
     DateTimePtr m_date;
     std::string m_user_agent;
     std::string m_mime_version;

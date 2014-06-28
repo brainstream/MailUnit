@@ -21,7 +21,7 @@
 #include <functional>
 #include <ostream>
 #include <boost/filesystem.hpp>
-#include <MailUnit/Aux.h>
+#include <LibMailUnit/Def.h>
 #include <MailUnit/Exception.h>
 
 

@@ -22,7 +22,7 @@
 #include <memory>
 #include <atomic>
 #include <boost/asio.hpp>
-#include <MailUnit/Aux.h>
+#include <LibMailUnit/Def.h>
 #include <MailUnit/Smtp/SessionProvider.h>
 
 namespace MailUnit {

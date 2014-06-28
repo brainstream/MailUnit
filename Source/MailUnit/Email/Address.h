@@ -22,7 +22,7 @@
 #include <string>
 #include <vector>
 #include <ostream>
-#include <MailUnit/Aux.h>
+#include <LibMailUnit/Def.h>
 
 /*
  * Most important RFC parts:

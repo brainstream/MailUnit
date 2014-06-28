@@ -15,9 +15,35 @@
  *                                                                                             *
  ***********************************************************************************************/
 
-#ifndef __LIBMU_MAILUNIT_H__
-#define __LIBMU_MAILUNIT_H__
+#include <cstdlib>
+#include <LibMailUnit/Memory.h>
 
-#include "Mime/MessageId.h"
+struct MUHandle
+{
+    void * pointer;
+    MU_DESTRUCTOR destructor;
+}; // struct MUHandle
 
-#endif // __LIBMU_MAILUNIT_H__
+
+MU_HANDLE muAlloc(size_t _size, MU_DESTRUCTOR _dtor /*= NULL*/)
+{
+    MUHandle * result = new MUHandle();
+    result->pointer = std::malloc(_size);
+    result->destructor = _dtor;
+    return result;
+}
+
+void muFree(MU_HANDLE _handle)
+{
+    if(nullptr != _handle->destructor)
+    {
+        _handle->destructor(_handle->pointer);
+    }
+    std::free(_handle->pointer);
+    delete _handle;
+}
+
+void * muPointer(MU_HANDLE _handle)
+{
+    return _handle->pointer;
+}

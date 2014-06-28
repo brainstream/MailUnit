@@ -20,7 +20,7 @@
 
 #include <ostream>
 #include <boost/program_options.hpp>
-#include <MailUnit/Aux.h>
+#include <LibMailUnit/Def.h>
 #include <MailUnit/Logger.h>
 
 namespace MailUnit {

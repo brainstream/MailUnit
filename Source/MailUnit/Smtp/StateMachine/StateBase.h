@@ -20,7 +20,7 @@
 
 #include <string>
 #include <boost/msm/front/states.hpp>
-#include <MailUnit/Aux.h>
+#include <LibMailUnit/Def.h>
 #include <MailUnit/Smtp/Message.h>
 #include <MailUnit/Smtp/ResponseCode.h>
 

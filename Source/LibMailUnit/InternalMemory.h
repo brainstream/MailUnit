@@ -15,9 +15,17 @@
  *                                                                                             *
  ***********************************************************************************************/
 
-#ifndef __LIBMU_MAILUNIT_H__
-#define __LIBMU_MAILUNIT_H__
+#ifndef __MULIB_INTERNALMEMORY_H__
+#define __MULIB_INTERNALMEMORY_H__
 
-#include "Mime/MessageId.h"
+#include <LibMailUnit/Memory.h>
 
-#endif // __LIBMU_MAILUNIT_H__
+void * muPointer(MU_HANDLE _handle);
+
+template<typename T>
+inline T * muPointerT(MU_HANDLE _handle)
+{
+    return static_cast<T *>(muPointer(_handle));
+}
+
+#endif // __MULIB_INTERNALMEMORY_H__

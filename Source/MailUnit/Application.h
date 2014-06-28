@@ -19,7 +19,7 @@
 #define __MU_APPLICATION_H__
 
 #include <boost/filesystem.hpp>
-#include <MailUnit/Aux.h>
+#include <LibMailUnit/Def.h>
 #include <MailUnit/Config.h>
 #include <MailUnit/Logger.h>
 #include <MailUnit/Exception.h>

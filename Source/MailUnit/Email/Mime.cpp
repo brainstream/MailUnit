@@ -36,7 +36,6 @@ const char * const HeaderKey::mime_version = "MIME-Version";
 Mime::Mime(const Smtp::Message & _message)
 {
     initHeaderMap(_message);
-    initFromHeaderMap(m_message_id, HeaderKey::message_id);
     initFromHeaderMap(m_subject, HeaderKey::subject);
     initFromHeaderMap(m_mime_version, HeaderKey::mime_version);
     initFromHeaderMap(m_sender, HeaderKey::sender);
@@ -71,13 +70,6 @@ void Mime::initFromHeaderMap(AddressGroupPtr & _address_group, const char * _key
         _address_group = AddressGroup::parse(value);
     if(nullptr == _address_group)
         _address_group = makeEmptyAddressGroupPtr();
-}
-
-void Mime::initFromHeaderMap(MessageIdPtr & _message_id, const char * _key)
-{
-    std::string value;
-    if(findFirstHeaderValue(_key, value))
-        _message_id = MessageIdPtr(new MessageId(value));
 }
 
 void Mime::initFromHeaderMap(std::string & _string, const char * _key)

@@ -1,33 +1,51 @@
 /***********************************************************************************************
  *                                                                                             *
- * This file is part of MailUnit Client Library.                                                *
+ * This file is part of MailUnit Library.                                                      *
  *                                                                                             *
- * MailUnit Client Library is free software: you can redistribute it and/or modify it under     *
- * the terms of the GNU Lesser General Public License as published by the Free Software        *
- * Foundation, either version 3 of the License, or (at your option) any later version.         *
+ * MailUnit Library is free software: you can redistribute it and/or modify it under the terms *
+ * of the GNU Lesser General Public License as published by the Free Software Foundation,      *
+ * either version 3 of the License, or (at your option) any later version.                     *
  *                                                                                             *
- * MailUnit Client Library is distributed in the hope that it will be useful,                   *
- * but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS   *
- * FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more details.       *
+ * MailUnit Library is distributed in the hope that it will be useful, but WITHOUT ANY         *
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  *
+ * PURPOSE. See the GNU Lesser General Public License for more details.                        *
  *                                                                                             *
  * You should have received a copy of the GNU License General Public License along with        *
- * MailUnit Client Library.  If not, see <http://www.gnu.org/licenses>.                         *
+ * MailUnit Library. If not, see <http://www.gnu.org/licenses>.                                *
  *                                                                                             *
  ***********************************************************************************************/
 
-#ifndef __MU_COMMON_DEF_H__
-#define __MU_COMMON_DEF_H__
-
-#include <stdint.h>
+#ifndef __LIBMU_DEF_H__
+#define __LIBMU_DEF_H__
 
 #ifdef _WIN32
-#   ifdef MU
-#       define STUBMPT_API __declspec(dllexport) extern "C"
+#   ifdef _MU_LIB
+#       define MUAPI __declspec(dllexport) extern "C"
 #   else
-#       define STUBMPT_API __declspec(dllimport) extern "C"
+#       define MUAPI __declspec(dllimport) extern "C"
 #   endif
 #else
-#   define STUBMPT_API extern "C"
+#   define MUAPI extern "C"
 #endif
 
-#endif // __MU_COMMON_DEF_H__
+#define MU_UNUSED(var) (void)var
+
+#if defined __cplusplus && __cplusplus >= 201103L
+#   define MUCPP11
+#endif // __cplusplus && __cplusplus >= 201103L
+
+#ifdef MUCPP11
+#   define MU_DISABLE_COPY(name)                    \
+        name(const name &)                = delete; \
+        name(name &&)                     = delete; \
+        name & operator = (const name &)  = delete; \
+        name & operator = (name &&)       = delete;
+
+#   define MU_DEFAULT_COPY(name)                     \
+        name(const name &)                = default; \
+        name(name &&)                     = default; \
+        name & operator = (const name &)  = default; \
+        name & operator = (name &&)       = default;
+#endif // MUCPP11
+
+#endif // __LIBMU_DEF_H__
