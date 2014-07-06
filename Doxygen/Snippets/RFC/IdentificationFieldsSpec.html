@@ -1,0 +1,12 @@
+<P>
+<A HREF="http://tools.ietf.org/html/rfc5322#section-3.6.4">RFC 5322 3.6.4</A>:
+<BLOCKQUOTE><PRE>
+message-id      =   "Message-ID:" msg-id CRLF
+in-reply-to     =   "In-Reply-To:" 1*msg-id CRLF
+references      =   "References:" 1*msg-id CRLF
+msg-id          =   [CFWS] "<" id-left "@" id-right ">" [CFWS]
+id-left         =   dot-atom-text / obs-id-left
+id-right        =   dot-atom-text / no-fold-literal / obs-id-right
+no-fold-literal =   "[" *dtext "]"
+</PRE></BLOCKQUOTE>
+</P>

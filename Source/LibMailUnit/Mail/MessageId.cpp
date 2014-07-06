@@ -17,7 +17,9 @@
 
 #include <string>
 #include <LibMailUnit/InternalMemory.h>
-#include <LibMailUnit/Mime/MessageId.h>
+#include <LibMailUnit/Mail/MessageId.h>
+
+using namespace LibMailUnit;
 
 namespace {
 
@@ -70,8 +72,7 @@ MessageId::MessageId(const char * _id_string) :
 
 MU_MSGID muParseMessageId(const char * _raw_message_id)
 {
-    MU_HANDLE handle = muAlloc(sizeof(MessageId));
-    new(muPointer(handle)) MessageId(_raw_message_id);
+    MU_HANDLE handle = makeHandle<MessageId, const char *>(_raw_message_id);
     return handle;
     // TODO: MU_INVALID_HANDLE on error
 }
@@ -80,19 +81,19 @@ const char * muMessageIdString(MU_MSGID _msg_id)
 {
     if(nullptr == _msg_id)
         return nullptr;
-    return muPointerT<MessageId>(_msg_id)->full().c_str();
+    return handlePointer<MessageId>(_msg_id)->full().c_str();
 }
 
 const char * muMessageIdLeft(MU_MSGID _msg_id)
 {
     if(nullptr == _msg_id)
         return nullptr;
-    return muPointerT<MessageId>(_msg_id)->left().c_str();
+    return handlePointer<MessageId>(_msg_id)->left().c_str();
 }
 
 const char * muMessageIdRight(MU_MSGID _msg_id)
 {
     if(nullptr == _msg_id)
         return nullptr;
-    return muPointerT<MessageId>(_msg_id)->right().c_str();
+    return handlePointer<MessageId>(_msg_id)->right().c_str();
 }

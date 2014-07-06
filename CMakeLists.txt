@@ -46,7 +46,14 @@ find_package(Threads REQUIRED)
 set(Boost_USE_MULTITHREADED ON)
 set(Boost_USE_STATIC_LIBS OFF)
 set(Boost_USE_STATIC_RUNTIME OFF)
-find_package(Boost REQUIRED COMPONENTS system filesystem date_time program_options regex)
+find_package(Boost REQUIRED COMPONENTS
+    system
+    filesystem
+    date_time
+    program_options
+    regex
+    iostreams
+)
 
 include_directories(
     ${CMAKE_CURRENT_LIST_DIR}/Source
@@ -60,8 +67,10 @@ set(SRC_LIB
     Include/LibMailUnit/Memory.h
     Source/LibMailUnit/InternalMemory.h
     Source/LibMailUnit/Memory.cpp
-    Include/LibMailUnit/Mime/MessageId.h
-    Source/LibMailUnit/Mime/MessageId.cpp
+    Include/LibMailUnit/Mail/Headers.h
+    Source/LibMailUnit/Mail/Headers.cpp
+    Include/LibMailUnit/Mail/MessageId.h
+    Source/LibMailUnit/Mail/MessageId.cpp
 )
 
 set(SRC_SERVER
@@ -106,6 +115,14 @@ set(SRC_SERVER
     Source/MailUnit/Database/Sql.h
 )
 
+set(DOXYGEN_SRC
+    Doxygen/Doxyfile
+    Doxygen/Pages/Main.dox
+    Doxygen/Snippets/RFC/DateSpec.html
+    Doxygen/Snippets/RFC/AddressSpec.html
+    Doxygen/Snippets/RFC/IdentificationFieldsSpec.html
+)
+
 set(LIBS
     ${Boost_LIBRARIES}
     ${CMAKE_THREAD_LIBS_INIT}
@@ -121,3 +138,5 @@ add_executable(${TARGET_SERVER} ${SRC_SERVER})
 target_compile_definitions(${TARGET_SERVER} PRIVATE -D_MU_SERVER)
 target_link_libraries(${TARGET_SERVER} ${LIBS} ${TARGET_LIB})
 set_target_properties(${TARGET_SERVER} PROPERTIES OUTPUT_NAME ${BINARY_NAME})
+
+add_custom_target(doxyfiles SOURCES ${DOXYGEN_SRC})

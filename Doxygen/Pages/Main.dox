@@ -1,0 +1,23 @@
+/**
+@mainpage
+@section rfc List of RFC
+@li <A HREF="http://tools.ietf.org/html/rfc5321">RFC 5321</A> - Simple Mail Transfer Protocol
+@li <A HREF="http://tools.ietf.org/html/rfc6531">RFC 6531</A> - SMTP Extension for Internationalized Email
+@li <A HREF="http://tools.ietf.org/html/rfc4021">RFC 4021</A> - Registration of Mail and MIME Header Fields
+@li <A HREF="http://tools.ietf.org/html/rfc5322">RFC 5322</A> - Internet Message Format
+@li <A HREF="http://tools.ietf.org/html/rfc6854">RFC 6854</A> - Update to Internet Message Format to Allow Group Syntax in the "From:" and "Sender:" Header Fields
+@li <A HREF="http://tools.ietf.org/html/rfc2045">RFC 2045</A> - Multipurpose Internet Mail Extensions (MIME) Part One: Format of Internet Message Bodies
+@li <A HREF="http://tools.ietf.org/html/rfc2231">RFC 2231</A> - MIME Parameter Value and Encoded Word Extensions: Character Sets, Languages, and Continuations
+@li <A HREF="http://tools.ietf.org/html/rfc6532">RFC 6532</A> - Internationalized Email Headers
+@li <A HREF="http://tools.ietf.org/html/rfc2046">RFC 2046</A> - Multipurpose Internet Mail Extensions (MIME) Part Two: Media Types
+@li <A HREF="http://tools.ietf.org/html/rfc3676">RFC 3676</A> - The Text/Plain Format and DelSp Parameters
+@li <A HREF="http://tools.ietf.org/html/rfc3798">RFC 3798</A> - Message Disposition Notification
+@li <A HREF="http://tools.ietf.org/html/rfc6533">RFC 6533</A> - Internationalized Delivery Status and Disposition Notifications
+@li <A HREF="http://tools.ietf.org/html/rfc5147">RFC 5147</A> - URI Fragment Identifiers for the text/plain Media Type
+@li <A HREF="http://tools.ietf.org/html/rfc6657">RFC 6657</A> - Update to MIME regarding "charset" Parameter Handling in Textual Media Types
+@li <A HREF="http://tools.ietf.org/html/rfc2047">RFC 2047</A> - MIME (Multipurpose Internet Mail Extensions) Part Three: Message Header Extensions for Non-ASCII Text
+@li <A HREF="http://tools.ietf.org/html/rfc4289">RFC 4289</A> - Multipurpose Internet Mail Extensions (MIME) Part Four: Registration Procedures
+@li <A HREF="http://tools.ietf.org/html/rfc2049">RFC 2049</A> - Multipurpose Internet Mail Extensions (MIME) Part Five: Conformance Criteria and Examples
+@li <A HREF="http://tools.ietf.org/html/rfc6838">RFC 6838</A> - Media Type Specifications and Registration Procedures
+@li <A HREF="http://tools.ietf.org/html/rfc5536">RFC 5536</A> - Netnews Article Format
+*/

@@ -15,17 +15,51 @@
  *                                                                                             *
  ***********************************************************************************************/
 
-#ifndef __MULIB_INTERNALMEMORY_H__
-#define __MULIB_INTERNALMEMORY_H__
+#ifndef __LIBMU_INTERNALMEMORY_H__
+#define __LIBMU_INTERNALMEMORY_H__
 
 #include <LibMailUnit/Memory.h>
 
-void * muPointer(MU_HANDLE _handle);
-
-template<typename T>
-inline T * muPointerT(MU_HANDLE _handle)
+struct MUHandle
 {
-    return static_cast<T *>(muPointer(_handle));
+    MUHandle(void * _pointer, bool _deletable) :
+        pointer(_pointer),
+        destructor(nullptr),
+        deletable(_deletable)
+    {
+    }
+
+    MUHandle(void * _pointer, MU_DESTRUCTOR _destructor, bool _deletable) :
+        pointer(_pointer),
+        destructor(_destructor),
+        deletable(_deletable)
+    {
+    }
+
+    void * pointer;
+    MU_DESTRUCTOR destructor;
+    bool deletable;
+}; // struct MUHandle
+
+
+namespace LibMailUnit {
+
+template<typename Type, typename... CtorArgs>
+inline MU_HANDLE makeHandle(CtorArgs... _ctor_args)
+{
+    MU_HANDLE handle = muAlloc(sizeof(Type), [](void * _pointer) {
+        delete static_cast<Type *>(_pointer);
+    });
+    new(handle->pointer) Type(_ctor_args...);
+    return handle;
 }
 
-#endif // __MULIB_INTERNALMEMORY_H__
+template<typename Type>
+inline Type * handlePointer(MU_HANDLE _handle)
+{
+    return static_cast<Type *>(_handle->pointer);
+}
+
+} // namespace LibMailUnit
+
+#endif // __LIBMU_INTERNALMEMORY_H__

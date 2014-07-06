@@ -1,0 +1,27 @@
+<P>
+<A HREF="http://tools.ietf.org/html/rfc5322#section-3.4">RFC 5322 3.4</A>:
+<BLOCKQUOTE><PRE>
+address         =   mailbox / group
+mailbox         =   name-addr / addr-spec
+name-addr       =   [display-name] angle-addr
+angle-addr      =   [CFWS] "<" addr-spec ">" [CFWS] /
+                    obs-angle-addr
+group           =   display-name ":" [group-list] ";" [CFWS]
+display-name    =   phrase
+mailbox-list    =   (mailbox *("," mailbox)) / obs-mbox-list
+address-list    =   (address *("," address)) / obs-addr-list
+group-list      =   mailbox-list / CFWS / obs-group-list
+</PRE></BLOCKQUOTE>
+</P>
+<P>
+<A HREF="http://tools.ietf.org/html/rfc5322#section-3.4.1">RFC 5322 3.4.1</A>:
+<BLOCKQUOTE><PRE>
+addr-spec       =   local-part "@" domain
+local-part      =   dot-atom / quoted-string / obs-local-part
+domain          =   dot-atom / domain-literal / obs-domain
+domain-literal  =   [CFWS] "[" *([FWS] dtext) [FWS] "]" [CFWS]
+dtext           =   %d33-90 /          ; Printable US-ASCII
+                    %d94-126 /         ;  characters not including
+                    obs-dtext          ;  "[", "]", or "\"
+</PRE></BLOCKQUOTE>
+</P>

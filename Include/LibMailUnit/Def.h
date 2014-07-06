@@ -15,8 +15,15 @@
  *                                                                                             *
  ***********************************************************************************************/
 
+/**
+ * @file
+ * @brief Contains auxiliary definitions.
+ */
+
 #ifndef __LIBMU_DEF_H__
 #define __LIBMU_DEF_H__
+
+/** @cond HIDDEN */
 
 #ifdef _WIN32
 #   ifdef _MU_LIB
@@ -24,8 +31,10 @@
 #   else
 #       define MUAPI __declspec(dllimport) extern "C"
 #   endif
+#   define MU_NATIVE_FILE HFILE
 #else
 #   define MUAPI extern "C"
+#   define MU_NATIVE_FILE int
 #endif
 
 #define MU_UNUSED(var) (void)var
@@ -47,5 +56,7 @@
         name & operator = (const name &)  = default; \
         name & operator = (name &&)       = default;
 #endif // MUCPP11
+
+/** @endcond HIDDEN */
 
 #endif // __LIBMU_DEF_H__

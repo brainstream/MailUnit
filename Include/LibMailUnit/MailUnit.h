@@ -15,9 +15,15 @@
  *                                                                                             *
  ***********************************************************************************************/
 
+/**
+ * @file
+ * @brief Main include file.
+ */
+
 #ifndef __LIBMU_MAILUNIT_H__
 #define __LIBMU_MAILUNIT_H__
 
-#include "Mime/MessageId.h"
+#include "Mail/Headers.h"
+#include "Mail/MessageId.h"
 
 #endif // __LIBMU_MAILUNIT_H__

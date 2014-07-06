@@ -16,34 +16,25 @@
  ***********************************************************************************************/
 
 #include <cstdlib>
-#include <LibMailUnit/Memory.h>
-
-struct MUHandle
-{
-    void * pointer;
-    MU_DESTRUCTOR destructor;
-}; // struct MUHandle
+#include <LibMailUnit/InternalMemory.h>
 
 
 MU_HANDLE muAlloc(size_t _size, MU_DESTRUCTOR _dtor /*= NULL*/)
 {
-    MUHandle * result = new MUHandle();
-    result->pointer = std::malloc(_size);
-    result->destructor = _dtor;
-    return result;
+    return new MUHandle(std::malloc(_size), _dtor, true);
+}
+
+MU_HANDLE muWrapPointer(void * _pointer)
+{
+    return new MUHandle(_pointer, false);
 }
 
 void muFree(MU_HANDLE _handle)
 {
-    if(nullptr != _handle->destructor)
+    if(_handle->deletable && nullptr != _handle->destructor)
     {
         _handle->destructor(_handle->pointer);
     }
     std::free(_handle->pointer);
     delete _handle;
-}
-
-void * muPointer(MU_HANDLE _handle)
-{
-    return _handle->pointer;
 }
