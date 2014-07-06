@@ -59,19 +59,6 @@ typedef void (* MU_DESTRUCTOR)(void *);
 MUAPI MU_HANDLE muAlloc(size_t _size, MU_DESTRUCTOR _dtor = NULL);
 
 /**
- * @brief Wraps @a _pointer into handle.
- *
- * @param _pointer
- *     A pointer to wrap.
- * @return
- *     Handle contained a @a _pointer.
- * @remarks
- *     Calling the @ref muFree function is not required for handles created by this function.
- *     The @ref muFree function will do nothing with handles created by this functuin.
- */
-MUAPI MU_HANDLE muWrapPointer(void * _pointer);
-
-/**
  * @brief Releases a memory allocated by the @ref muAlloc function.
  * @sa muAlloc
  */

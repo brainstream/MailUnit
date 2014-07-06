@@ -24,11 +24,6 @@ MU_HANDLE muAlloc(size_t _size, MU_DESTRUCTOR _dtor /*= NULL*/)
     return new MUHandle(std::malloc(_size), _dtor, true);
 }
 
-MU_HANDLE muWrapPointer(void * _pointer)
-{
-    return new MUHandle(_pointer, false);
-}
-
 void muFree(MU_HANDLE _handle)
 {
     if(_handle->deletable && nullptr != _handle->destructor)

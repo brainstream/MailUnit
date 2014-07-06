@@ -203,7 +203,7 @@ MU_MAIL_HEADER muMailHeaderByIndex(MU_MAIL_HEADERLIST _headers, size_t _index)
     HeaderMap * map = handlePointer<HeaderMap>(_headers);
     if(nullptr == map || map->size() <= _index)
         return MU_INVALID_HANDLE;
-    return muWrapPointer((*map)[_index]);
+    return wrapPointer((*map)[_index]);
 }
 
 MU_MAIL_HEADER muMailHeaderByName(MU_MAIL_HEADERLIST _headers, const char * _name)
@@ -212,7 +212,7 @@ MU_MAIL_HEADER muMailHeaderByName(MU_MAIL_HEADERLIST _headers, const char * _nam
     if(nullptr == map)
         return MU_INVALID_HANDLE;
     Header * header = map->find(_name);
-    return nullptr == header ? MU_INVALID_HANDLE : muWrapPointer(header);
+    return nullptr == header ? MU_INVALID_HANDLE : wrapPointer(header);
 }
 
 size_t muMailHeaderValueCount(MU_MAIL_HEADER _header)

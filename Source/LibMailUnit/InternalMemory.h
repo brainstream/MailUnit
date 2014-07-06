@@ -44,6 +44,11 @@ struct MUHandle
 
 namespace LibMailUnit {
 
+inline MU_HANDLE wrapPointer(void * _pointer)
+{
+    return new MUHandle(_pointer, false);
+}
+
 template<typename Type, typename... CtorArgs>
 inline MU_HANDLE makeHandle(CtorArgs... _ctor_args)
 {
