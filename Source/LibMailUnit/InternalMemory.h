@@ -50,10 +50,10 @@ inline MU_HANDLE wrapPointer(void * _pointer)
 }
 
 template<typename Type, typename... CtorArgs>
-inline MU_HANDLE makeHandle(CtorArgs... _ctor_args)
+inline MU_HANDLE makeObjectHandle(CtorArgs... _ctor_args)
 {
     MU_HANDLE handle = muAlloc(sizeof(Type), [](void * _pointer) {
-        delete static_cast<Type *>(_pointer);
+        static_cast<Type *>(_pointer)->~Type();
     });
     new(handle->pointer) Type(_ctor_args...);
     return handle;

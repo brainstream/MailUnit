@@ -99,7 +99,7 @@ HeaderParser::HeaderParser(std::istream & _input, HeaderMap & _output) :
 
 MU_MAIL_HEADERLIST  HeaderParser::parse(std::istream & _input)
 {
-    MU_HANDLE handle = makeHandle<HeaderMap>();
+    MU_HANDLE handle = makeObjectHandle<HeaderMap>();
     HeaderMap * map = handlePointer<HeaderMap>(handle);
     HeaderParser(_input, *map).parse();
     return handle;

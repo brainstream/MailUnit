@@ -72,7 +72,7 @@ MessageId::MessageId(const char * _id_string) :
 
 MU_MSGID muParseMessageId(const char * _raw_message_id)
 {
-    MU_HANDLE handle = makeHandle<MessageId, const char *>(_raw_message_id);
+    MU_HANDLE handle = makeObjectHandle<MessageId>(_raw_message_id);
     return handle;
     // TODO: MU_INVALID_HANDLE on error
 }

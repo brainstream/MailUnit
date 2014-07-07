@@ -21,6 +21,7 @@ project(MailUnit)
 set(BINARY_NAME    mailunit)
 set(TARGET_SERVER  mailunit-server)
 set(TARGET_LIB     mailunit-lib)
+set(TARGET_TESTS   mailunit-tests)
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     message(STATUS "Application will be built in the Debug configuration")
@@ -43,9 +44,17 @@ endif()
 
 find_package(Threads REQUIRED)
 
+#### Begin Boost ####
+if(ALLOW_TESTS)
+    set(BOOST_TEST unit_test_framework)
+endif(ALLOW_TESTS)
+if(WIN32)
+    set(Boost_USE_STATIC_LIBS ON)
+else()
+    set(Boost_USE_STATIC_LIBS OFF)
+    add_definitions(-DBOOST_TEST_DYN_LINK)
+endif()
 set(Boost_USE_MULTITHREADED ON)
-set(Boost_USE_STATIC_LIBS OFF)
-set(Boost_USE_STATIC_RUNTIME OFF)
 find_package(Boost REQUIRED COMPONENTS
     system
     filesystem
@@ -53,7 +62,9 @@ find_package(Boost REQUIRED COMPONENTS
     program_options
     regex
     iostreams
+    ${BOOST_TEST}
 )
+#### End Boost ####
 
 include_directories(
     ${CMAKE_CURRENT_LIST_DIR}/Source
@@ -115,6 +126,11 @@ set(SRC_SERVER
     Source/MailUnit/Database/Sql.h
 )
 
+set(TESTS_SRC
+    Tests/Main.cpp
+    Tests/LibMailUnit/Memory.cpp
+)
+
 set(DOXYGEN_SRC
     Doxygen/Doxyfile
     Doxygen/Pages/Main.dox
@@ -138,5 +154,12 @@ add_executable(${TARGET_SERVER} ${SRC_SERVER})
 target_compile_definitions(${TARGET_SERVER} PRIVATE -D_MU_SERVER)
 target_link_libraries(${TARGET_SERVER} ${LIBS} ${TARGET_LIB})
 set_target_properties(${TARGET_SERVER} PROPERTIES OUTPUT_NAME ${BINARY_NAME})
+
+if(ALLOW_TESTS)
+    enable_testing()
+    add_executable(${TARGET_TESTS} ${TESTS_SRC})
+    target_link_libraries(${TARGET_TESTS} ${LIBS} ${TARGET_LIB})
+    add_test("tests" ${TARGET_TESTS})
+endif(ALLOW_TESTS)
 
 add_custom_target(doxyfiles SOURCES ${DOXYGEN_SRC})
