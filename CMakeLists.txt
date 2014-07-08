@@ -156,10 +156,8 @@ target_link_libraries(${TARGET_SERVER} ${LIBS} ${TARGET_LIB})
 set_target_properties(${TARGET_SERVER} PROPERTIES OUTPUT_NAME ${BINARY_NAME})
 
 if(ALLOW_TESTS)
-    enable_testing()
     add_executable(${TARGET_TESTS} ${TESTS_SRC})
     target_link_libraries(${TARGET_TESTS} ${LIBS} ${TARGET_LIB})
-    add_test("tests" ${TARGET_TESTS})
 endif(ALLOW_TESTS)
 
 add_custom_target(doxyfiles SOURCES ${DOXYGEN_SRC})
