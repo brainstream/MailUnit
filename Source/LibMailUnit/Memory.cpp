@@ -15,21 +15,15 @@
  *                                                                                             *
  ***********************************************************************************************/
 
-#include <cstdlib>
 #include <LibMailUnit/InternalMemory.h>
 
 
 MU_HANDLE muAlloc(size_t _size, MU_DESTRUCTOR _dtor /*= NULL*/)
 {
-    return new MUHandle(std::malloc(_size), _dtor, true);
+    return new MUHandle(_size, _dtor);
 }
 
 void muFree(MU_HANDLE _handle)
 {
-    if(_handle->deletable && nullptr != _handle->destructor)
-    {
-        _handle->destructor(_handle->pointer);
-    }
-    std::free(_handle->pointer);
     delete _handle;
 }
