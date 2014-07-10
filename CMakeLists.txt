@@ -128,7 +128,10 @@ set(SRC_SERVER
 
 set(TESTS_SRC
     Tests/Main.cpp
+    Tests/TestFixture.h
+    Tests/TestFixture.cpp
     Tests/LibMailUnit/Memory.cpp
+    Tests/LibMailUnit/Headers.cpp
 )
 
 set(DOXYGEN_SRC

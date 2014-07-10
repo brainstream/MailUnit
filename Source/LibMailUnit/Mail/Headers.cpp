@@ -84,7 +84,8 @@ Header * HeaderMap::find(const std::string & _name) const
 {
     for(Header * header: *this)
     {
-        if(boost::algorithm::ilexicographical_compare(_name, header->name))
+
+        if(boost::algorithm::iequals(_name, header->name))
             return header;
     }
     return nullptr;

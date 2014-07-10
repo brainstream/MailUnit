@@ -15,6 +15,38 @@
  *                                                                                             *
  ***********************************************************************************************/
 
-#define BOOST_TEST_MAIN
-#define BOOST_TEST_MODULE "MailUnit"
-#include <boost/test/unit_test.hpp>
+#ifndef __LIBMUTESTS_TESTFIXTURE_H__
+#define __LIBMUTESTS_TESTFIXTURE_H__
+
+#include <map>
+#include <LibMailUnit/Def.h>
+#ifdef _WIN32
+#   include <windows.h>
+#else
+#   include <cstdlib>
+#   include <unistd.h>
+#endif
+
+
+namespace LibMailUnit {
+namespace Test {
+
+class TestFixture
+{
+public:
+    ~TestFixture();
+    MU_NATIVE_FILE createTempFile(const std::string & _content);
+    void releaseFile(MU_NATIVE_FILE _file);
+
+private:
+    void deleteFile(const std::pair<MU_NATIVE_FILE, std::string> & _file);
+
+private:
+    std::map<MU_NATIVE_FILE, std::string> m_files;
+}; // class TestFixture
+
+
+} // namespace Test
+} // namespace LibMailUnit
+
+#endif // __LIBMUTESTS_TESTFIXTURE_H__
