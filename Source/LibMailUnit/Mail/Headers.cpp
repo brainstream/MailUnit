@@ -84,7 +84,6 @@ Header * HeaderMap::find(const std::string & _name) const
 {
     for(Header * header: *this)
     {
-
         if(boost::algorithm::iequals(_name, header->name))
             return header;
     }
@@ -98,7 +97,7 @@ HeaderParser::HeaderParser(std::istream & _input, HeaderMap & _output) :
 {
 }
 
-MU_MAIL_HEADERLIST  HeaderParser::parse(std::istream & _input)
+MU_MAIL_HEADERLIST HeaderParser::parse(std::istream & _input)
 {
     MU_HANDLE handle = makeObjectHandle<HeaderMap>();
     HeaderMap * map = handlePointer<HeaderMap>(handle);
