@@ -22,26 +22,26 @@
 #include <LibMailUnit/Def.h>
 #include <LibMailUnit/Memory.h>
 
-struct MUHandle
+struct MHandle
 {
-    MU_DISABLE_COPY(MUHandle)
+    MU_DISABLE_COPY(MHandle)
 
 public:
-    explicit MUHandle(void * _pointer) :
+    explicit MHandle(void * _pointer) :
         mp_pointer(_pointer),
         m_destructor(nullptr),
         m_destructible(false)
     {
     }
 
-    MUHandle(size_t _mem_size, MU_DESTRUCTOR _destructor) :
+    MHandle(size_t _mem_size, MU_DESTRUCTOR _destructor) :
         mp_pointer(malloc(_mem_size)),
         m_destructor(_destructor),
         m_destructible(true)
     {
     }
 
-    ~MUHandle()
+    ~MHandle()
     {
         if(nullptr != m_destructor)
         {
@@ -63,14 +63,14 @@ private:
     void * mp_pointer;
     MU_DESTRUCTOR m_destructor;
     bool m_destructible;
-}; // struct MUHandle
+}; // struct MHandle
 
 
 namespace LibMailUnit {
 
 inline MU_HANDLE wrapPointer(void * _pointer)
 {
-    return new MUHandle(_pointer);
+    return new MHandle(_pointer);
 }
 
 template<typename Type, typename... CtorArgs>

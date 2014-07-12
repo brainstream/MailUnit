@@ -82,6 +82,8 @@ set(SRC_LIB
     Source/LibMailUnit/Mail/Headers.cpp
     Include/LibMailUnit/Mail/MessageId.h
     Source/LibMailUnit/Mail/MessageId.cpp
+    Include/LibMailUnit/Mail/DateTime.h
+    Source/LibMailUnit/Mail/DateTime.cpp
 )
 
 set(SRC_SERVER
@@ -133,6 +135,7 @@ set(TESTS_SRC
     Tests/LibMailUnit/Memory.cpp
     Tests/LibMailUnit/Headers.cpp
     Tests/LibMailUnit/MessageId.cpp
+    Tests/LibMailUnit/DateTime.cpp
 )
 
 set(DOXYGEN_SRC

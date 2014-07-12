@@ -198,7 +198,7 @@
  * <A HREF="http://tools.ietf.org/html/rfc5322#section-3.6">RFC 5322 3.6</A> some of the headers
  * can appear more than once.
  */
-typedef struct MUMailHeader
+typedef struct MMailHeader
 {
     /**
      * @brief A name of the header
@@ -214,7 +214,7 @@ typedef struct MUMailHeader
      * @brief Count of @ref values
      */
     const size_t values_count;
-} MUMailHeader;
+} MMailHeader;
 
 
 typedef MU_HANDLE MU_MAIL_HEADER;

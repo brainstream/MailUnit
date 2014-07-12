@@ -31,7 +31,7 @@
  * @sa muAlloc
  * @sa muFree
 */
-typedef struct MUHandle * MU_HANDLE;
+typedef struct MHandle * MU_HANDLE;
 
 /**
  * @brief Object desctuctor function type.

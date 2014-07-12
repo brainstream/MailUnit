@@ -17,7 +17,7 @@
 
 /**
  * @file
- * @brief Representation of the "Message-ID" Mail/MIME header
+ * @brief The message id header format parser and coresponding data types.
  *
  * @anchor rfc-message-id
  * @htmlinclude RFC/IdentificationFieldsSpec.html
@@ -33,7 +33,7 @@ typedef MU_HANDLE MU_MSGID;
 /**
  * @brief Parses string described in @ref rfc-message-id "RFC"
  * @param _raw_message_id
- *     Singlr string from the mail header.
+ *     String from a mail header.
  * @return
  *     Handle to parsed message id or @ref MU_INVALID_HANDLE.
  * @sa muMessageIdString
@@ -43,9 +43,9 @@ typedef MU_HANDLE MU_MSGID;
 MUAPI MU_MSGID muMessageIdParse(const char * _raw_message_id);
 
 /**
- * @brief Returns source string passed to the @ref muParseMessageId function.
+ * @brief Returns source string passed to the @ref muMessageIdParse function.
  * @param _msg_id
- *     Handle returned from the @ref muParseMessageId function.
+ *     Handle returned from the @ref muMessageIdParse function.
  * @sa muParseMessageId
  * @sa muMessageIdLeft
  * @sa muMessageIdRight
@@ -55,8 +55,8 @@ MUAPI const char * muMessageIdString(MU_MSGID _msg_id);
 /**
  * @brief Returns left part of message id.
  * @param _msg_id
- *     Handle returned from the @ref muParseMessageId function.
- * @sa muParseMessageId
+ *     Handle returned from the @ref muMessageIdParse function.
+ * @sa muMessageIdParse
  * @sa muMessageIdString
  * @sa muMessageIdRight
  */
@@ -65,8 +65,8 @@ MUAPI const char * muMessageIdLeft(MU_MSGID _msg_id);
 /**
  * @brief Returns right part of message id.
  * @param _msg_id
- *     Handle returned from the @ref muParseMessageId function.
- * @sa muParseMessageId
+ *     Handle returned from the @ref muMessageIdParse function.
+ * @sa muMessageIdParse
  * @sa muMessageIdString
  * @sa muMessageIdLeft
  */
