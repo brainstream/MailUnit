@@ -23,77 +23,54 @@ using namespace LibMailUnit;
 
 namespace {
 
-class MessageId
+struct MessageId
 {
-public:
-    MU_DEFAULT_COPY(MessageId)
-    explicit MessageId(const char * _id_string);
-
-public:
-    const std::string & full() const
-    {
-        return m_id_string;
-    }
-
-    const std::string & left() const
-    {
-        return m_left;
-    }
-
-    const std::string & right() const
-    {
-        return m_right;
-    }
-
-private:
-    std::string m_id_string;
-    std::string m_left;
-    std::string m_right;
-}; // class MessageId
+    std::string id_string;
+    std::string left;
+    std::string right;
+}; // struct MessageId
 
 } // namespace
 
-MessageId::MessageId(const char * _id_string) :
-    m_id_string(_id_string)
+MU_MSGID muMessageIdParse(const char * _raw_message_id)
 {
-    // TODO: error!
-    size_t at_pos = m_id_string.find("@");
-    if(std::string::npos != at_pos)
+    MU_HANDLE handle = makeObjectHandle<MessageId>();
+    MessageId * message_id = handlePointer<MessageId>(handle);
+    message_id->id_string = _raw_message_id;
+    size_t at_pos = message_id->id_string.find("@");
+    size_t lt_pos = message_id->id_string.find("<");
+    size_t gt_pos = message_id->id_string.rfind(">");
+    if(std::string::npos == at_pos || std::string::npos == lt_pos || std::string::npos == gt_pos)
     {
-        size_t left_pos = '<' == m_id_string[0] ? 1 : 0;
-        size_t left_len = left_pos ? at_pos - 1 : at_pos;
-        size_t right_pos = at_pos + 1;
-        size_t right_len = '>' == m_id_string[m_id_string.length() - 1] ?
-            m_id_string.length() - right_pos - 1 : std::string::npos;
-        m_left = m_id_string.substr(left_pos, left_len);
-        m_right = m_id_string.substr(right_pos, right_len);
+        muFree(handle);
+        return MU_INVALID_HANDLE;
     }
-}
-
-MU_MSGID muParseMessageId(const char * _raw_message_id)
-{
-    MU_HANDLE handle = makeObjectHandle<MessageId>(_raw_message_id);
+    size_t left_pos = lt_pos + 1;
+    size_t left_len = left_pos ? at_pos - 1 : at_pos;
+    size_t right_pos = at_pos + 1;
+    size_t right_len = gt_pos - at_pos - 1;
+    message_id->left = message_id->id_string.substr(left_pos, left_len);
+    message_id->right = message_id->id_string.substr(right_pos, right_len);
     return handle;
-    // TODO: MU_INVALID_HANDLE on error
 }
 
 const char * muMessageIdString(MU_MSGID _msg_id)
 {
     if(nullptr == _msg_id)
         return nullptr;
-    return handlePointer<MessageId>(_msg_id)->full().c_str();
+    return handlePointer<MessageId>(_msg_id)->id_string.c_str();
 }
 
 const char * muMessageIdLeft(MU_MSGID _msg_id)
 {
     if(nullptr == _msg_id)
         return nullptr;
-    return handlePointer<MessageId>(_msg_id)->left().c_str();
+    return handlePointer<MessageId>(_msg_id)->left.c_str();
 }
 
 const char * muMessageIdRight(MU_MSGID _msg_id)
 {
     if(nullptr == _msg_id)
         return nullptr;
-    return handlePointer<MessageId>(_msg_id)->right().c_str();
+    return handlePointer<MessageId>(_msg_id)->right.c_str();
 }

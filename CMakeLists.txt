@@ -132,6 +132,7 @@ set(TESTS_SRC
     Tests/TestFixture.cpp
     Tests/LibMailUnit/Memory.cpp
     Tests/LibMailUnit/Headers.cpp
+    Tests/LibMailUnit/MessageId.cpp
 )
 
 set(DOXYGEN_SRC

@@ -15,61 +15,32 @@
  *                                                                                             *
  ***********************************************************************************************/
 
-/**
- * @file
- * @brief Representation of the "Message-ID" Mail/MIME header
- *
- * @anchor rfc-message-id
- * @htmlinclude RFC/IdentificationFieldsSpec.html
-*/
+#include <boost/test/unit_test.hpp>
+#include <LibMailUnit/Mail/MessageId.h>
 
-#ifndef __LIBMU_MAIL_MESSAGEID_H__
-#define __LIBMU_MAIL_MESSAGEID_H__
+namespace LibMailUnit {
+namespace Test {
 
-#include "../Memory.h"
+BOOST_AUTO_TEST_SUITE(MessageId)
 
-typedef MU_HANDLE MU_MSGID;
+BOOST_AUTO_TEST_CASE(ParseTest)
+{
+    const char valid_id[]     = "<539DD070.1070602@127.0.0.1>";
+    const char invalid_id_1[] = "_539DD070.1070602@127.0.0.1>";
+    const char invalid_id_2[] = "<539DD070.1070602@127.0.0.1_";
+    const char invalid_id_3[] = "<539DD070.1070602_127.0.0.1>";
+    MU_MSGID msg_id = muMessageIdParse(valid_id);
+    BOOST_CHECK_NE(MU_INVALID_HANDLE, msg_id);
+    BOOST_CHECK_EQUAL(valid_id, muMessageIdString(msg_id));
+    BOOST_CHECK_EQUAL("539DD070.1070602", muMessageIdLeft(msg_id));
+    BOOST_CHECK_EQUAL("127.0.0.1", muMessageIdRight(msg_id));
+    muFree(msg_id);
+    BOOST_CHECK_EQUAL(MU_INVALID_HANDLE, muMessageIdParse(invalid_id_1));
+    BOOST_CHECK_EQUAL(MU_INVALID_HANDLE, muMessageIdParse(invalid_id_2));
+    BOOST_CHECK_EQUAL(MU_INVALID_HANDLE, muMessageIdParse(invalid_id_3));
+}
 
-/**
- * @brief Parses string described in @ref rfc-message-id "RFC"
- * @param _raw_message_id
- *     Singlr string from the mail header.
- * @return
- *     Handle to parsed message id or @ref MU_INVALID_HANDLE.
- * @sa muMessageIdString
- * @sa muMessageIdLeft
- * @sa muMessageIdRight
- */
-MUAPI MU_MSGID muMessageIdParse(const char * _raw_message_id);
+BOOST_AUTO_TEST_SUITE_END()
 
-/**
- * @brief Returns source string passed to the @ref muParseMessageId function.
- * @param _msg_id
- *     Handle returned from the @ref muParseMessageId function.
- * @sa muParseMessageId
- * @sa muMessageIdLeft
- * @sa muMessageIdRight
- */
-MUAPI const char * muMessageIdString(MU_MSGID _msg_id);
-
-/**
- * @brief Returns left part of message id.
- * @param _msg_id
- *     Handle returned from the @ref muParseMessageId function.
- * @sa muParseMessageId
- * @sa muMessageIdString
- * @sa muMessageIdRight
- */
-MUAPI const char * muMessageIdLeft(MU_MSGID _msg_id);
-
-/**
- * @brief Returns right part of message id.
- * @param _msg_id
- *     Handle returned from the @ref muParseMessageId function.
- * @sa muParseMessageId
- * @sa muMessageIdString
- * @sa muMessageIdLeft
- */
-MUAPI const char * muMessageIdRight(MU_MSGID _msg_id);
-
-#endif // __LIBMU_MAIL_MESSAGEID_H__
+} // namespace Test
+} // namespace LibMailUnit
