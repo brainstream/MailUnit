@@ -102,14 +102,8 @@ set(SRC_SERVER
     Source/MailUnit/Exception.h
     Source/MailUnit/SmtpController.h
     Source/MailUnit/SmtpController.cpp
-    Source/MailUnit/Email/Mime.h
-    Source/MailUnit/Email/Mime.cpp
-    Source/MailUnit/Email/Header.h
-    Source/MailUnit/Email/Header.cpp
-    Source/MailUnit/Email/Address.h
-    Source/MailUnit/Email/Address.cpp
-    Source/MailUnit/Email/DateTime.h
-    Source/MailUnit/Email/DateTime.cpp
+    Source/MailUnit/Email.h
+    Source/MailUnit/Email.cpp
     Source/MailUnit/Smtp/ProtocolDef.h
     Source/MailUnit/Smtp/Server.h
     Source/MailUnit/Smtp/Server.cpp

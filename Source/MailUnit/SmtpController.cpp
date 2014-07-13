@@ -17,7 +17,7 @@
 
 #include <iostream>
 #include <MailUnit/SmtpController.h>
-#include <MailUnit/Email/Mime.h>
+#include <MailUnit/Email.h>
 #include <MailUnit/Application.h>
 
 using namespace MailUnit;
@@ -31,19 +31,23 @@ SmtpController::SmtpController(boost::asio::io_service &_io_service) :
 
 void SmtpController::onMessageRecieved(const Smtp::Message & _message)
 {
-    Email::Mime * mime = new Email::Mime(_message);
-    std::cout << "Message has been recived: \n";
-    {
-        std::cout << std::endl;
-    }
-    std::cout << "\tSubject: " << mime->subject() << std::endl <<
-                 "\tDate: " << *mime->date() << std::endl <<
-                 "\tFrom: " << mime->from() << std::endl <<
-                 "\tTo: " << mime->to() << std::endl <<
-                 "\tCC: " << mime->cc() << std::endl <<
-                 "\tBCC: " << mime->bcc() << std::endl;
-    delete mime;
-    std::cout << std::endl << _message.data << std::endl << std::endl;
+    Email * email = new Email(_message);
+    std::cout << "Message has been recived: \n" <<
+        "\tSubject: " << email->subject() << std::endl <<
+         "\tFrom:\n";
+    for(const std::string & from : email->fromAddresses())
+        std::cout << "\t\t" << from << std::endl;
+    std::cout << "\tTo:\n";
+    for(const std::string & to : email->toAddresses())
+        std::cout << "\t\t" << to << std::endl;
+    std::cout << "\tCC:\n";
+    for(const std::string & cc : email->ccAddresses())
+        std::cout << "\t\t" << cc << std::endl;
+    std::cout << "\tBCC:\n";
+    for(const std::string & bcc : email->bccAddresses())
+        std::cout << "\t\t" << bcc << std::endl;
+    // TODO: date
+    delete email;
     std::cout.flush();
     app().log().info("Message received"); // TODO: more details
 }

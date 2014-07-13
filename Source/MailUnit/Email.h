@@ -15,40 +15,75 @@
  *                                                                                             *
  ***********************************************************************************************/
 
-#ifndef __STUBMPT_EMAIL_HEADER_H__
-#define __STUBMPT_EMAIL_HEADER_H__
+#ifndef __MU_EMAIL_H__
+#define __MU_EMAIL_H__
 
-#include <map>
 #include <vector>
 #include <string>
-#include <istream>
-#include <boost/algorithm/string.hpp>
-
-/*
- * Most important RFC parts:
- *
- * RFC 5322 - Internet Message Format. Section 2.2 - Header Fields
- *     http://tools.ietf.org/html/rfc5322#section-2.2
- * RFC 5322 - Internet Message Format. Section 2.2.3 - Long Header Fields
- *     http://tools.ietf.org/html/rfc5322#section-2.2.3
- */
+#include <MailUnit/Smtp/Message.h>
 
 namespace MailUnit {
-namespace Email {
 
-struct HeaderKeyComparer
+class Email
 {
-    bool operator ()(const std::string & _left, const std::string & _right) const
+public:
+    enum class AddressType
     {
-        return boost::algorithm::ilexicographical_compare(_left, _right);
+        Invalid,
+        From,
+        To,
+        Cc,
+        Bcc
+    };
+
+public:
+    Email(const Smtp::Message & _smtp_message);
+    AddressType containsAddress(const std::string & _address);
+
+public:
+    const std::vector<std::string> & fromAddresses() const
+    {
+        return m_from_addresses;
     }
-}; // struct HeaderKeyComparer
 
-typedef std::map<std::string, std::vector<std::string>, struct HeaderKeyComparer> HeaderMap;
+    const std::vector<std::string> & toAddresses() const
+    {
+        return m_to_addresses;
+    }
 
-void parseHeaders(std::istream & _input, HeaderMap & _output);
+    const std::vector<std::string> & ccAddresses() const
+    {
+        return m_cc_addresses;
+    }
 
-} // namespace Email
+    const std::vector<std::string> & bccAddresses() const
+    {
+        return m_bcc_addresses;
+    }
+
+    const std::string & subject() const
+    {
+        return m_subject;
+    }
+
+    const std::string & data() const
+    {
+        return m_data;
+    }
+
+private:
+    void parseSmtpHeaders(const Smtp::Message & _smtp_message);
+    void appendBccFromSmtpMessage(const Smtp::Message & _smtp_message);
+
+private:
+    std::vector<std::string> m_from_addresses;
+    std::vector<std::string> m_to_addresses;
+    std::vector<std::string> m_cc_addresses;
+    std::vector<std::string> m_bcc_addresses;
+    std::string m_subject;
+    std::string m_data;
+}; // class Email
+
 } // namespace MailUnit
 
-#endif // __STUBMPT_EMAIL_HEADER_H__
+#endif // __MU_EMAIL_H__
