@@ -15,61 +15,27 @@
  *                                                                                             *
  ***********************************************************************************************/
 
-/**
- * @file
- * @brief Contains auxiliary definitions.
- */
+#include <boost/algorithm/string.hpp>
+#include <LibMailUnit/Mail/Mailbox.h>
 
-#ifndef __LIBMU_DEF_H__
-#define __LIBMU_DEF_H__
+using namespace LibMailUnit::Mail;
 
-/**
- * @cond HIDDEN
- */
-
-#ifdef _WIN32
-#   ifdef _MU_LIB
-#       define MUAPI __declspec(dllexport) extern "C"
-#   else
-#       define MUAPI __declspec(dllimport) extern "C"
-#   endif
-#   define MU_NATIVE_FILE HFILE
-#else
-#   define MUAPI extern "C"
-#   define MU_NATIVE_FILE int
-#endif
-
-#define MU_UNUSED(var) (void)var
-
-#if defined __cplusplus && __cplusplus >= 201103L
-#   define MUCPP11
-#endif // __cplusplus && __cplusplus >= 201103L
-
-#ifdef MUCPP11
-#   define MU_DISABLE_COPY(name)                    \
-        name(const name &)                = delete; \
-        name(name &&)                     = delete; \
-        name & operator = (const name &)  = delete; \
-        name & operator = (name &&)       = delete;
-
-#   define MU_DEFAULT_COPY(name)                     \
-        name(const name &)                = default; \
-        name(name &&)                     = default; \
-        name & operator = (const name &)  = default; \
-        name & operator = (name &&)       = default;
-#endif // MUCPP11
-
-/**
- * @endcond
- */
-
-/**
- * @brief Boolean type
- */
-typedef enum
+std::shared_ptr<Mailbox> Mailbox::parse(const std::string & _input)
 {
-    mfalse = 0, /**< The @a true value */
-    mtrue  = 1  /**< The @a false value */
-} MBool;
-
-#endif // __LIBMU_DEF_H__
+    // TODO: process the case when the angle symbol is part of the quoted string
+    size_t open_angle_pos = _input.find('<');
+    if(std::string::npos == open_angle_pos)
+    {
+        return std::make_shared<Mailbox>(boost::algorithm::trim_copy(_input));
+    }
+    size_t close_angle_pos = _input.find('>');
+    if(std::string::npos == close_angle_pos)
+    {
+        return nullptr;
+    }
+    size_t mailbox_start_pos = open_angle_pos + 1;
+    size_t mailbox_len = close_angle_pos - mailbox_start_pos;
+    std::string name = boost::algorithm::trim_copy(_input.substr(0, open_angle_pos));
+    std::string address = boost::algorithm::trim_copy(_input.substr(mailbox_start_pos, mailbox_len));
+    return std::make_shared<Mailbox>(address, name);
+}

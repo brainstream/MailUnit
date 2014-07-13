@@ -15,61 +15,43 @@
  *                                                                                             *
  ***********************************************************************************************/
 
-/**
- * @file
- * @brief Contains auxiliary definitions.
- */
+#ifndef __LIBMU_MAIL_MAILBOX_H__
+#define __LIBMU_MAIL_MAILBOX_H__
 
-#ifndef __LIBMU_DEF_H__
-#define __LIBMU_DEF_H__
+#include <memory>
+#include <string>
 
-/**
- * @cond HIDDEN
- */
+namespace LibMailUnit {
+namespace Mail {
 
-#ifdef _WIN32
-#   ifdef _MU_LIB
-#       define MUAPI __declspec(dllexport) extern "C"
-#   else
-#       define MUAPI __declspec(dllimport) extern "C"
-#   endif
-#   define MU_NATIVE_FILE HFILE
-#else
-#   define MUAPI extern "C"
-#   define MU_NATIVE_FILE int
-#endif
-
-#define MU_UNUSED(var) (void)var
-
-#if defined __cplusplus && __cplusplus >= 201103L
-#   define MUCPP11
-#endif // __cplusplus && __cplusplus >= 201103L
-
-#ifdef MUCPP11
-#   define MU_DISABLE_COPY(name)                    \
-        name(const name &)                = delete; \
-        name(name &&)                     = delete; \
-        name & operator = (const name &)  = delete; \
-        name & operator = (name &&)       = delete;
-
-#   define MU_DEFAULT_COPY(name)                     \
-        name(const name &)                = default; \
-        name(name &&)                     = default; \
-        name & operator = (const name &)  = default; \
-        name & operator = (name &&)       = default;
-#endif // MUCPP11
-
-/**
- * @endcond
- */
-
-/**
- * @brief Boolean type
- */
-typedef enum
+class Mailbox final
 {
-    mfalse = 0, /**< The @a true value */
-    mtrue  = 1  /**< The @a false value */
-} MBool;
+public:
+    explicit Mailbox(const std::string & _address, const std::string & _name = std::string()) :
+        m_name(_name),
+        m_address(_address)
+    {
+    }
 
-#endif // __LIBMU_DEF_H__
+    const std::string & name() const
+    {
+        return m_name;
+    }
+
+    const std::string & address() const
+    {
+        return m_address;
+    }
+
+public:
+    static std::shared_ptr<Mailbox> parse(const std::string & _input);
+
+private:
+    std::string m_name;
+    std::string m_address;
+}; // class Mailbox
+
+} // namespace Mail
+} // namespace LibMailUnit
+
+#endif // __LIBMU_MAIL_MAILBOX_H__

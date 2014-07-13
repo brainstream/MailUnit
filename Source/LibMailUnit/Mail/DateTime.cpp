@@ -38,7 +38,7 @@ constexpr char month_name_dec[] = "Dec";
 
 constexpr char day_name_mon[] = "Mon";
 constexpr char day_name_tue[] = "Tue";
-constexpr char day_name_wed[] = "Wed" ;
+constexpr char day_name_wed[] = "Wed";
 constexpr char day_name_thu[] = "Thu";
 constexpr char day_name_fri[] = "Fri";
 constexpr char day_name_sat[] = "Sat";
@@ -111,11 +111,11 @@ std::pair<short, short> parseTimeZone(const std::string & _zone_string)
 
 } // namespace
 
-int muDateTimeParse(const char * _raw_date_time, MDateTime * _date_time)
+MBool muDateTimeParse(const char * _raw_date_time, MDateTime * _date_time)
 {
     if(nullptr == _date_time)
     {
-        return -1;
+        return mfalse;
     }
     boost::regex regex("\\s*"
         "((?<day_of_week>\\w{3})\\s*,\\s*)?"
@@ -130,7 +130,7 @@ int muDateTimeParse(const char * _raw_date_time, MDateTime * _date_time)
     boost::cmatch matches;
     if(!boost::regex_match(_raw_date_time, matches, regex))
     {
-        return -1;
+        return mfalse;
     }
     boost::csub_match day_of_week_match = matches["day_of_week"];
     boost::csub_match year_match = matches["year"];
@@ -143,17 +143,19 @@ int muDateTimeParse(const char * _raw_date_time, MDateTime * _date_time)
     if(!year_match.matched || !month_match.matched || !day_match.matched ||
        !hours_match.matched || !minutes_match.matched || !timezone_match.matched)
     {
-        return -1;
+        return mfalse;
     }
     MDayOfWeek day_of_week = mdow_invalid;
     if(day_of_week_match.matched)
+    {
         day_of_week = parseDayOfWeek(day_of_week_match);
+    }
     unsigned short year = 0;
     std::sscanf(year_match.str().c_str(), "%4hu", &year);
     MMonth month = parseMonth(month_match);
     if(mmonth_invalid == month)
     {
-        return -1;
+        return mfalse;
     }
     unsigned short day = 0;
     std::sscanf(day_match.str().c_str(), "%2hu", &day);
@@ -163,7 +165,9 @@ int muDateTimeParse(const char * _raw_date_time, MDateTime * _date_time)
     std::sscanf(minutes_match.str().c_str(), "%2hu", &minutes);
     unsigned short seconds = 0;
     if(seconds_match.matched)
+    {
         std::sscanf(seconds_match.str().c_str(), "%2hu", &seconds);
+    }
     std::pair<short, short> timezone_offset = parseTimeZone(timezone_match);
     _date_time->day_of_week = day_of_week;
     _date_time->year = year;
@@ -174,7 +178,7 @@ int muDateTimeParse(const char * _raw_date_time, MDateTime * _date_time)
     _date_time->seconds = seconds;
     _date_time->timezone_offset_hours = timezone_offset.first;
     _date_time->timezone_offset_minutes = timezone_offset.second;
-    return 0;
+    return mtrue;
 }
 
 

@@ -15,61 +15,46 @@
  *                                                                                             *
  ***********************************************************************************************/
 
-/**
- * @file
- * @brief Contains auxiliary definitions.
- */
+#ifndef __LIBMU_MAIL_MAILBOXGROUP_H__
+#define __LIBMU_MAIL_MAILBOXGROUP_H__
 
-#ifndef __LIBMU_DEF_H__
-#define __LIBMU_DEF_H__
+#include <vector>
+#include <LibMailUnit/Mail/Mailbox.h>
 
-/**
- * @cond HIDDEN
- */
+namespace LibMailUnit {
+namespace Mail {
 
-#ifdef _WIN32
-#   ifdef _MU_LIB
-#       define MUAPI __declspec(dllexport) extern "C"
-#   else
-#       define MUAPI __declspec(dllimport) extern "C"
-#   endif
-#   define MU_NATIVE_FILE HFILE
-#else
-#   define MUAPI extern "C"
-#   define MU_NATIVE_FILE int
-#endif
-
-#define MU_UNUSED(var) (void)var
-
-#if defined __cplusplus && __cplusplus >= 201103L
-#   define MUCPP11
-#endif // __cplusplus && __cplusplus >= 201103L
-
-#ifdef MUCPP11
-#   define MU_DISABLE_COPY(name)                    \
-        name(const name &)                = delete; \
-        name(name &&)                     = delete; \
-        name & operator = (const name &)  = delete; \
-        name & operator = (name &&)       = delete;
-
-#   define MU_DEFAULT_COPY(name)                     \
-        name(const name &)                = default; \
-        name(name &&)                     = default; \
-        name & operator = (const name &)  = default; \
-        name & operator = (name &&)       = default;
-#endif // MUCPP11
-
-/**
- * @endcond
- */
-
-/**
- * @brief Boolean type
- */
-typedef enum
+class MailboxGroup final
 {
-    mfalse = 0, /**< The @a true value */
-    mtrue  = 1  /**< The @a false value */
-} MBool;
+public:
+    MailboxGroup(const std::string & _input);
 
-#endif // __LIBMU_DEF_H__
+    const std::string & name() const
+    {
+        return m_name;
+    }
+
+    size_t mailboxCount() const
+    {
+        return m_mailboxes.size();
+    }
+
+    bool empty() const
+    {
+        return m_mailboxes.empty();
+    }
+
+    Mailbox & operator [](size_t _index)
+    {
+        return *m_mailboxes[_index].get();
+    }
+
+private:
+    std::string m_name;
+    std::vector<std::shared_ptr<Mailbox>> m_mailboxes;
+}; // class MailboxGroup
+
+} // namespace Mail
+} // namespace LibMailUnit
+
+#endif // __LIBMU_MAIL_MAILBOXGROUP_H__

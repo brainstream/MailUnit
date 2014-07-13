@@ -23,21 +23,13 @@
 #ifndef __LIBMU_MAIN_H__
 #define __LIBMU_MAIN_H__
 
-#include <string.h>
 #include "Def.h"
 
 /**
  * @brief Type of object to handle and manipulate a memory.
- * @sa muAlloc
  * @sa muFree
 */
 typedef struct MHandle * MU_HANDLE;
-
-/**
- * @brief Object desctuctor function type.
- * @sa muAlloc
- */
-typedef void (* MU_DESTRUCTOR)(void *);
 
 /**
  * @brief Invalid handle value.
@@ -45,22 +37,7 @@ typedef void (* MU_DESTRUCTOR)(void *);
 #define MU_INVALID_HANDLE (MU_HANDLE)-1
 
 /**
- * @brief Allocates memory for object.
- * @remarks
- *     Memory allocated by the @a muAlloc function must be released by the @ref muFree function.
- * @param _size
- *     Count of bytes to allocate.
- * @param _dtor
- *     Function that will be called by the @a muFree function before the memory will be released.
- * @return
- *     Object to handle and manipulate a memory.
- * @sa muFree
- */
-MUAPI MU_HANDLE muAlloc(size_t _size, MU_DESTRUCTOR _dtor = NULL);
-
-/**
- * @brief Releases a memory allocated by the @ref muAlloc function.
- * @sa muAlloc
+ * @brief Releases an allocated memory.
  */
 MUAPI void muFree(MU_HANDLE _handle);
 

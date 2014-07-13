@@ -15,61 +15,25 @@
  *                                                                                             *
  ***********************************************************************************************/
 
-/**
- * @file
- * @brief Contains auxiliary definitions.
- */
+#include <boost/algorithm/string.hpp>
+#include <LibMailUnit/Mail/MailboxGroup.h>
 
-#ifndef __LIBMU_DEF_H__
-#define __LIBMU_DEF_H__
+using namespace LibMailUnit::Mail;
 
-/**
- * @cond HIDDEN
- */
-
-#ifdef _WIN32
-#   ifdef _MU_LIB
-#       define MUAPI __declspec(dllexport) extern "C"
-#   else
-#       define MUAPI __declspec(dllimport) extern "C"
-#   endif
-#   define MU_NATIVE_FILE HFILE
-#else
-#   define MUAPI extern "C"
-#   define MU_NATIVE_FILE int
-#endif
-
-#define MU_UNUSED(var) (void)var
-
-#if defined __cplusplus && __cplusplus >= 201103L
-#   define MUCPP11
-#endif // __cplusplus && __cplusplus >= 201103L
-
-#ifdef MUCPP11
-#   define MU_DISABLE_COPY(name)                    \
-        name(const name &)                = delete; \
-        name(name &&)                     = delete; \
-        name & operator = (const name &)  = delete; \
-        name & operator = (name &&)       = delete;
-
-#   define MU_DEFAULT_COPY(name)                     \
-        name(const name &)                = default; \
-        name(name &&)                     = default; \
-        name & operator = (const name &)  = default; \
-        name & operator = (name &&)       = default;
-#endif // MUCPP11
-
-/**
- * @endcond
- */
-
-/**
- * @brief Boolean type
- */
-typedef enum
+MailboxGroup::MailboxGroup(const std::string & _input)
 {
-    mfalse = 0, /**< The @a true value */
-    mtrue  = 1  /**< The @a false value */
-} MBool;
-
-#endif // __LIBMU_DEF_H__
+    // TODO: process the case when the colon symbol is part of the quoted string or domain
+    size_t colon_pos = _input.find(':');
+    if(std::string::npos != colon_pos)
+        m_name = boost::trim_copy(_input.substr(0, colon_pos));
+    std::vector<std::string> raw_addresses;
+    boost::algorithm::split(raw_addresses,
+        std::string::npos == colon_pos ? _input : _input.substr(colon_pos + 1),
+        [](char symbol) { return ',' == symbol; });
+    for(const std::string & raw_address : raw_addresses)
+    {
+        std::shared_ptr<Mailbox> mailbox = Mailbox::parse(raw_address);
+        if(nullptr != mailbox)
+            m_mailboxes.push_back(mailbox);
+    }
+}

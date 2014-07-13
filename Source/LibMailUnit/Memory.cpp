@@ -17,12 +17,6 @@
 
 #include <LibMailUnit/InternalMemory.h>
 
-
-MU_HANDLE muAlloc(size_t _size, MU_DESTRUCTOR _dtor /*= NULL*/)
-{
-    return new MHandle(_size, _dtor);
-}
-
 void muFree(MU_HANDLE _handle)
 {
     delete _handle;

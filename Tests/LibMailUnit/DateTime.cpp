@@ -35,7 +35,7 @@ BOOST_AUTO_TEST_CASE(ParseTest)
 
     MDateTime date_time;
     memset(&date_time, 0, sizeof(MDateTime));
-    BOOST_CHECK_EQUAL(0, muDateTimeParse(valid_raw_dow, &date_time));
+    BOOST_CHECK_EQUAL(mtrue, muDateTimeParse(valid_raw_dow, &date_time));
     BOOST_CHECK_EQUAL(mdow_sat, date_time.day_of_week);
     BOOST_CHECK_EQUAL(12, date_time.day);
     BOOST_CHECK_EQUAL(mmonth_jul, date_time.month);
@@ -47,7 +47,7 @@ BOOST_AUTO_TEST_CASE(ParseTest)
     BOOST_CHECK_EQUAL(-30, date_time.timezone_offset_minutes);
 
     memset(&date_time, 0, sizeof(MDateTime));
-    BOOST_CHECK_EQUAL(0, muDateTimeParse(valid_raw_dow_without_sec, &date_time));
+    BOOST_CHECK_EQUAL(mtrue, muDateTimeParse(valid_raw_dow_without_sec, &date_time));
     BOOST_CHECK_EQUAL(mdow_sat, date_time.day_of_week);
     BOOST_CHECK_EQUAL(12, date_time.day);
     BOOST_CHECK_EQUAL(mmonth_jul, date_time.month);
@@ -59,7 +59,7 @@ BOOST_AUTO_TEST_CASE(ParseTest)
     BOOST_CHECK_EQUAL(30, date_time.timezone_offset_minutes);
 
     memset(&date_time, 0, sizeof(MDateTime));
-    BOOST_CHECK_EQUAL(0, muDateTimeParse(valid_raw_dow_without_dow, &date_time));
+    BOOST_CHECK_EQUAL(mtrue, muDateTimeParse(valid_raw_dow_without_dow, &date_time));
     BOOST_CHECK_EQUAL(mdow_invalid, date_time.day_of_week);
     BOOST_CHECK_EQUAL(12, date_time.day);
     BOOST_CHECK_EQUAL(mmonth_jul, date_time.month);
@@ -70,11 +70,11 @@ BOOST_AUTO_TEST_CASE(ParseTest)
     BOOST_CHECK_EQUAL(-4, date_time.timezone_offset_hours);
     BOOST_CHECK_EQUAL(-30, date_time.timezone_offset_minutes);
 
-    BOOST_CHECK_EQUAL(-1, muDateTimeParse(valid_raw_dow, nullptr));
-    BOOST_CHECK_EQUAL(-1, muDateTimeParse(invalid_raw_dow_1, &date_time));
-    BOOST_CHECK_EQUAL(-1, muDateTimeParse(invalid_raw_dow_2, &date_time));
-    BOOST_CHECK_EQUAL(-1, muDateTimeParse(invalid_raw_dow_3, &date_time));
-    BOOST_CHECK_EQUAL(-1, muDateTimeParse(invalid_raw_dow_4, &date_time));
+    BOOST_CHECK_EQUAL(mfalse, muDateTimeParse(valid_raw_dow, nullptr));
+    BOOST_CHECK_EQUAL(mfalse, muDateTimeParse(invalid_raw_dow_1, &date_time));
+    BOOST_CHECK_EQUAL(mfalse, muDateTimeParse(invalid_raw_dow_2, &date_time));
+    BOOST_CHECK_EQUAL(mfalse, muDateTimeParse(invalid_raw_dow_3, &date_time));
+    BOOST_CHECK_EQUAL(mfalse, muDateTimeParse(invalid_raw_dow_4, &date_time));
 }
 
 BOOST_AUTO_TEST_SUITE_END()

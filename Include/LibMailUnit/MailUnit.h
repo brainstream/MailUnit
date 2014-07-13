@@ -25,5 +25,7 @@
 
 #include "Mail/Headers.h"
 #include "Mail/MessageId.h"
+#include "Mail/DateTime.h"
+#include "Mail/Address.h"
 
 #endif // __LIBMU_MAILUNIT_H__

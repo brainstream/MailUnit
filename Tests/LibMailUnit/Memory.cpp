@@ -47,17 +47,6 @@ struct Test
     bool * dtor_flag;
 };
 
-BOOST_AUTO_TEST_CASE(muAllocTest)
-{
-    static bool destructor_called = false;
-    MU_HANDLE handle = muAlloc(8, [](void *) {
-        destructor_called = true;
-    });
-    BOOST_CHECK(!destructor_called);
-    muFree(handle);
-    BOOST_CHECK(destructor_called);
-}
-
 BOOST_AUTO_TEST_CASE(makeObjectHandleTest)
 {
     bool destructor_called = false;
@@ -74,11 +63,13 @@ BOOST_AUTO_TEST_CASE(wrapPointerTest)
 {
     bool destructor_called = false;
     Test * test = new Test(&destructor_called);
-    MU_HANDLE handle = LibMailUnit::wrapPointer(test);
+    MU_HANDLE handle = LibMailUnit::wrapPointer(test, false);
     BOOST_CHECK_EQUAL(test, LibMailUnit::handlePointer<Test>(handle));
     muFree(handle);
-    BOOST_CHECK(!destructor_called);
-    delete test;
+    BOOST_CHECK_EQUAL(false, destructor_called);
+    handle = LibMailUnit::wrapPointer(test, true);
+    muFree(handle);
+    BOOST_CHECK_EQUAL(true, destructor_called);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

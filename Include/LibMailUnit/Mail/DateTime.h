@@ -23,12 +23,12 @@
  * @htmlinclude RFC/DateSpec.html
 */
 
-#include "../Memory.h"
+#include "../Def.h"
 
 /**
  * @brief The month
  */
-typedef enum MMonth
+typedef enum
 {
     mmonth_invalid = 0,  /**< The invalid month value */
     mmonth_jan     = 1,  /**< January */
@@ -48,7 +48,7 @@ typedef enum MMonth
 /**
  * @brief The day of week
  */
-typedef enum MDayOfWeek
+typedef enum
 {
     mdow_invalid = 0, /**< The invalid day of week value */
     mdow_mon     = 1, /**< Monday */
@@ -63,7 +63,7 @@ typedef enum MDayOfWeek
 /**
  * @brief Representation of date and time.
  */
-typedef struct MDateTime
+typedef struct
 {
     MDayOfWeek day_of_week;        /**< Day of week */
     unsigned short year;           /**< Year */
@@ -83,7 +83,7 @@ typedef struct MDateTime
  * @param _date_time
  *     Pointer to the object to hold a result of parsing. <i>Must not be a NULL.</i>
  * @return
- *     In success case returns 0 and -1 otherwise.
+ *     In success case returns @ref MBool::mtrue and @ref MBool::mfalse otherwise.
  *     The @a _date_time object will not be modified if parsing failed.
  */
-MUAPI int muDateTimeParse(const char * _raw_date_time, MDateTime * _date_time);
+MUAPI MBool muDateTimeParse(const char * _raw_date_time, MDateTime * _date_time);

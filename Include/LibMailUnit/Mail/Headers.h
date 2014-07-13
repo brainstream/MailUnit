@@ -198,7 +198,7 @@
  * <A HREF="http://tools.ietf.org/html/rfc5322#section-3.6">RFC 5322 3.6</A> some of the headers
  * can appear more than once.
  */
-typedef struct MMailHeader
+typedef struct
 {
     /**
      * @brief A name of the header
@@ -228,6 +228,8 @@ typedef MU_HANDLE MU_MAIL_HEADERLIST;
  *     from a data by an empty line as described in the \ref rfc-headers "RFC".
  * @return
  *     Handle to headers list or @ref MU_INVALID_HANDLE.
+ * @remarks
+ *     Returned handle must be destroyed by calling the @ref muFree function.
  */
 MUAPI MU_MAIL_HEADERLIST muMailHeadersParseString(const char * _input);
 
@@ -241,6 +243,9 @@ MUAPI MU_MAIL_HEADERLIST muMailHeadersParseString(const char * _input);
  *
  * Function will read file from current position.
  * After execution a read position will be placed after end of a header section.
+ *
+ * @remarks
+ *     Returned handle must be destroyed by calling the @ref muFree function.
  */
 MUAPI MU_MAIL_HEADERLIST muMailHeadersParseFile(MU_NATIVE_FILE _input);
 
@@ -251,12 +256,16 @@ MUAPI size_t muMailHeadersCount(MU_MAIL_HEADERLIST _headers);
 
 /**
  * @brief Returns a header at @a _index position or @a NULL.
+ * @remarks
+ *     Returned handle does not require destruction.
  * @sa muMailHeadersCount
  */
 MUAPI MU_MAIL_HEADER muMailHeaderByIndex(MU_MAIL_HEADERLIST _headers, size_t _index);
 
 /**
  * @brief Returns a header named @a _name or @a NULL.
+ * @remarks
+ *     Returned handle does not require destruction.
  */
 MUAPI MU_MAIL_HEADER muMailHeaderByName(MU_MAIL_HEADERLIST _headers, const char * _name);
 

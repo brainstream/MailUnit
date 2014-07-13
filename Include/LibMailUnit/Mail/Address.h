@@ -17,61 +17,57 @@
 
 /**
  * @file
- * @brief The message id header format parser and coresponding data types.
+ * @brief The address mail header formats parser and coresponding data types.
  *
- * @anchor rfc-message-id
- * @htmlinclude RFC/IdentificationFieldsSpec.html
+ * @anchor rfc-address-id
+ * @htmlinclude RFC/AddressSpec.html
 */
-
-#ifndef __LIBMU_MAIL_MESSAGEID_H__
-#define __LIBMU_MAIL_MESSAGEID_H__
 
 #include "../Memory.h"
 
-typedef MU_HANDLE MU_MSGID;
+typedef MU_HANDLE MU_MAILBOXGROUP;
+typedef MU_HANDLE MU_MAILBOX;
 
 /**
- * @brief Parses string described in @ref rfc-message-id "RFC"
- * @param _raw_message_id
- *     String from a mail header.
+ * @brief Parses string described in @ref rfc-address-id "RFC"
+ *
+ * @param _raw_address_group
+ *     String that describes either a mailbox or a mailbox group.
  * @return
- *     Handle to parsed message id or @ref MU_INVALID_HANDLE.
+ *     If string parsed successfully function returns a handle of the mailbox group object.
+ *     In failure case the function returns @a MU_INVALID_HANDLE.
  * @remarks
  *     Returned handle must be destroyed by calling the @ref muFree function.
- * @sa muMessageIdString
- * @sa muMessageIdLeft
- * @sa muMessageIdRight
  */
-MUAPI MU_MSGID muMessageIdParse(const char * _raw_message_id);
+MUAPI MU_MAILBOXGROUP muMailboxGroupParse(const char * _raw_address_group);
 
 /**
- * @brief Returns source string passed to the @ref muMessageIdParse function.
- * @param _msg_id
- *     Handle returned from the @ref muMessageIdParse function.
- * @sa muParseMessageId
- * @sa muMessageIdLeft
- * @sa muMessageIdRight
+ * @brief Returns a count of mailboxes in @a _mailbox_group.
  */
-MUAPI const char * muMessageIdString(MU_MSGID _msg_id);
+MUAPI size_t muMailboxCount(MU_MAILBOXGROUP _mailbox_group);
 
 /**
- * @brief Returns left part of message id.
- * @param _msg_id
- *     Handle returned from the @ref muMessageIdParse function.
- * @sa muMessageIdParse
- * @sa muMessageIdString
- * @sa muMessageIdRight
+ * @brief Returns a mailbox at @a _index position in @a _mailbox_group or @a MU_INVALID_HANDLE.
+ * @remarks
+ *     Returned handle does not require destruction.
  */
-MUAPI const char * muMessageIdLeft(MU_MSGID _msg_id);
+MUAPI MU_MAILBOX muMailbox(MU_MAILBOXGROUP _mailbox_group, size_t _index);
 
 /**
- * @brief Returns right part of message id.
- * @param _msg_id
- *     Handle returned from the @ref muMessageIdParse function.
- * @sa muMessageIdParse
- * @sa muMessageIdString
- * @sa muMessageIdLeft
+ * @brief Returns the optional name of the mailbox group.
+ *
+ * If @a _mailbox_group does not contain a name, function returns @a NULL.
  */
-MUAPI const char * muMessageIdRight(MU_MSGID _msg_id);
+MUAPI const char * muMailboxGroupName(MU_MAILBOXGROUP _mailbox_group);
 
-#endif // __LIBMU_MAIL_MESSAGEID_H__
+/**
+ * @brief Returns the optional name of the mailbox.
+ *
+ * If @a _mailbox does not contain a name, function returns @a NULL.
+ */
+MUAPI const char * muMailboxName(MU_MAILBOX _mailbox);
+
+/**
+ * @brief Returns an address from @a _mailbox or @a NULL.
+ */
+MUAPI const char * muMailboxAddress(MU_MAILBOX _mailbox);
