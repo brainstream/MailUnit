@@ -19,6 +19,7 @@
 #include <MailUnit/SmtpController.h>
 #include <MailUnit/Email.h>
 #include <MailUnit/Application.h>
+#include <MailUnit/Database/Email.h>
 
 using namespace MailUnit;
 
@@ -47,6 +48,7 @@ void SmtpController::onMessageRecieved(const Smtp::Message & _message)
     for(const std::string & bcc : email->bccAddresses())
         std::cout << "\t\t" << bcc << std::endl;
     // TODO: date
+    Database::saveEmail(*email);
     delete email;
     std::cout.flush();
     app().log().info("Message received"); // TODO: more details

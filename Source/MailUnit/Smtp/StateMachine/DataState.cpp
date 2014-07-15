@@ -48,10 +48,10 @@ void DataState::processHeader(const std::string & _input)
 void DataState::processData(const std::string & _input, Message & _message)
 {
     m_read_state.data_accepting = 1;
-    size_t end_pos = _input.find(SMTP_DATA_END);
+    m_data += _input;
+    size_t end_pos = m_data.find(SMTP_DATA_END);
     if(std::string::npos == end_pos)
     {
-        m_data += _input;
         return;
     }
     m_data += _input.substr(0, end_pos);

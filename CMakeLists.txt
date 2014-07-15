@@ -22,6 +22,7 @@ set(BINARY_NAME    mailunit)
 set(TARGET_SERVER  mailunit-server)
 set(TARGET_LIB     mailunit-lib)
 set(TARGET_TESTS   mailunit-tests)
+set(TARGET_SQLITE  sqlite)
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     message(STATUS "Application will be built in the Debug configuration")
@@ -69,6 +70,7 @@ find_package(Boost REQUIRED COMPONENTS
 include_directories(
     ${CMAKE_CURRENT_LIST_DIR}/Source
     ${CMAKE_CURRENT_LIST_DIR}/Include
+    ${CMAKE_CURRENT_LIST_DIR}/ThirdParty
     ${Boost_INCLUDE_DIRS}
 )
 
@@ -126,6 +128,8 @@ set(SRC_SERVER
     Source/MailUnit/Smtp/StateMachine/DataState.cpp
     Source/MailUnit/Smtp/StateMachine/QuitState.h
     Source/MailUnit/Database/Sql.h
+    Source/MailUnit/Database/Email.h
+    Source/MailUnit/Database/Email.cpp
 )
 
 set(TESTS_SRC
@@ -147,11 +151,18 @@ set(DOXYGEN_SRC
     Doxygen/Snippets/RFC/IdentificationFieldsSpec.html
 )
 
+set(SQLITE_SRC
+    ThirdParty/SQLite/sqlite3.c
+    ThirdParty/SQLite/sqlite3ext.h
+    ThirdParty/SQLite/sqlite3.h
+)
+
 set(LIBS
     ${Boost_LIBRARIES}
     ${CMAKE_THREAD_LIBS_INIT}
 )
 
+add_library(${TARGET_SQLITE} STATIC ${SQLITE_SRC})
 
 add_library(${TARGET_LIB} SHARED ${SRC_LIB})
 target_link_libraries(${TARGET_LIB} ${LIBS})
@@ -160,7 +171,7 @@ set_target_properties(${TARGET_LIB} PROPERTIES OUTPUT_NAME ${BINARY_NAME})
 
 add_executable(${TARGET_SERVER} ${SRC_SERVER})
 target_compile_definitions(${TARGET_SERVER} PRIVATE -D_MU_SERVER)
-target_link_libraries(${TARGET_SERVER} ${LIBS} ${TARGET_LIB})
+target_link_libraries(${TARGET_SERVER} ${LIBS} ${TARGET_LIB} ${TARGET_SQLITE} ${CMAKE_DL_LIBS})
 set_target_properties(${TARGET_SERVER} PROPERTIES OUTPUT_NAME ${BINARY_NAME})
 
 if(ALLOW_TESTS)
