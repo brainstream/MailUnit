@@ -16,6 +16,7 @@
  ***********************************************************************************************/
 
 #include <sstream>
+#include <cstdio>
 #include <boost/algorithm/string.hpp>
 #include <MailUnit/Database/SQLite.h>
 
@@ -40,9 +41,14 @@ constexpr const char * const sql_init_db =
     "CREATE INDEX IF NOT EXISTS \"iExchangeMailbox\" ON \"Exchange\"(\"Mailbox\");\n"
     "CREATE INDEX IF NOT EXISTS \"iExchangeMessage\" ON \"Exchange\"(\"Message\");";
 
+inline std::string prepareValueString(const std::string & _string)
+{
+    return boost::replace_all_copy(_string, "'", "''");
+}
+
 } // namespace
 
-SQLite::SQLite(const boost::filesystem::path & _filepath) throw(DatabaseException)
+SQLite::SQLite(const boost::filesystem::path & _filepath)
 {
     int sqlite_result = sqlite3_initialize();
     if(SQLITE_OK != sqlite_result)
@@ -70,16 +76,18 @@ void SQLite::shutdown()
     sqlite3_shutdown();
 }
 
-void SQLite::save(const Email & _email) throw(DatabaseException)
+void SQLite::save(const Email & _email)
 {
     prepareDatabase();
-    std::stringstream sqlstream;
-    sqlstream << "INSERT INTO \"Message\" (\"Subject\", \"Data\") VALUES('" <<
-        boost::replace_all_copy(_email.subject(), "'", "''") << "', '" <<
-        boost::replace_all_copy(_email.data(), "'", "''") << "');";
+    unsigned int message_id = insertMessage(_email);
+    insertExchange(message_id, _email);
+}
+
+void SQLite::prepareDatabase()
+{
     char * error = nullptr;
-    sqlite3_exec(mp_sqlite, sqlstream.str().c_str(), nullptr, nullptr, &error);
-    if(nullptr != error)
+    int insert_result = sqlite3_exec(mp_sqlite, sql_init_db, nullptr, this, &error);
+    if(SQLITE_OK != insert_result)
     {
         std::string er_string(error);
         sqlite3_free(error);
@@ -87,11 +95,54 @@ void SQLite::save(const Email & _email) throw(DatabaseException)
     }
 }
 
-void SQLite::prepareDatabase() throw(DatabaseException)
+unsigned int SQLite::insertMessage(const Email & _email)
 {
+    std::stringstream sqlstream;
+    sqlstream << "INSERT INTO \"Message\" (\"Subject\", \"Data\") VALUES('" <<
+        prepareValueString(_email.subject()) << "', '" <<
+        prepareValueString(_email.data()) << "');\n" <<
+        "SELECT last_insert_rowid();";
+    unsigned int message_id = ~0;
     char * error = nullptr;
-    sqlite3_exec(mp_sqlite, sql_init_db, nullptr, nullptr, &error);
-    if(nullptr != error)
+    int insert_result = sqlite3_exec(mp_sqlite, sqlstream.str().c_str(),
+        [](void * pmessage_id, int count, char ** values, char **) {
+            if(count == 1) std::sscanf(values[0], "%u", pmessage_id);
+            return 0;
+        }, &message_id, &error);
+    if(SQLITE_OK != insert_result)
+    {
+        std::string er_string(error);
+        sqlite3_free(error);
+        throw DatabaseException(er_string);
+    }
+    if(~0 == message_id)
+    {
+        throw DatabaseException("Unable to obtain the inserted object ID");
+    }
+    return message_id;
+}
+
+void SQLite::insertExchange(unsigned int _message_id, const Email & _email)
+{
+    std::vector<std::pair<Email::AddressType, const std::vector<std::string> *>> typed_addresses = {
+        { Email::AddressType::From, &_email.fromAddresses() },
+        { Email::AddressType::To,   &_email.toAddresses()   },
+        { Email::AddressType::Cc,   &_email.ccAddresses()   },
+        { Email::AddressType::Bcc,  &_email.bccAddresses()  }
+    };
+    std::stringstream sqlstream;
+    for(auto & typed_address : typed_addresses)
+    {
+        for(auto & address : *typed_address.second)
+        {
+            sqlstream << "INSERT INTO \"Exchange\" (\"Message\", \"Mailbox\", \"Reason\") VALUES ("
+                << _message_id << ", '" << prepareValueString(address) << "', "
+                << static_cast<short>(typed_address.first) << ");\n";
+        }
+    }
+    char * error = nullptr;
+    int insert_result = sqlite3_exec(mp_sqlite, sqlstream.str().c_str(), nullptr, nullptr, &error);
+    if(SQLITE_OK != insert_result)
     {
         std::string er_string(error);
         sqlite3_free(error);

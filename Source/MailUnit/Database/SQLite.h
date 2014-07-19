@@ -30,15 +30,17 @@ class SQLite final : public Database
     MU_DISABLE_COPY(SQLite)
 
 public:
-    SQLite(const boost::filesystem::path & _filepath) throw(DatabaseException);
+    SQLite(const boost::filesystem::path & _filepath);
     ~SQLite() override;
-    void save(const Email & _email) throw(DatabaseException);
+    void save(const Email & _email);
 
 public:
     static void shutdown();
 
 private:
-    void prepareDatabase() throw(DatabaseException);
+    void prepareDatabase();
+    unsigned int insertMessage(const Email & _email);
+    void insertExchange(unsigned int _message_id, const Email & _email);
 
 private:
     sqlite3 * mp_sqlite;
