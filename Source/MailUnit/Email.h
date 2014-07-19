@@ -24,6 +24,16 @@
 
 namespace MailUnit {
 
+struct EmailData
+{
+    std::vector<std::string> from_addresses;
+    std::vector<std::string> to_addresses;
+    std::vector<std::string> cc_addresses;
+    std::vector<std::string> bcc_addresses;
+    std::string subject;
+    std::string data;
+}; // struct EmailData
+
 class Email
 {
 public:
@@ -37,7 +47,8 @@ public:
     };
 
 public:
-    Email(const Smtp::Message & _smtp_message);
+    explicit Email(EmailData && _data);
+    explicit Email(const Smtp::Message & _smtp_message);
     AddressType containsAddress(const std::string & _address);
 
 public:

@@ -18,6 +18,8 @@
 #ifndef __MU_DATABASE_DATABASE_H__
 #define __MU_DATABASE_DATABASE_H__
 
+#include <memory>
+#include <vector>
 #include <LibMailUnit/Def.h>
 #include <MailUnit/Email.h>
 #include <MailUnit/Exception.h>
@@ -27,6 +29,12 @@ namespace Data {
 
 MU_EXCEPTION(DatabaseException)
 
+struct EmailQueryCriterion
+{
+    Email::AddressType address_type;
+    std::string mailbox;
+}; // struct EmailQueryCriterion
+
 class Database
 {
     MU_DISABLE_COPY(Database)
@@ -34,7 +42,9 @@ class Database
 public:
     Database() { }
     virtual ~Database() { }
-    virtual void save(const Email & _email) = 0;
+    virtual void storeEmail(const Email & _email) = 0;
+    virtual std::vector<std::shared_ptr<Email>> findEmails(
+        const std::vector<EmailQueryCriterion> & _criteria) = 0;
 }; // class SQLite
 
 } // namespace Data

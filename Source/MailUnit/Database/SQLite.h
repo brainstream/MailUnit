@@ -32,7 +32,9 @@ class SQLite final : public Database
 public:
     SQLite(const boost::filesystem::path & _filepath);
     ~SQLite() override;
-    void save(const Email & _email);
+    void storeEmail(const Email & _email) override;
+    std::vector<std::shared_ptr<Email>> findEmails(
+        const std::vector<EmailQueryCriterion> & _criteria) override;
 
 public:
     static void shutdown();

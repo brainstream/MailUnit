@@ -35,6 +35,17 @@ void collectAddressesFromHeader(MU_MAIL_HEADERLIST _headers, const char * _heade
 
 } // namespace
 
+
+Email::Email(EmailData && _data) :
+    m_from_addresses(std::move(_data.from_addresses)),
+    m_to_addresses(std::move(_data.to_addresses)),
+    m_cc_addresses(std::move(_data.cc_addresses)),
+    m_bcc_addresses(std::move(_data.bcc_addresses)),
+    m_subject(std::move(_data.subject)),
+    m_data(std::move(_data.data))
+{
+}
+
 Email::Email(const Smtp::Message & _smtp_message)
 {
     parseSmtpHeaders(_smtp_message);

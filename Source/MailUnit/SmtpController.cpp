@@ -65,7 +65,7 @@ void SmtpController::onMessageRecieved(const Smtp::Message & _message)
     {
         try
         {
-            mp_database->save(*email);
+            mp_database->storeEmail(*email);
         }
         catch(const Data::DatabaseException & error)
         {
