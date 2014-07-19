@@ -127,9 +127,9 @@ set(SRC_SERVER
     Source/MailUnit/Smtp/StateMachine/DataState.h
     Source/MailUnit/Smtp/StateMachine/DataState.cpp
     Source/MailUnit/Smtp/StateMachine/QuitState.h
-    Source/MailUnit/Database/Sql.h
-    Source/MailUnit/Database/Email.h
-    Source/MailUnit/Database/Email.cpp
+    Source/MailUnit/Database/Database.h
+    Source/MailUnit/Database/SQLite.h
+    Source/MailUnit/Database/SQLite.cpp
 )
 
 set(TESTS_SRC
@@ -163,6 +163,7 @@ set(LIBS
 )
 
 add_library(${TARGET_SQLITE} STATIC ${SQLITE_SRC})
+target_compile_definitions(${TARGET_SQLITE} PRIVATE -DSQLITE_THREADSAFE=1)
 
 add_library(${TARGET_LIB} SHARED ${SRC_LIB})
 target_link_libraries(${TARGET_LIB} ${LIBS})

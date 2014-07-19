@@ -32,8 +32,8 @@ public:
 }; // class Excpetion
 
 
-#define MU_EXCEPTION(name)              \
-    class name : public MailUnit::Excpetion   \
+#define MU_EXCEPTION(name)                   \
+    class name : public MailUnit::Excpetion  \
     {                                        \
     public:                                  \
         name(const std::string & _message) : \

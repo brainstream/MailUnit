@@ -15,39 +15,36 @@
  *                                                                                             *
  ***********************************************************************************************/
 
-#ifndef __MU_DATABASE_SQL_H__
-#define __MU_DATABASE_SQL_H__
+#ifndef __MU_DATABASE_SQLITE_H__
+#define __MU_DATABASE_SQLITE_H__
+
+#include <boost/filesystem/path.hpp>
+#include <SQLite/sqlite3.h>
+#include <MailUnit/Database/Database.h>
 
 namespace MailUnit {
-namespace Database {
+namespace Data {
 
-constexpr const char * const sql_init_db =
-    "CREATE TABLE \"Message\"(\n"
-    "    \"Id\"      INTEGER PRIMARY KEY AUTOINCREMENT,\n"
-    "    \"Subject\" TEXT,\n"
-    "    \"RawData\" TEXT\n"
-    ");\n"
-    "CREATE TABLE \"Header\"(\n"
-    "    \"Id\"      INTEGER PRIMARY KEY AUTOINCREMENT,\n"
-    "    \"Message\" INTEGER,\n"
-    "    \"Name\"    VARCHAR(250),\n"
-    "    \"Value\"   TEXT,\n"
-    "    FOREIGN KEY(\"Message\") REFERENCES \"Message\"(\"Id\")\n"
-    ");\n"
-    "CREATE TABLE \"Exchange\"(\n"
-    "    \"Id\"      INTEGER PRIMARY KEY AUTOINCREMENT,\n"
-    "    \"Mailbox\" VARCHAR(250),\n"
-    "    \"Message\" INTEGER,\n"
-    "    \"Reason\"  INTEGER,\n"
-    "    FOREIGN KEY(\"Message\") REFERENCES \"Message\"(\"Id\")\n"
-    ");\n"
-    "CREATE INDEX \"iMessageSubject\"  ON \"Message\"(\"Subject\");\n"
-    "CREATE INDEX \"iHeaderMessage\"   ON \"Header\"(\"Message\");\n"
-    "CREATE INDEX \"iHeaderName\"      ON \"Header\"(\"Name\");\n"
-    "CREATE INDEX \"iExchangeMailbox\" ON \"Exchange\"(\"Mailbox\");\n"
-    "CREATE INDEX \"iExchangeMessage\" ON \"Exchange\"(\"Message\");";
+class SQLite final : public Database
+{
+    MU_DISABLE_COPY(SQLite)
 
-} // namespace Database
+public:
+    SQLite(const boost::filesystem::path & _filepath) throw(DatabaseException);
+    ~SQLite() override;
+    void save(const Email & _email) throw(DatabaseException);
+
+public:
+    static void shutdown();
+
+private:
+    void prepareDatabase() throw(DatabaseException);
+
+private:
+    sqlite3 * mp_sqlite;
+}; // class SQLite
+
+} // namespace Data
 } // namespace MailUnit
 
-#endif // __MU_DATABASE_SQL_H__
+#endif // __MU_DATABASE_SQLITE_H__

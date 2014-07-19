@@ -19,6 +19,7 @@
 #define __MU_SMTPCONTROLLER_H__
 
 #include <MailUnit/Smtp/SessionProvider.h>
+#include <MailUnit/Database/SQLite.h>
 
 namespace MailUnit {
 
@@ -26,8 +27,12 @@ class SmtpController : public Smtp::SessionProvider
 {
 public:
     explicit SmtpController(boost::asio::io_service & _io_service);
+    ~SmtpController() override;
     void onMessageRecieved(const Smtp::Message & _message) override;
     void onFail() override;
+
+private:
+    Data::Database * mp_database;
 }; // class SmtpController
 
 } // namespace MailUnit

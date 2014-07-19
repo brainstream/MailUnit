@@ -17,9 +17,7 @@
 
 #include <iostream>
 #include <MailUnit/SmtpController.h>
-#include <MailUnit/Email.h>
 #include <MailUnit/Application.h>
-#include <MailUnit/Database/Email.h>
 
 using namespace MailUnit;
 
@@ -28,6 +26,21 @@ SmtpController::SmtpController(boost::asio::io_service &_io_service) :
 {
     std::cout << "New SMTP session has been started\n\n";
     app().log().info("New SMTP session has been started");
+    try
+    {
+        mp_database = new Data::SQLite("/home/brainstream/temp/mailunit.sqlite"); // TODO: config
+    }
+    catch(const Data::DatabaseException & error)
+    {
+        app().log().error("An error occurred during an attempt to "
+            "establish a connection to the database", error);
+        mp_database = nullptr;
+    }
+}
+
+SmtpController::~SmtpController()
+{
+    delete mp_database;
 }
 
 void SmtpController::onMessageRecieved(const Smtp::Message & _message)
@@ -48,7 +61,18 @@ void SmtpController::onMessageRecieved(const Smtp::Message & _message)
     for(const std::string & bcc : email->bccAddresses())
         std::cout << "\t\t" << bcc << std::endl;
     // TODO: date
-    Database::saveEmail(*email);
+    if(nullptr != mp_database)
+    {
+        try
+        {
+            mp_database->save(*email);
+        }
+        catch(const Data::DatabaseException & error)
+        {
+            app().log().error("An error occurred during an attempt to "
+                "save an e-mail into the database", error);
+        }
+    }
     delete email;
     std::cout.flush();
     app().log().info("Message received"); // TODO: more details

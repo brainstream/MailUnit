@@ -15,19 +15,30 @@
  *                                                                                             *
  ***********************************************************************************************/
 
-#ifndef __MU_DATABASE_MAIL_H__
-#define __MU_DATABASE_MAIL_H__
+#ifndef __MU_DATABASE_DATABASE_H__
+#define __MU_DATABASE_DATABASE_H__
 
-#include <memory>
-#include <vector>
+#include <LibMailUnit/Def.h>
 #include <MailUnit/Email.h>
+#include <MailUnit/Exception.h>
 
 namespace MailUnit {
-namespace Database {
+namespace Data {
 
-void saveEmail(const Email & _email);
+MU_EXCEPTION(DatabaseException)
 
-} // namespace Database
+class Database
+{
+    MU_DISABLE_COPY(Database)
+
+public:
+    Database() { }
+    virtual ~Database() { }
+    virtual void save(const Email & _email) = 0;
+}; // class SQLite
+
+} // namespace Data
 } // namespace MailUnit
 
-#endif // __MU_DATABASE_MAIL_H__
+
+#endif // __MU_DATABASE_DATABASE_H__

@@ -96,6 +96,7 @@ int main(int _argc, const char ** _argv)
         else
             global_app->start();
         delete global_app;
+        // TODO: finalizer with the SQLite::shutdownd call
         return EXIT_SUCCESS;
     }
     catch(std::exception & error)
