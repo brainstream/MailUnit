@@ -74,7 +74,7 @@ std::string makeFindEmailsQuery(const std::vector<EmailQueryCriterion> & _criter
     return sqlstream.str();
 }
 
-int findEmailsQueryCallback(void * _vector_of_email_sptrs, int _count, char ** _values, char **)
+int findEmailsQueryCallback(void * _vector_of_email_sptrs, int, char ** _values, char **)
 {
     auto result = static_cast<std::vector<std::shared_ptr<Email>> *>(_vector_of_email_sptrs);
     EmailData * data = new EmailData();
