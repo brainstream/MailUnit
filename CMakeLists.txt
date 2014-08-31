@@ -96,7 +96,13 @@ set(SRC_LIB
     Source/LibMailUnit/Mail/MailboxGroup.cpp
 )
 
+set(TESTABLE_SRC_SERVER
+    Source/MailUnit/Remote/Edsl.h
+    Source/MailUnit/Remote/Edsl.cpp
+)
+
 set(SRC_SERVER
+    ${TESTABLE_SRC_SERVER}
     Source/MailUnit/Application.h
     Source/MailUnit/Application.cpp
     Source/MailUnit/Config.h
@@ -134,11 +140,10 @@ set(SRC_SERVER
     Source/MailUnit/Database/SQLite.cpp
     Source/MailUnit/Remote/Server.h
     Source/MailUnit/Remote/Server.cpp
-    Source/MailUnit/Remote/Edsl.h
-    Source/MailUnit/Remote/Edsl.cpp
 )
 
 set(TESTS_SRC
+    ${TESTABLE_SRC_SERVER}
     Tests/Main.cpp
     Tests/TestFixture.h
     Tests/TestFixture.cpp
@@ -147,6 +152,7 @@ set(TESTS_SRC
     Tests/LibMailUnit/MessageId.cpp
     Tests/LibMailUnit/DateTime.cpp
     Tests/LibMailUnit/Address.cpp
+    Tests/MailUnit/Edsl.cpp
 )
 
 set(DOXYGEN_SRC
