@@ -15,42 +15,23 @@
  *                                                                                             *
  ***********************************************************************************************/
 
-#ifndef __MU_SMTP_SERVER_H__
-#define __MU_SMTP_SERVER_H__
+#ifndef __MU_REMOTE_SERVER_H__
+#define __MU_REMOTE_SERVER_H__
 
-#include <cstdint>
-#include <memory>
-#include <atomic>
 #include <boost/asio.hpp>
-#include <LibMailUnit/Def.h>
-#include <MailUnit/Smtp/SessionProvider.h>
 
 namespace MailUnit {
-namespace Smtp {
+namespace Remote {
 
 class Server final
 {
-    MU_DISABLE_COPY(Server)
-    struct ServerHolder;
-
 public:
-    static void startNew(boost::asio::io_service & _io_service, uint16_t _port, std::shared_ptr<SessionProvider> _provider);
-    ~Server() = default;
 
 private:
-    Server(boost::asio::io_service & _io_service, uint16_t _port, std::shared_ptr<SessionProvider> _provider);
-    void accept();
-    void shutdown();
-
-private:
-    std::atomic<ServerHolder *> m_holder;
-    std::atomic_bool m_shutdown;
-    std::shared_ptr<SessionProvider> m_provider_ptr;
-    boost::asio::ip::tcp::acceptor m_acceptor;
-    boost::asio::ip::tcp::socket m_socket;
+    Server(boost::asio::io_service & _io_service, uint16_t _port);
 }; // class Server
 
-} // namespace Smtp
+} // namespace Remote
 } // namespace MailUnit
 
-#endif // __MU_SMTP_SERVER_H__
+#endif // __MU_REMOTE_SERVER_H__

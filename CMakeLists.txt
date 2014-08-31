@@ -132,6 +132,10 @@ set(SRC_SERVER
     Source/MailUnit/Database/Database.h
     Source/MailUnit/Database/SQLite.h
     Source/MailUnit/Database/SQLite.cpp
+    Source/MailUnit/Remote/Server.h
+    Source/MailUnit/Remote/Server.cpp
+    Source/MailUnit/Remote/Edsl.h
+    Source/MailUnit/Remote/Edsl.cpp
 )
 
 set(TESTS_SRC
