@@ -21,7 +21,7 @@
 #include <boost/spirit/include/phoenix_operator.hpp>
 #include <MailUnit/Remote/Edsl.h>
 
-using namespace MailUnit::Remote::Edsl;
+using namespace MailUnit::Remote::Dsel;
 namespace qi = boost::spirit::qi;
 
 BOOST_FUSION_ADAPT_STRUCT(
@@ -334,7 +334,7 @@ std::ostream & operator << (std::ostream & _stream, const Expression & _expressi
     return _stream;
 }
 
-std::shared_ptr<Expression> MailUnit::Remote::Edsl::parse(const std::string & _input)
+std::shared_ptr<Expression> MailUnit::Remote::Dsel::parse(const std::string & _input)
 {
     Grammar grammar;
     Expression * expression = new Expression();

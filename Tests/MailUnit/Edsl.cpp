@@ -19,7 +19,7 @@
 #include <boost/test/unit_test.hpp>
 #include <MailUnit/Remote/Edsl.h>
 
-using namespace MailUnit::Remote::Edsl;
+using namespace MailUnit::Remote::Dsel;
 
 namespace MailUnit {
 namespace Test {

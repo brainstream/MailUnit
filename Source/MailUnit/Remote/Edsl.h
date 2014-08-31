@@ -15,8 +15,8 @@
  *                                                                                             *
  ***********************************************************************************************/
 
-#ifndef __MU_REMOTE_EDSL_H__
-#define __MU_REMOTE_EDSL_H__
+#ifndef __MU_REMOTE_DSEL_H__
+#define __MU_REMOTE_DSEL_H__
 
 #include <memory>
 #include <string>
@@ -27,7 +27,7 @@
 
 namespace MailUnit {
 namespace Remote {
-namespace Edsl {
+namespace Dsel {
 
 typedef std::string Identifier;
 
@@ -105,20 +105,20 @@ struct Expression
 
 std::shared_ptr<Expression> parse(const std::string & _input);
 
-} // namespace Edsl
+} // namespace Dsel
 } // namespace Remote
 } // namespace MailUnit
 
-std::ostream & operator << (std::ostream & _stream, MailUnit::Remote::Edsl::SpecialTarget _target);
-std::ostream & operator << (std::ostream & _stream, const MailUnit::Remote::Edsl::Target & _target);
-std::ostream & operator << (std::ostream & _stream, const MailUnit::Remote::Edsl::ConditionValue & _value);
-std::ostream & operator << (std::ostream & _stream, MailUnit::Remote::Edsl::ConditionBinaryOperator _operator);
-std::ostream & operator << (std::ostream & _stream, MailUnit::Remote::Edsl::ConditionUnaryOperator _operator);
-std::ostream & operator << (std::ostream & _stream, MailUnit::Remote::Edsl::ConditionJoinOperator _operator);
-std::ostream & operator << (std::ostream & _stream, const MailUnit::Remote::Edsl::BinaryCondition & _condition);
-std::ostream & operator << (std::ostream & _stream, const MailUnit::Remote::Edsl::UnaryCondition & _condition);
-std::ostream & operator << (std::ostream & _stream, const MailUnit::Remote::Edsl::ConditionSequenceOperand & _operand);
-std::ostream & operator << (std::ostream & _stream, const MailUnit::Remote::Edsl::ConditionSequence & _condition);
-std::ostream & operator << (std::ostream & _stream, const MailUnit::Remote::Edsl::Expression & _expression);
+std::ostream & operator << (std::ostream & _stream, MailUnit::Remote::Dsel::SpecialTarget _target);
+std::ostream & operator << (std::ostream & _stream, const MailUnit::Remote::Dsel::Target & _target);
+std::ostream & operator << (std::ostream & _stream, const MailUnit::Remote::Dsel::ConditionValue & _value);
+std::ostream & operator << (std::ostream & _stream, MailUnit::Remote::Dsel::ConditionBinaryOperator _operator);
+std::ostream & operator << (std::ostream & _stream, MailUnit::Remote::Dsel::ConditionUnaryOperator _operator);
+std::ostream & operator << (std::ostream & _stream, MailUnit::Remote::Dsel::ConditionJoinOperator _operator);
+std::ostream & operator << (std::ostream & _stream, const MailUnit::Remote::Dsel::BinaryCondition & _condition);
+std::ostream & operator << (std::ostream & _stream, const MailUnit::Remote::Dsel::UnaryCondition & _condition);
+std::ostream & operator << (std::ostream & _stream, const MailUnit::Remote::Dsel::ConditionSequenceOperand & _operand);
+std::ostream & operator << (std::ostream & _stream, const MailUnit::Remote::Dsel::ConditionSequence & _condition);
+std::ostream & operator << (std::ostream & _stream, const MailUnit::Remote::Dsel::Expression & _expression);
 
-#endif // __MU_REMOTE_EDSL_H__
+#endif // __MU_REMOTE_DSEL_H__
