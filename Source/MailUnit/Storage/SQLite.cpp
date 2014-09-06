@@ -18,10 +18,10 @@
 #include <sstream>
 #include <cstdio>
 #include <boost/algorithm/string.hpp>
-#include <MailUnit/Database/SQLite.h>
+#include <MailUnit/Storage/SQLite.h>
 
 using namespace MailUnit;
-using namespace MailUnit::Data;
+using namespace MailUnit::Storage;
 
 namespace {
 

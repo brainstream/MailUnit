@@ -17,9 +17,9 @@
 
 #include <sstream>
 #include <boost/test/unit_test.hpp>
-#include <MailUnit/Remote/Edsl.h>
+#include <MailUnit/Storage/Edsl.h>
 
-using namespace MailUnit::Remote::Dsel;
+using namespace MailUnit::Storage::Dsel;
 
 namespace MailUnit {
 namespace Test {
@@ -55,6 +55,11 @@ BOOST_AUTO_TEST_CASE(parseTest)
         {
             true,
             "select * from Test;",
+            "SELECT * FROM Test;"
+        },
+        {
+            true,
+            "select\r\n*\tfrom\vTest;",
             "SELECT * FROM Test;"
         },
         {

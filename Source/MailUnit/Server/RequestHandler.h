@@ -15,40 +15,29 @@
  *                                                                                             *
  ***********************************************************************************************/
 
-#ifndef __MU_DATABASE_DATABASE_H__
-#define __MU_DATABASE_DATABASE_H__
+#ifndef __MU_SERVER_REQUESTHANDLER_H__
+#define __MU_SERVER_REQUESTHANDLER_H__
 
-#include <memory>
-#include <vector>
+#include <boost/system/error_code.hpp>
 #include <LibMailUnit/Def.h>
-#include <MailUnit/Email.h>
-#include <MailUnit/Exception.h>
 
 namespace MailUnit {
-namespace Data {
+namespace Server {
 
-MU_EXCEPTION(DatabaseException)
-
-struct EmailQueryCriterion
+template<typename Socket>
+class RequestHandler
 {
-    Email::AddressType address_type;
-    std::string mailbox;
-}; // struct EmailQueryCriterion
-
-class Database
-{
-    MU_DISABLE_COPY(Database)
-
 public:
-    Database() { }
-    virtual ~Database() { }
-    virtual void storeEmail(const Email & _email) = 0;
-    virtual std::vector<std::shared_ptr<Email>> findEmails(
-        const std::vector<EmailQueryCriterion> & _criteria) = 0;
-}; // class SQLite
+    virtual ~RequestHandler() { }
+    virtual void handleConnection(Socket _socket) = 0;
+    virtual bool handleError(const boost::system::error_code & _err_code)
+    {
+        MU_UNUSED(_err_code);
+        return false;
+    }
+}; // class RequestHandler
 
-} // namespace Data
+} // namespace Server
 } // namespace MailUnit
 
-
-#endif // __MU_DATABASE_DATABASE_H__
+#endif // __MU_SERVER_REQUESTHANDLER_H__

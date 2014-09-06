@@ -19,10 +19,12 @@
 #include <boost/asio.hpp>
 #include <MailUnit/Smtp/Server.h>
 #include <MailUnit/SmtpController.h>
+#include <MailUnit/Server/TcpServer.h>
+#include <MailUnit/Storage/ServerRequestHandler.h>
 #include <MailUnit/Application.h>
 
 using namespace MailUnit;
-using namespace MailUnit::Smtp;
+using namespace MailUnit::Server;
 
 namespace {
 
@@ -73,7 +75,12 @@ void PrivateApplication::start()
 {
     app().log().info("Application started");
     boost::asio::io_service service;
-    Server::startNew(service, config().portNumber(), std::make_shared<SmtpController>(service));
+    Smtp::Server::startNew(service, config().portNumber(), std::make_shared<SmtpController>(service));
+
+    // TODO: from config (including ip address)
+    boost::asio::ip::tcp::endpoint storage_server_endpoint(boost::asio::ip::tcp::v4(), 5880);
+    startTcpServer(service, storage_server_endpoint, std::make_shared<Storage::ServerRequestHandler>());
+
     service.run();
 }
 

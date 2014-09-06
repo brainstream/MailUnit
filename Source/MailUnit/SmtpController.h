@@ -19,7 +19,7 @@
 #define __MU_SMTPCONTROLLER_H__
 
 #include <MailUnit/Smtp/SessionProvider.h>
-#include <MailUnit/Database/SQLite.h>
+#include <MailUnit/Storage/SQLite.h>
 
 namespace MailUnit {
 
@@ -32,7 +32,7 @@ public:
     void onFail() override;
 
 private:
-    Data::Database * mp_database;
+    Storage::Database * mp_database;
 }; // class SmtpController
 
 } // namespace MailUnit

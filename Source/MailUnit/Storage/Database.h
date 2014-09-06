@@ -15,23 +15,40 @@
  *                                                                                             *
  ***********************************************************************************************/
 
-#ifndef __MU_REMOTE_SERVER_H__
-#define __MU_REMOTE_SERVER_H__
+#ifndef __MU_STORAGE_DATABASE_H__
+#define __MU_STORAGE_DATABASE_H__
 
-#include <boost/asio.hpp>
+#include <memory>
+#include <vector>
+#include <LibMailUnit/Def.h>
+#include <MailUnit/Email.h>
+#include <MailUnit/Exception.h>
 
 namespace MailUnit {
-namespace Remote {
+namespace Storage {
 
-class Server final
+MU_EXCEPTION(DatabaseException)
+
+struct EmailQueryCriterion
 {
+    Email::AddressType address_type;
+    std::string mailbox;
+}; // struct EmailQueryCriterion
+
+class Database
+{
+    MU_DISABLE_COPY(Database)
+
 public:
+    Database() { }
+    virtual ~Database() { }
+    virtual void storeEmail(const Email & _email) = 0;
+    virtual std::vector<std::shared_ptr<Email>> findEmails(
+        const std::vector<EmailQueryCriterion> & _criteria) = 0;
+}; // class SQLite
 
-private:
-    Server(boost::asio::io_service & _io_service, uint16_t _port);
-}; // class Server
-
-} // namespace Remote
+} // namespace Storage
 } // namespace MailUnit
 
-#endif // __MU_REMOTE_SERVER_H__
+
+#endif // __MU_STORAGE_DATABASE_H__

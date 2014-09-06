@@ -15,8 +15,8 @@
  *                                                                                             *
  ***********************************************************************************************/
 
-#ifndef __MU_REMOTE_DSEL_H__
-#define __MU_REMOTE_DSEL_H__
+#ifndef __MU_STORAGE_DSEL_H__
+#define __MU_STORAGE_DSEL_H__
 
 #include <memory>
 #include <string>
@@ -26,7 +26,7 @@
 #include <boost/optional.hpp>
 
 namespace MailUnit {
-namespace Remote {
+namespace Storage {
 namespace Dsel {
 
 typedef std::string Identifier;
@@ -106,19 +106,19 @@ struct Expression
 std::shared_ptr<Expression> parse(const std::string & _input);
 
 } // namespace Dsel
-} // namespace Remote
+} // namespace Storage
 } // namespace MailUnit
 
-std::ostream & operator << (std::ostream & _stream, MailUnit::Remote::Dsel::SpecialTarget _target);
-std::ostream & operator << (std::ostream & _stream, const MailUnit::Remote::Dsel::Target & _target);
-std::ostream & operator << (std::ostream & _stream, const MailUnit::Remote::Dsel::ConditionValue & _value);
-std::ostream & operator << (std::ostream & _stream, MailUnit::Remote::Dsel::ConditionBinaryOperator _operator);
-std::ostream & operator << (std::ostream & _stream, MailUnit::Remote::Dsel::ConditionUnaryOperator _operator);
-std::ostream & operator << (std::ostream & _stream, MailUnit::Remote::Dsel::ConditionJoinOperator _operator);
-std::ostream & operator << (std::ostream & _stream, const MailUnit::Remote::Dsel::BinaryCondition & _condition);
-std::ostream & operator << (std::ostream & _stream, const MailUnit::Remote::Dsel::UnaryCondition & _condition);
-std::ostream & operator << (std::ostream & _stream, const MailUnit::Remote::Dsel::ConditionSequenceOperand & _operand);
-std::ostream & operator << (std::ostream & _stream, const MailUnit::Remote::Dsel::ConditionSequence & _condition);
-std::ostream & operator << (std::ostream & _stream, const MailUnit::Remote::Dsel::Expression & _expression);
+std::ostream & operator << (std::ostream & _stream, MailUnit::Storage::Dsel::SpecialTarget _target);
+std::ostream & operator << (std::ostream & _stream, const MailUnit::Storage::Dsel::Target & _target);
+std::ostream & operator << (std::ostream & _stream, const MailUnit::Storage::Dsel::ConditionValue & _value);
+std::ostream & operator << (std::ostream & _stream, MailUnit::Storage::Dsel::ConditionBinaryOperator _operator);
+std::ostream & operator << (std::ostream & _stream, MailUnit::Storage::Dsel::ConditionUnaryOperator _operator);
+std::ostream & operator << (std::ostream & _stream, MailUnit::Storage::Dsel::ConditionJoinOperator _operator);
+std::ostream & operator << (std::ostream & _stream, const MailUnit::Storage::Dsel::BinaryCondition & _condition);
+std::ostream & operator << (std::ostream & _stream, const MailUnit::Storage::Dsel::UnaryCondition & _condition);
+std::ostream & operator << (std::ostream & _stream, const MailUnit::Storage::Dsel::ConditionSequenceOperand & _operand);
+std::ostream & operator << (std::ostream & _stream, const MailUnit::Storage::Dsel::ConditionSequence & _condition);
+std::ostream & operator << (std::ostream & _stream, const MailUnit::Storage::Dsel::Expression & _expression);
 
-#endif // __MU_REMOTE_DSEL_H__
+#endif // __MU_STORAGE_DSEL_H__

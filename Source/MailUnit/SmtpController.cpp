@@ -28,9 +28,9 @@ SmtpController::SmtpController(boost::asio::io_service &_io_service) :
     app().log().info("New SMTP session has been started");
     try
     {
-        mp_database = new Data::SQLite("/home/brainstream/temp/mailunit.sqlite"); // TODO: config
+        mp_database = new Storage::SQLite("/home/brainstream/temp/mailunit.sqlite"); // TODO: config
     }
-    catch(const Data::DatabaseException & error)
+    catch(const Storage::DatabaseException & error)
     {
         app().log().error("An error occurred during an attempt to "
             "establish a connection to the database", error);
@@ -67,7 +67,7 @@ void SmtpController::onMessageRecieved(const Smtp::Message & _message)
         {
             mp_database->storeEmail(*email);
         }
-        catch(const Data::DatabaseException & error)
+        catch(const Storage::DatabaseException & error)
         {
             app().log().error("An error occurred during an attempt to "
                 "save an e-mail into the database", error);

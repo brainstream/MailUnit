@@ -15,31 +15,40 @@
  *                                                                                             *
  ***********************************************************************************************/
 
-#ifndef __MU_SMTP_SESSIONPROVIDER_H__
-#define __MU_SMTP_SESSIONPROVIDER_H__
+#ifndef __MU_STORAGE_SQLITE_H__
+#define __MU_STORAGE_SQLITE_H__
 
-#include <memory>
-#include <boost/asio.hpp>
-#include <MailUnit/Smtp/Message.h>
+#include <boost/filesystem/path.hpp>
+#include <SQLite/sqlite3.h>
+#include <MailUnit/Storage/Database.h>
 
 namespace MailUnit {
-namespace Smtp {
+namespace Storage {
 
-// TODO: change to classic observer!
-class SessionProvider : public std::enable_shared_from_this<SessionProvider>
+class SQLite final : public Database
 {
+    MU_DISABLE_COPY(SQLite)
+
 public:
-    explicit SessionProvider(boost::asio::io_service & _io_service); // TODO: delete service from args
-    virtual ~SessionProvider();
-    void startNewSession(boost::asio::ip::tcp::socket _socket);
-    virtual void onMessageRecieved(const Message & _message) = 0;
-    virtual void onFail() = 0;
+    SQLite(const boost::filesystem::path & _filepath);
+    ~SQLite() override;
+    void storeEmail(const Email & _email) override;
+    std::vector<std::shared_ptr<Email>> findEmails(
+        const std::vector<EmailQueryCriterion> & _criteria) override;
+
+public:
+    static void shutdown();
 
 private:
-    boost::asio::io_service & mr_io_service;
-}; // class SessionProvider
+    void prepareDatabase();
+    unsigned int insertMessage(const Email & _email);
+    void insertExchange(unsigned int _message_id, const Email & _email);
 
-} // namespace Smtp
+private:
+    sqlite3 * mp_sqlite;
+}; // class SQLite
+
+} // namespace Storage
 } // namespace MailUnit
 
-#endif // __MU_SMTP_SESSIONPROVIDER_H__
+#endif // __MU_STORAGE_SQLITE_H__

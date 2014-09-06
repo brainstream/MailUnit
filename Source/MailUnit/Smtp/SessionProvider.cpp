@@ -42,7 +42,7 @@ private:
     std::shared_ptr<SessionProvider> m_provider_ptr;
     StateMachine * mp_state_machine;
     Message * mp_message;
-    char * m_buffer;
+    char * mp_buffer;
 }; // class Session
 
 } // namespace
@@ -68,7 +68,7 @@ Session::Session(boost::asio::ip::tcp::socket _socket, std::shared_ptr<SessionPr
     m_provider_ptr(_provider),
     mp_state_machine(new StateMachine()),
     mp_message(new Message()),
-    m_buffer(new char[s_buffer_size])
+    mp_buffer(new char[s_buffer_size])
 {
 }
 
@@ -76,7 +76,7 @@ Session::~Session()
 {
     delete mp_state_machine;
     delete mp_message;
-    delete [] m_buffer;
+    delete [] mp_buffer;
 }
 
 void Session::start()
@@ -110,12 +110,12 @@ void Session::write(const std::string & _message)
 void Session::read()
 {
     auto self(shared_from_this());
-    m_socket.async_receive(boost::asio::buffer(m_buffer, s_buffer_size - 1),
+    m_socket.async_receive(boost::asio::buffer(mp_buffer, s_buffer_size - 1),
         [this, self](const boost::system::error_code & ec, std::size_t length)
         {
             if(ec) return; // TODO: log
-            m_buffer[length] = '\0';
-            processInput(m_buffer);
+            mp_buffer[length] = '\0';
+            processInput(mp_buffer);
             performNextAction();
         });
 }

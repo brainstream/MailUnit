@@ -15,40 +15,24 @@
  *                                                                                             *
  ***********************************************************************************************/
 
-#ifndef __MU_DATABASE_SQLITE_H__
-#define __MU_DATABASE_SQLITE_H__
+#ifndef __MU_SERVER_TCPSERVER_H__
+#define __MU_SERVER_TCPSERVER_H__
 
-#include <boost/filesystem/path.hpp>
-#include <SQLite/sqlite3.h>
-#include <MailUnit/Database/Database.h>
+#include <memory>
+#include <boost/asio.hpp>
+#include <LibMailUnit/Def.h>
+#include <MailUnit/Server/RequestHandler.h>
 
 namespace MailUnit {
-namespace Data {
+namespace Server {
 
-class SQLite final : public Database
-{
-    MU_DISABLE_COPY(SQLite)
+typedef RequestHandler<boost::asio::ip::tcp::socket> TcpRequestHandler;
 
-public:
-    SQLite(const boost::filesystem::path & _filepath);
-    ~SQLite() override;
-    void storeEmail(const Email & _email) override;
-    std::vector<std::shared_ptr<Email>> findEmails(
-        const std::vector<EmailQueryCriterion> & _criteria) override;
+void startTcpServer(boost::asio::io_service & _io_service,
+    const boost::asio::ip::tcp::endpoint & _endpoint,
+    std::shared_ptr<TcpRequestHandler> _handler);
 
-public:
-    static void shutdown();
-
-private:
-    void prepareDatabase();
-    unsigned int insertMessage(const Email & _email);
-    void insertExchange(unsigned int _message_id, const Email & _email);
-
-private:
-    sqlite3 * mp_sqlite;
-}; // class SQLite
-
-} // namespace Data
+} // namespace Server
 } // namespace MailUnit
 
-#endif // __MU_DATABASE_SQLITE_H__
+#endif // __MU_SERVER_TCPSERVER_H__

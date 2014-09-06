@@ -97,8 +97,8 @@ set(SRC_LIB
 )
 
 set(TESTABLE_SRC_SERVER
-    Source/MailUnit/Remote/Edsl.h
-    Source/MailUnit/Remote/Edsl.cpp
+    Source/MailUnit/Storage/Edsl.h
+    Source/MailUnit/Storage/Edsl.cpp
 )
 
 set(SRC_SERVER
@@ -114,6 +114,9 @@ set(SRC_SERVER
     Source/MailUnit/SmtpController.cpp
     Source/MailUnit/Email.h
     Source/MailUnit/Email.cpp
+    Source/MailUnit/Server/RequestHandler.h
+    Source/MailUnit/Server/TcpServer.h
+    Source/MailUnit/Server/TcpServer.cpp
     Source/MailUnit/Smtp/ProtocolDef.h
     Source/MailUnit/Smtp/Server.h
     Source/MailUnit/Smtp/Server.cpp
@@ -135,11 +138,11 @@ set(SRC_SERVER
     Source/MailUnit/Smtp/StateMachine/DataState.h
     Source/MailUnit/Smtp/StateMachine/DataState.cpp
     Source/MailUnit/Smtp/StateMachine/QuitState.h
-    Source/MailUnit/Database/Database.h
-    Source/MailUnit/Database/SQLite.h
-    Source/MailUnit/Database/SQLite.cpp
-    Source/MailUnit/Remote/Server.h
-    Source/MailUnit/Remote/Server.cpp
+    Source/MailUnit/Storage/Database.h
+    Source/MailUnit/Storage/SQLite.h
+    Source/MailUnit/Storage/SQLite.cpp
+    Source/MailUnit/Storage/ServerRequestHandler.h
+    Source/MailUnit/Storage/ServerRequestHandler.cpp
 )
 
 set(TESTS_SRC
