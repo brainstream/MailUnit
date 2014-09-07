@@ -110,21 +110,17 @@ set(SRC_SERVER
     Source/MailUnit/Logger.h
     Source/MailUnit/Logger.cpp
     Source/MailUnit/Exception.h
-    Source/MailUnit/SmtpController.h
-    Source/MailUnit/SmtpController.cpp
     Source/MailUnit/Email.h
     Source/MailUnit/Email.cpp
     Source/MailUnit/Server/RequestHandler.h
     Source/MailUnit/Server/TcpServer.h
     Source/MailUnit/Server/TcpServer.cpp
     Source/MailUnit/Smtp/ProtocolDef.h
-    Source/MailUnit/Smtp/Server.h
-    Source/MailUnit/Smtp/Server.cpp
     Source/MailUnit/Smtp/ResponseCode.h
     Source/MailUnit/Smtp/ResponseCode.cpp
-    Source/MailUnit/Smtp/SessionProvider.h
-    Source/MailUnit/Smtp/SessionProvider.cpp
     Source/MailUnit/Smtp/Message.h
+    Source/MailUnit/Smtp/ServerRequestHandler.h
+    Source/MailUnit/Smtp/ServerRequestHandler.cpp
     Source/MailUnit/Smtp/StateMachine/StateMachine.h
     Source/MailUnit/Smtp/StateMachine/StateBase.h
     Source/MailUnit/Smtp/StateMachine/SingleLineCmdState.h

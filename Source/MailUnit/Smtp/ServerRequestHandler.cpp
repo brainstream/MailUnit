@@ -15,31 +15,37 @@
  *                                                                                             *
  ***********************************************************************************************/
 
-#include <MailUnit/Smtp/SessionProvider.h>
+#include <MailUnit/Application.h>
+#include <MailUnit/Email.h>
+#include <MailUnit/Smtp/ServerRequestHandler.h>
 #include <MailUnit/Smtp/ProtocolDef.h>
 #include <MailUnit/Smtp/StateMachine/StateMachine.h>
 
+using namespace MailUnit;
 using namespace MailUnit::Smtp;
 
 namespace {
 
-class Session : public std::enable_shared_from_this<Session>
+class Session final : public std::enable_shared_from_this<Session>
 {
+    MU_DISABLE_COPY(Session)
+
 public:
-    Session(boost::asio::ip::tcp::socket _socket, std::shared_ptr<SessionProvider> _provider);
+    inline Session(boost::asio::ip::tcp::socket _socket, std::shared_ptr<Storage::Database> _database);
     ~Session();
-    void start();
+    inline void start();
 
 private:
     void performNextAction();
     void write(const std::string & _message);
     void read();
     void processInput(const std::string & _input);
+    void saveMessage(const Message & _message);
 
 private:
     static const size_t s_buffer_size = 1024;
     boost::asio::ip::tcp::socket m_socket;
-    std::shared_ptr<SessionProvider> m_provider_ptr;
+    std::shared_ptr<Storage::Database> m_database_ptr;
     StateMachine * mp_state_machine;
     Message * mp_message;
     char * mp_buffer;
@@ -47,25 +53,27 @@ private:
 
 } // namespace
 
-
-
-SessionProvider::SessionProvider(boost::asio::io_service & _io_service) :
-    mr_io_service(_io_service)
+ServerRequestHandler::ServerRequestHandler(std::shared_ptr<MailUnit::Storage::Database> _database) :
+    m_database_ptr(_database)
 {
 }
 
-SessionProvider::~SessionProvider()
+void ServerRequestHandler::handleConnection(boost::asio::ip::tcp::socket _socket)
 {
+    app().log().info("New connection accepted by the SMTP server");
+    std::make_shared<Session>(std::move(_socket), m_database_ptr)->start();
 }
 
-void SessionProvider::startNewSession(boost::asio::ip::tcp::socket _socket)
+bool ServerRequestHandler::handleError(const boost::system::error_code & _err_code)
 {
-    std::make_shared<Session>(std::move(_socket), shared_from_this())->start();
+    MailUnit::app().log().error(std::string("The SMTP server has stopped due an error: ") +
+        _err_code.message());
+    return false;
 }
 
-Session::Session(boost::asio::ip::tcp::socket _socket, std::shared_ptr<SessionProvider> _provider) :
+Session::Session(boost::asio::ip::tcp::socket _socket, std::shared_ptr<Storage::Database> _database) :
     m_socket(std::move(_socket)),
-    m_provider_ptr(_provider),
+    m_database_ptr(_database),
     mp_state_machine(new StateMachine()),
     mp_message(new Message()),
     mp_buffer(new char[s_buffer_size])
@@ -90,11 +98,46 @@ void Session::performNextAction()
     StateBase * state = mp_state_machine->get_state_by_id(state_id);
     ResponseCode response;
     if(state->isProtocolProcessingCompleted())
-        m_provider_ptr->onMessageRecieved(*mp_message);
+        saveMessage(*mp_message);
     if(state->response(&response))
         write(translateResponseCode(response));
     else
         read();
+}
+
+void Session::saveMessage(const Message & _message)
+{
+    Email * email = new Email(_message);
+    std::cout << "Message has been recived: \n" <<
+        "\tSubject: " << email->subject() << std::endl <<
+         "\tFrom:\n";
+    for(const std::string & from : email->fromAddresses())
+        std::cout << "\t\t" << from << std::endl;
+    std::cout << "\tTo:\n";
+    for(const std::string & to : email->toAddresses())
+        std::cout << "\t\t" << to << std::endl;
+    std::cout << "\tCC:\n";
+    for(const std::string & cc : email->ccAddresses())
+        std::cout << "\t\t" << cc << std::endl;
+    std::cout << "\tBCC:\n";
+    for(const std::string & bcc : email->bccAddresses())
+        std::cout << "\t\t" << bcc << std::endl;
+    // TODO: date
+    if(nullptr != m_database_ptr)
+    {
+        try
+        {
+            m_database_ptr->storeEmail(*email);
+        }
+        catch(const Storage::DatabaseException & error)
+        {
+            app().log().error("An error occurred during an attempt to "
+                "save an e-mail into the database", error);
+        }
+    }
+    delete email;
+    std::cout.flush();
+    app().log().info("Message received"); // TODO: more details
 }
 
 void Session::write(const std::string & _message)
@@ -155,4 +198,3 @@ void Session::processInput(const std::string & _input)
         return;
     }
 }
-

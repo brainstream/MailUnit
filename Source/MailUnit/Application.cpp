@@ -17,10 +17,10 @@
 
 #include <iostream>
 #include <boost/asio.hpp>
-#include <MailUnit/Smtp/Server.h>
-#include <MailUnit/SmtpController.h>
 #include <MailUnit/Server/TcpServer.h>
+#include <MailUnit/Smtp/ServerRequestHandler.h>
 #include <MailUnit/Storage/ServerRequestHandler.h>
+#include <MailUnit/Storage/SQLite.h>
 #include <MailUnit/Application.h>
 
 using namespace MailUnit;
@@ -74,8 +74,14 @@ PrivateApplication::PrivateApplication(int _argc, const char ** _argv) :
 void PrivateApplication::start()
 {
     app().log().info("Application started");
+
     boost::asio::io_service service;
-    Smtp::Server::startNew(service, config().portNumber(), std::make_shared<SmtpController>(service));
+
+    // TODO: config
+    std::shared_ptr<Storage::Database> database(new Storage::SQLite("/home/brainstream/temp/mailunit.sqlite"));
+    // TODO: ip address from config
+    boost::asio::ip::tcp::endpoint smtp_server_endpoint(boost::asio::ip::tcp::v4(), config().portNumber());
+    startTcpServer(service, smtp_server_endpoint, std::make_shared<Smtp::ServerRequestHandler>(database));
 
     // TODO: from config (including ip address)
     boost::asio::ip::tcp::endpoint storage_server_endpoint(boost::asio::ip::tcp::v4(), 5880);
@@ -83,8 +89,6 @@ void PrivateApplication::start()
 
     service.run();
 }
-
-
 
 Application & MailUnit::app()
 {

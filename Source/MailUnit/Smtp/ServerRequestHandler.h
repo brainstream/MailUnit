@@ -15,31 +15,29 @@
  *                                                                                             *
  ***********************************************************************************************/
 
-#ifndef __MU_SMTP_SESSIONPROVIDER_H__
-#define __MU_SMTP_SESSIONPROVIDER_H__
+#ifndef __MU_SMTP_SERVERREQUESTHANDLER_H__
+#define __MU_SMTP_SERVERREQUESTHANDLER_H__
 
 #include <memory>
 #include <boost/asio.hpp>
-#include <MailUnit/Smtp/Message.h>
+#include <MailUnit/Server/RequestHandler.h>
+#include <MailUnit/Storage/Database.h>
 
 namespace MailUnit {
 namespace Smtp {
 
-// TODO: change to classic observer!
-class SessionProvider : public std::enable_shared_from_this<SessionProvider>
+class ServerRequestHandler : public MailUnit::Server::RequestHandler<boost::asio::ip::tcp::socket>
 {
 public:
-    explicit SessionProvider(boost::asio::io_service & _io_service); // TODO: delete service from args
-    virtual ~SessionProvider();
-    void startNewSession(boost::asio::ip::tcp::socket _socket);
-    virtual void onMessageRecieved(const Message & _message) = 0;
-    virtual void onFail() = 0;
+    ServerRequestHandler(std::shared_ptr<MailUnit::Storage::Database> _database);
+    void handleConnection(boost::asio::ip::tcp::socket _socket) override;
+    bool handleError(const boost::system::error_code & _err_code) override;
 
 private:
-    boost::asio::io_service & mr_io_service;
-}; // class SessionProvider
+    std::shared_ptr<MailUnit::Storage::Database> m_database_ptr;
+}; // class ServerRequestHandler
 
 } // namespace Smtp
 } // namespace MailUnit
 
-#endif // __MU_SMTP_SESSIONPROVIDER_H__
+#endif // __MU_SMTP_SERVERREQUESTHANDLER_H__
