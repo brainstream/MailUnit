@@ -19,7 +19,7 @@
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/phoenix_core.hpp>
 #include <boost/spirit/include/phoenix_operator.hpp>
-#include <MailUnit/Storage/Edsl.h>
+#include <MailUnit/Storage/Dsel.h>
 
 using namespace MailUnit::Storage::Dsel;
 namespace qi = boost::spirit::qi;

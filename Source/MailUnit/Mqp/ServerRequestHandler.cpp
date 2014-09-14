@@ -16,9 +16,14 @@
  ***********************************************************************************************/
 
 #include <memory>
-#include <MailUnit/Storage/ServerRequestHandler.h>
+#include <sstream>
+#include <functional>
+#include <boost/algorithm/string.hpp>
+#include <MailUnit/Mqp/ServerRequestHandler.h>
+#include <MailUnit/Mqp/DBObjectCompressor.h>
 #include <MailUnit/Application.h>
 
+using namespace MailUnit::Mqp;
 using namespace MailUnit::Storage;
 
 namespace {
@@ -28,7 +33,7 @@ class Session final : public std::enable_shared_from_this<Session>
     MU_DISABLE_COPY(Session)
 
 public:
-    inline explicit Session(boost::asio::ip::tcp::socket _socket);
+    inline explicit Session(boost::asio::ip::tcp::socket _socket, std::shared_ptr<Database> _database);
     ~Session();
     inline void start();
 
@@ -36,10 +41,12 @@ private:
     size_t findEndOfQuery(const char * _query_piece, size_t _length);
     void read();
     void processQuery();
-    void write(const std::string & _text);
+    void writeObjectSet(std::shared_ptr<DBObjectSet> _objects, DBObjectSet::ConstIterator _pos);
+    void write(const std::string & _text, std::function<void()> _callback);
 
 private:
     boost::asio::ip::tcp::socket m_socket;
+    std::shared_ptr<Database> m_database_ptr;
     static const size_t s_buffer_size = 256;
     char * mp_buffer;
     bool m_position_in_quoted_text;
@@ -51,7 +58,7 @@ private:
 void ServerRequestHandler::handleConnection(boost::asio::ip::tcp::socket _socket)
 {
     MailUnit::app().log().info("New connection accepted by the storage server");
-    std::make_shared<Session>(std::move(_socket))->start();
+    std::make_shared<Session>(std::move(_socket), m_database_ptr)->start();
 }
 
 bool ServerRequestHandler::handleError(const boost::system::error_code & _err_code)
@@ -61,8 +68,9 @@ bool ServerRequestHandler::handleError(const boost::system::error_code & _err_co
     return false;
 }
 
-Session::Session(boost::asio::ip::tcp::socket _socket) :
+Session::Session(boost::asio::ip::tcp::socket _socket, std::shared_ptr<Database> _database) :
     m_socket(std::move(_socket)),
+    m_database_ptr(_database),
     mp_buffer(new char[s_buffer_size]),
     m_position_in_quoted_text(false)
 {
@@ -85,6 +93,7 @@ void Session::read()
         [self](const boost::system::error_code & ec, std::size_t length)
         {
             if(ec) return; // TODO: log
+            self->mp_buffer[length] = '\0';
             size_t end_pos = self->findEndOfQuery(self->mp_buffer, length);
             self->m_query.append(self->mp_buffer, &self->mp_buffer[length - 1]);
             if(end_pos != length)
@@ -96,18 +105,49 @@ void Session::read()
 
 void Session::processQuery()
 {
-    // TODO: make query to a DB
-    std::string query(std::move(m_query));
-    write(query);
+    try
+    {
+        std::string query(std::move(m_query));
+        boost::algorithm::trim(query);
+        std::shared_ptr<DBObjectSet> objects = m_database_ptr->query(query);
+        writeObjectSet(objects, objects->cbegin());
+    }
+    catch(const DatabaseException & error)
+    {
+        std::shared_ptr<Session> self(shared_from_this());
+        std::stringstream message;
+        message << "ERROR " << error.what() << "\r\n";
+        write(message.str(), [self]() {
+            self->read();
+        });
+    }
 }
 
-void Session::write(const std::string & _text)
+void Session::writeObjectSet(std::shared_ptr<DBObjectSet> _objects, DBObjectSet::ConstIterator _pos)
 {
-    std::shared_ptr<Session> self(shared_from_this());
+    if(_objects->cend() == _pos)
+    {
+        read();
+    }
+    else
+    {
+        std::shared_ptr<Session> self(shared_from_this());
+        std::stringstream stream;
+        compressDBObject(*_pos, stream);
+        ++_pos;
+        write(stream.str(), [self, _objects, _pos]() {
+            self->writeObjectSet(_objects, _pos);
+        });
+    }
+}
+
+void Session::write(const std::string & _text, std::function<void()> _callback)
+{
     m_socket.async_send(boost::asio::buffer(_text),
-        [self](const boost::system::error_code & ec, std::size_t length)
+        [_callback](const boost::system::error_code & ec, std::size_t length)
         {
-            self->read();
+            // TODO: error handling
+            _callback();
         });
 }
 

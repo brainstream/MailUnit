@@ -19,7 +19,7 @@
 #include <boost/asio.hpp>
 #include <MailUnit/Server/TcpServer.h>
 #include <MailUnit/Smtp/ServerRequestHandler.h>
-#include <MailUnit/Storage/ServerRequestHandler.h>
+#include <MailUnit/Mqp/ServerRequestHandler.h>
 #include <MailUnit/Storage/SQLite.h>
 #include <MailUnit/Application.h>
 
@@ -85,7 +85,7 @@ void PrivateApplication::start()
 
     // TODO: from config (including ip address)
     boost::asio::ip::tcp::endpoint storage_server_endpoint(boost::asio::ip::tcp::v4(), 5880);
-    startTcpServer(service, storage_server_endpoint, std::make_shared<Storage::ServerRequestHandler>());
+    startTcpServer(service, storage_server_endpoint, std::make_shared<Mqp::ServerRequestHandler>(database));
 
     service.run();
 }

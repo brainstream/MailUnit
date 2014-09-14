@@ -15,23 +15,33 @@
  *                                                                                             *
  ***********************************************************************************************/
 
-#ifndef __MU_STORAGE_SESSION_H__
-#define __MU_STORAGE_SESSION_H__
+#ifndef __MU_MQP_SERVERREQUESTHANDLER_H__
+#define __MU_MQP_SERVERREQUESTHANDLER_H__
 
+#include <memory>
 #include <boost/asio.hpp>
 #include <MailUnit/Server/RequestHandler.h>
+#include <MailUnit/Storage/Database.h>
 
 namespace MailUnit {
-namespace Storage {
+namespace Mqp {
 
 class ServerRequestHandler : public Server::RequestHandler<boost::asio::ip::tcp::socket>
 {
 public:
+    explicit ServerRequestHandler(std::shared_ptr<MailUnit::Storage::Database> _database) :
+        m_database_ptr(_database)
+    {
+    }
+
     void handleConnection(boost::asio::ip::tcp::socket _socket) override;
     bool handleError(const boost::system::error_code & _err_code) override;
+
+private:
+    std::shared_ptr<MailUnit::Storage::Database> m_database_ptr;
 }; // class ServerRequestHandler
 
 } // namespace Storage
-} // namespace MailUnit
+} // namespace Mqp
 
-#endif // __MU_STORAGE_SESSION_H__
+#endif // __MU_MQP_SERVERREQUESTHANDLER_H__

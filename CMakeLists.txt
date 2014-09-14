@@ -23,8 +23,6 @@ set(TARGET_SERVER    mailunit-server)
 set(TARGET_LIB       mailunit-lib)
 set(TARGET_TESTS     mailunit-tests)
 set(TARGET_SQLITE    sqlite)
-set(TARGET_B64       b64)
-set(TARGET_TINYXML   tinyxmle)
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     message(STATUS "Application will be built in the Debug configuration")
@@ -97,8 +95,8 @@ set(SRC_LIB
 )
 
 set(TESTABLE_SRC_SERVER
-    Source/MailUnit/Storage/Edsl.h
-    Source/MailUnit/Storage/Edsl.cpp
+    Source/MailUnit/Storage/Dsel.h
+    Source/MailUnit/Storage/Dsel.cpp
 )
 
 set(SRC_SERVER
@@ -137,8 +135,11 @@ set(SRC_SERVER
     Source/MailUnit/Storage/Database.h
     Source/MailUnit/Storage/SQLite.h
     Source/MailUnit/Storage/SQLite.cpp
-    Source/MailUnit/Storage/ServerRequestHandler.h
-    Source/MailUnit/Storage/ServerRequestHandler.cpp
+    Source/MailUnit/Storage/DBObject.h
+    Source/MailUnit/Mqp/ServerRequestHandler.h
+    Source/MailUnit/Mqp/ServerRequestHandler.cpp
+    Source/MailUnit/Mqp/DBObjectCompressor.h
+    Source/MailUnit/Mqp/DBObjectCompressor.cpp
 )
 
 set(TESTS_SRC
@@ -168,24 +169,6 @@ set(SQLITE_SRC
     ThirdParty/SQLite/sqlite3.h
 )
 
-set(B64_SRC
-    ThirdParty/b64/cdecode.c
-    ThirdParty/b64/cdecode.h
-    ThirdParty/b64/cencode.c
-    ThirdParty/b64/cencode.h
-    ThirdParty/b64/decode.h
-    ThirdParty/b64/encode.h
-)
-
-set(TINYXML_SRC
-    ThirdParty/TinyXML/tinystr.cpp
-    ThirdParty/TinyXML/tinystr.h
-    ThirdParty/TinyXML/tinyxml.cpp
-    ThirdParty/TinyXML/tinyxmlerror.cpp
-    ThirdParty/TinyXML/tinyxml.h
-    ThirdParty/TinyXML/tinyxmlparser.cpp
-)
-
 set(LIBS
     ${Boost_LIBRARIES}
     ${CMAKE_THREAD_LIBS_INIT}
@@ -194,13 +177,8 @@ set(LIBS
 add_library(${TARGET_SQLITE} STATIC ${SQLITE_SRC})
 target_compile_definitions(${TARGET_SQLITE} PRIVATE -DSQLITE_THREADSAFE=1)
 
-add_library(${TARGET_B64} STATIC ${B64_SRC})
-
-add_library(${TARGET_TINYXML} STATIC ${TINYXML_SRC})
-target_compile_definitions(${TARGET_TINYXML} PRIVATE -DTIXML_USE_STL)
-
 add_library(${TARGET_LIB} SHARED ${SRC_LIB})
-target_link_libraries(${TARGET_LIB} ${LIBS} ${TARGET_TINYXML} ${TARGET_B64})
+target_link_libraries(${TARGET_LIB} ${LIBS})
 target_compile_definitions(${TARGET_LIB} PRIVATE -D_MU_LIB)
 set_target_properties(${TARGET_LIB} PROPERTIES OUTPUT_NAME ${BINARY_NAME})
 

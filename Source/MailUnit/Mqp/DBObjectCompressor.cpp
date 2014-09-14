@@ -15,33 +15,14 @@
  *                                                                                             *
  ***********************************************************************************************/
 
-#ifndef __MU_STORAGE_DATABASE_H__
-#define __MU_STORAGE_DATABASE_H__
+#include <boost/iostreams/filter/zlib.hpp>
+#include <boost/iostreams/filtering_streambuf.hpp>
+#include <MailUnit/Mqp/DBObjectCompressor.h>
 
-#include <memory>
-#include <LibMailUnit/Def.h>
-#include <MailUnit/Email.h>
-#include <MailUnit/Storage/DBObject.h>
-#include <MailUnit/Exception.h>
+using namespace MailUnit::Storage;
 
-namespace MailUnit {
-namespace Storage {
-
-MU_EXCEPTION(DatabaseException)
-
-class Database
+void MailUnit::Mqp::compressDBObject(const DBObject & _object, std::ostream & _out)
 {
-    MU_DISABLE_COPY(Database)
-
-public:
-    Database() { }
-    virtual ~Database() { }
-    virtual void storeEmail(const Email & _email) = 0;
-    virtual std::shared_ptr<DBObjectSet> query(const std::string & _dsel_query) = 0;
-}; // class Database
-
-} // namespace Storage
-} // namespace MailUnit
-
-
-#endif // __MU_STORAGE_DATABASE_H__
+    // TODO: zlib!
+    _out << "<COMPRESSED OBJECT>";
+}

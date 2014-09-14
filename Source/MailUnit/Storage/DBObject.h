@@ -15,33 +15,76 @@
  *                                                                                             *
  ***********************************************************************************************/
 
-#ifndef __MU_STORAGE_DATABASE_H__
-#define __MU_STORAGE_DATABASE_H__
+#ifndef __MU_STORAGE_DBOBJECT_H__
+#define __MU_STORAGE_DBOBJECT_H__
 
-#include <memory>
-#include <LibMailUnit/Def.h>
-#include <MailUnit/Email.h>
-#include <MailUnit/Storage/DBObject.h>
-#include <MailUnit/Exception.h>
+#include <string>
+#include <list>
+#include <unordered_map>
 
 namespace MailUnit {
 namespace Storage {
 
-MU_EXCEPTION(DatabaseException)
-
-class Database
+class DBObject
 {
-    MU_DISABLE_COPY(Database)
+public:
+    inline void addField(const std::string & _name, const std::string & _value);
+
+private:
+    std::unordered_multimap<std::string, std::string> m_fields;
+}; // class DBObject
+
+class DBObjectSet
+{
+public:
+    typedef typename std::list<DBObject>::iterator Iterator;
+    typedef typename std::list<DBObject>::const_iterator ConstIterator;
 
 public:
-    Database() { }
-    virtual ~Database() { }
-    virtual void storeEmail(const Email & _email) = 0;
-    virtual std::shared_ptr<DBObjectSet> query(const std::string & _dsel_query) = 0;
-}; // class Database
+    inline DBObject & addObject();
+    inline Iterator begin();
+    inline ConstIterator cbegin();
+    inline Iterator end();
+    inline ConstIterator cend();
+
+private:
+    std::list<DBObject> m_objects;
+}; // class DBObjectSet
+
+
+void DBObject::addField(const std::string & _name, const std::string & _value)
+{
+    m_fields.insert({ _name, _value });
+}
+
+DBObject & DBObjectSet::addObject()
+{
+    m_objects.push_back(DBObject());
+    return m_objects.back();
+}
+
+DBObjectSet::Iterator DBObjectSet::begin()
+{
+    return m_objects.begin();
+}
+
+DBObjectSet::ConstIterator DBObjectSet::cbegin()
+{
+    return m_objects.cbegin();
+}
+
+DBObjectSet::Iterator DBObjectSet::end()
+{
+    return m_objects.end();
+}
+
+DBObjectSet::ConstIterator DBObjectSet::cend()
+{
+    return m_objects.cend();
+}
 
 } // namespace Storage
 } // namespace MailUnit
 
 
-#endif // __MU_STORAGE_DATABASE_H__
+#endif // __MU_STORAGE_DBOBJECT_H__

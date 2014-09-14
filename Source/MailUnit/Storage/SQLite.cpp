@@ -19,6 +19,7 @@
 #include <cstdio>
 #include <boost/algorithm/string.hpp>
 #include <MailUnit/Storage/SQLite.h>
+#include <MailUnit/Storage/Dsel.h>
 
 using namespace MailUnit;
 using namespace MailUnit::Storage;
@@ -47,32 +48,32 @@ inline std::string prepareValueString(const std::string & _string)
     return boost::replace_all_copy(_string, "'", "''");
 }
 
-std::string makeFindEmailsQuery(const std::vector<EmailQueryCriterion> & _criteria)
-{
-    std::stringstream sqlstream;
-    sqlstream <<
-        "SELECT m.Subject, m.Data, group_concat(e2.Mailbox, ';'), group_concat(e2.Reason, ';')\n"
-        "FROM Exchange e1\n"
-        "INNER JOIN Exchange e2 ON e2.Message = e1.Message\n"
-        "INNER JOIN Message m ON m.Id = e2.Message\n"
-        "WHERE\n";
-    size_t criterion_count = _criteria.size();
-    for(size_t i = 0; i < criterion_count; ++i)
-    {
-        if(i > 0)
-        {
-            sqlstream << " OR\n";
-        }
-        sqlstream << "(e1.Mailbox = '" << _criteria[i].mailbox << "' COLLATE NOCASE";
-        if(Email::AddressType::Invalid != _criteria[i].address_type)
-        {
-            sqlstream << " AND e1.Reason = " << static_cast<short>(_criteria[i].address_type);
-        }
-        sqlstream << ")\n";
-    }
-    sqlstream << "GROUP BY e2.Message";
-    return sqlstream.str();
-}
+//std::string makeFindEmailsQuery(const std::vector<EmailQueryCriterion> & _criteria)
+//{
+//    std::stringstream sqlstream;
+//    sqlstream <<
+//        "SELECT m.Subject, m.Data, group_concat(e2.Mailbox, ';'), group_concat(e2.Reason, ';')\n"
+//        "FROM Exchange e1\n"
+//        "INNER JOIN Exchange e2 ON e2.Message = e1.Message\n"
+//        "INNER JOIN Message m ON m.Id = e2.Message\n"
+//        "WHERE\n";
+//    size_t criterion_count = _criteria.size();
+//    for(size_t i = 0; i < criterion_count; ++i)
+//    {
+//        if(i > 0)
+//        {
+//            sqlstream << " OR\n";
+//        }
+//        sqlstream << "(e1.Mailbox = '" << _criteria[i].mailbox << "' COLLATE NOCASE";
+//        if(Email::AddressType::Invalid != _criteria[i].address_type)
+//        {
+//            sqlstream << " AND e1.Reason = " << static_cast<short>(_criteria[i].address_type);
+//        }
+//        sqlstream << ")\n";
+//    }
+//    sqlstream << "GROUP BY e2.Message";
+//    return sqlstream.str();
+//}
 
 int findEmailsQueryCallback(void * _vector_of_email_sptrs, int, char ** _values, char **)
 {
@@ -221,23 +222,49 @@ void SQLite::insertExchange(unsigned int _message_id, const Email & _email)
     }
 }
 
-std::vector<std::shared_ptr<Email>> SQLite::findEmails(
-    const std::vector<EmailQueryCriterion> & _criteria)
+std::shared_ptr<DBObjectSet> SQLite::query(const std::string & _dsel_query)
 {
-    std::vector<std::shared_ptr<Email>> result;
-    if(_criteria.empty())
+    // TODO: implement
+    std::shared_ptr<Dsel::Expression> expression = Dsel::parse(_dsel_query);
+    if(nullptr == expression)
     {
-        return result;
+        throw DatabaseException(std::string("Unable to parse the query: '") + _dsel_query + '\'');
     }
-    std::string sql = makeFindEmailsQuery(_criteria);
-    char * error = nullptr;
-    int select_result = sqlite3_exec(mp_sqlite, sql.c_str(),
-        findEmailsQueryCallback, &result, &error);
-    if(SQLITE_OK != select_result)
+    std::shared_ptr<DBObjectSet> objects = std::make_shared<DBObjectSet>();
     {
-        std::string er_string(error);
-        sqlite3_free(error);
-        throw DatabaseException(er_string);
+        DBObject & object = objects->addObject();
+        object.addField("Test Name", "Test Data");
+        object.addField("Test Name 2", "Test Data");
+        object.addField("Test Name", "Test Data 2");
+        object.addField("Test Name 2", "Test Data 3");
     }
-    return result;
+    {
+        DBObject & object = objects->addObject();
+        object.addField("Test Name", "Test Data");
+        object.addField("Test Name 2", "Test Data");
+        object.addField("Test Name", "Test Data 2");
+        object.addField("Test Name 2", "Test Data 3");
+    }
+    return objects;
 }
+
+//std::vector<std::shared_ptr<Email>> SQLite::findEmails(
+//    const std::vector<EmailQueryCriterion> & _criteria)
+//{
+//    std::vector<std::shared_ptr<Email>> result;
+//    if(_criteria.empty())
+//    {
+//        return result;
+//    }
+//    std::string sql = makeFindEmailsQuery(_criteria);
+//    char * error = nullptr;
+//    int select_result = sqlite3_exec(mp_sqlite, sql.c_str(),
+//        findEmailsQueryCallback, &result, &error);
+//    if(SQLITE_OK != select_result)
+//    {
+//        std::string er_string(error);
+//        sqlite3_free(error);
+//        throw DatabaseException(er_string);
+//    }
+//    return result;
+//}

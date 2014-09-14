@@ -15,33 +15,19 @@
  *                                                                                             *
  ***********************************************************************************************/
 
-#ifndef __MU_STORAGE_DATABASE_H__
-#define __MU_STORAGE_DATABASE_H__
+#ifndef __MU_MQP_DBOBJECTCOMPRESSOR_H__
+#define __MU_MQP_DBOBJECTCOMPRESSOR_H__
 
-#include <memory>
-#include <LibMailUnit/Def.h>
-#include <MailUnit/Email.h>
+#include <string>
+#include <ostream>
 #include <MailUnit/Storage/DBObject.h>
-#include <MailUnit/Exception.h>
 
 namespace MailUnit {
-namespace Storage {
+namespace Mqp {
 
-MU_EXCEPTION(DatabaseException)
+void compressDBObject(const MailUnit::Storage::DBObject & _object, std::ostream & _out);
 
-class Database
-{
-    MU_DISABLE_COPY(Database)
-
-public:
-    Database() { }
-    virtual ~Database() { }
-    virtual void storeEmail(const Email & _email) = 0;
-    virtual std::shared_ptr<DBObjectSet> query(const std::string & _dsel_query) = 0;
-}; // class Database
-
-} // namespace Storage
+} // namespace Mqp
 } // namespace MailUnit
 
-
-#endif // __MU_STORAGE_DATABASE_H__
+#endif // __MU_MQP_DBOBJECTCOMPRESSOR_H__
