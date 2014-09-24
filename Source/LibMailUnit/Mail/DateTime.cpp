@@ -16,9 +16,9 @@
  ***********************************************************************************************/
 
 #include <string>
-#include <cstdio>
 #include <utility>
 #include <boost/regex.hpp>
+#include <boost/lexical_cast.hpp>
 #include <LibMailUnit/Mail/DateTime.h>
 
 namespace {
@@ -97,10 +97,9 @@ std::pair<short, short> parseTimeZone(const std::string & _zone_string)
     static const size_t sign_pos    = 0;
     static const size_t hours_pos   = 1;
     static const size_t minutes_pos = 3;
-    short hours_offset = 0;
-    short minutes_offset = 0;
-    std::sscanf(&_zone_string.c_str()[hours_pos], "%2hd", &hours_offset);
-    std::sscanf(&_zone_string.c_str()[minutes_pos], "%2hd", &minutes_offset);
+    static const size_t value_len   = 2;
+    short hours_offset = boost::lexical_cast<short>(&_zone_string.c_str()[hours_pos], value_len);
+    short minutes_offset = boost::lexical_cast<short>(&_zone_string.c_str()[minutes_pos], value_len);
     if('-' == _zone_string[sign_pos])
     {
         hours_offset = -hours_offset;
@@ -150,23 +149,19 @@ MBool muDateTimeParse(const char * _raw_date_time, MDateTime * _date_time)
     {
         day_of_week = parseDayOfWeek(day_of_week_match);
     }
-    unsigned short year = 0;
-    std::sscanf(year_match.str().c_str(), "%4hu", &year);
+    unsigned short year = boost::lexical_cast<unsigned short>(year_match.str());
     MMonth month = parseMonth(month_match);
     if(mmonth_invalid == month)
     {
         return mfalse;
     }
-    unsigned short day = 0;
-    std::sscanf(day_match.str().c_str(), "%2hu", &day);
-    unsigned short hours = 0;
-    std::sscanf(hours_match.str().c_str(), "%2hu", &hours);
-    unsigned short minutes = 0;
-    std::sscanf(minutes_match.str().c_str(), "%2hu", &minutes);
+    unsigned short day = boost::lexical_cast<unsigned short>(day_match.str());
+    unsigned short hours = boost::lexical_cast<unsigned short>(hours_match.str());
+    unsigned short minutes = boost::lexical_cast<unsigned short>(minutes_match.str());
     unsigned short seconds = 0;
     if(seconds_match.matched)
     {
-        std::sscanf(seconds_match.str().c_str(), "%2hu", &seconds);
+        seconds = boost::lexical_cast<unsigned short>(seconds_match.str());
     }
     std::pair<short, short> timezone_offset = parseTimeZone(timezone_match);
     _date_time->day_of_week = day_of_week;

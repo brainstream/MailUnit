@@ -16,8 +16,8 @@
  ***********************************************************************************************/
 
 #include <sstream>
-#include <cstdio>
 #include <boost/algorithm/string.hpp>
+#include <boost/lexical_cast.hpp>
 #include <MailUnit/Storage/SQLite.h>
 #include <MailUnit/Storage/Dsel.h>
 
@@ -94,9 +94,7 @@ int findEmailsQueryCallback(void * _vector_of_email_sptrs, int, char ** _values,
     size_t mailbox_count = mailboxes.size();
     for(size_t i = 0; i < mailbox_count; ++i)
     {
-        Email::AddressType type;
-        std::sscanf(reasons[i].c_str(), "%uh", &type);
-        switch(type)
+        switch(static_cast<Email::AddressType>(boost::lexical_cast<int>(reasons[i])))
         {
         case Email::AddressType::From:
             data->from_addresses.push_back(mailboxes[i]);
@@ -178,7 +176,10 @@ unsigned int SQLite::insertMessage(const Email & _email)
     char * error = nullptr;
     int insert_result = sqlite3_exec(mp_sqlite, sqlstream.str().c_str(),
         [](void * pmessage_id, int count, char ** values, char **) {
-            if(count == 1) std::sscanf(values[0], "%u", pmessage_id);
+            if(count == 1)
+            {
+                *static_cast<unsigned int *>(pmessage_id) = boost::lexical_cast<unsigned int>(values[0]);
+            }
             return 0;
         }, &message_id, &error);
     if(SQLITE_OK != insert_result)
