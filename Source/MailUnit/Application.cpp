@@ -17,6 +17,7 @@
 
 #include <iostream>
 #include <boost/asio.hpp>
+#include <boost/scoped_ptr.hpp>
 #include <MailUnit/Server/TcpServer.h>
 #include <MailUnit/Smtp/ServerRequestHandler.h>
 #include <MailUnit/Mqp/ServerRequestHandler.h>
@@ -101,12 +102,12 @@ int main(int _argc, const char ** _argv)
 {
     try
     {
-        global_app = new PrivateApplication(_argc, _argv);
-        if(global_app->config().showHelp())
-            std::cout << global_app->config() << std::endl;
+        boost::scoped_ptr<PrivateApplication> app(new PrivateApplication(_argc, _argv));
+        global_app = app.get();
+        if(app->config().showHelp())
+            std::cout << app->config() << std::endl;
         else
-            global_app->start();
-        delete global_app;
+            app->start();
         // TODO: finalizer with the SQLite::shutdownd call
         return EXIT_SUCCESS;
     }
