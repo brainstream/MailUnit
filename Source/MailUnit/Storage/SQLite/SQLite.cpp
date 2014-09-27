@@ -18,7 +18,8 @@
 #include <sstream>
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
-#include <MailUnit/Storage/SQLite.h>
+#include <MailUnit/Storage/SQLite/SQLite.h>
+#include <MailUnit/Storage/SQLite/Query.h>
 #include <MailUnit/Storage/Dsel.h>
 
 using namespace MailUnit;
@@ -26,7 +27,22 @@ using namespace MailUnit::Storage;
 
 namespace {
 
-constexpr const char * const sql_init_db =
+namespace SqlTableMessage {
+    static const char * const table          = "Message";
+    static const char * const column_id      = "Id";
+    static const char * const column_subject = "Subject";
+    static const char * const column_data    = "Data";
+} // namespace SqlTableMessage
+
+namespace SqlTableExchange {
+    static const char * const table          = "Exchange";
+    static const char * const column_id      = "Id";
+    static const char * const column_mailbox = "Mailbox";
+    static const char * const column_message = "Message";
+    static const char * const column_reason  = "Reason";
+} // namespace SqlTableExchange
+
+static const char * const sql_init_db =
     "CREATE TABLE IF NOT EXISTS Message(\n"
     "    Id      INTEGER PRIMARY KEY AUTOINCREMENT,\n"
     "    Subject TEXT,\n"
@@ -46,6 +62,13 @@ constexpr const char * const sql_init_db =
 inline std::string prepareValueString(const std::string & _string)
 {
     return boost::replace_all_copy(_string, "'", "''");
+}
+
+std::string dselQueryToSql(const Dsel::Expression & _dsel_query)
+{
+    if(!boost::algorithm::iequals(_dsel_query.source, SqlTableMessage::table))
+        throw DatabaseException(std::string("Invalid source name: '") + _dsel_query.source + '\'');
+    //...........................................
 }
 
 //std::string makeFindEmailsQuery(const std::vector<EmailQueryCriterion> & _criteria)
@@ -167,14 +190,17 @@ void SQLite::prepareDatabase()
 
 unsigned int SQLite::insertMessage(const Email & _email)
 {
-    std::stringstream sqlstream;
-    sqlstream << "INSERT INTO Message (Subject, Data) VALUES('" <<
-        prepareValueString(_email.subject()) << "', '" <<
-        prepareValueString(_email.data()) << "');\n" <<
-        "SELECT last_insert_rowid();";
+    std::string sql = SQLQUERY_INSERT(SqlTableMessage::table,
+        SQLQUERY_COLUMNS(
+            SqlTableMessage::column_subject,
+            SqlTableMessage::column_data),
+        SQLQUERY_VALUES(
+            prepareValueString(_email.subject()),
+            prepareValueString(_email.data())
+        ));
     unsigned int message_id = ~0;
     char * error = nullptr;
-    int insert_result = sqlite3_exec(mp_sqlite, sqlstream.str().c_str(),
+    int insert_result = sqlite3_exec(mp_sqlite, sql.c_str(),
         [](void * pmessage_id, int count, char ** values, char **) {
             if(count == 1)
             {
@@ -208,9 +234,16 @@ void SQLite::insertExchange(unsigned int _message_id, const Email & _email)
     {
         for(auto & address : *typed_address.second)
         {
-            sqlstream << "INSERT INTO Exchange (Message, Mailbox, Reason) VALUES ("
-                << _message_id << ", '" << prepareValueString(address) << "', "
-                << static_cast<short>(typed_address.first) << ");\n";
+            sqlstream << SQLQUERY_INSERT(SqlTableExchange::table,
+                SQLQUERY_COLUMNS(
+                    SqlTableExchange::column_message,
+                    SqlTableExchange::column_mailbox,
+                    SqlTableExchange::column_reason),
+                SQLQUERY_VALUES(
+                    _message_id,
+                    prepareValueString(address),
+                    static_cast<short>(typed_address.first)
+                ));
         }
     }
     char * error = nullptr;
@@ -223,15 +256,15 @@ void SQLite::insertExchange(unsigned int _message_id, const Email & _email)
     }
 }
 
-std::shared_ptr<DBObjectSet> SQLite::query(const std::string & _dsel_query)
+std::unique_ptr<DBObjectSet> SQLite::query(const std::string & _dsel_query)
 {
     // TODO: implement
-    std::shared_ptr<Dsel::Expression> expression = Dsel::parse(_dsel_query);
+    std::unique_ptr<Dsel::Expression> expression = Dsel::parse(_dsel_query);
     if(nullptr == expression)
     {
         throw DatabaseException(std::string("Unable to parse the query: '") + _dsel_query + '\'');
     }
-    std::shared_ptr<DBObjectSet> objects = std::make_shared<DBObjectSet>();
+    auto objects = std::make_unique<DBObjectSet>();
     {
         DBObject & object = objects->addObject();
         object.addField("Test Name", "Test Data");

@@ -103,7 +103,7 @@ struct Expression
     boost::optional<ConditionSequence> conditions;
 }; // struct Expression
 
-std::shared_ptr<Expression> parse(const std::string & _input);
+std::unique_ptr<Expression> parse(const std::string & _input);
 
 } // namespace Dsel
 } // namespace Storage

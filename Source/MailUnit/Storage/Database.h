@@ -37,7 +37,7 @@ public:
     Database() { }
     virtual ~Database() { }
     virtual void storeEmail(const Email & _email) = 0;
-    virtual std::shared_ptr<DBObjectSet> query(const std::string & _dsel_query) = 0;
+    virtual std::unique_ptr<DBObjectSet> query(const std::string & _dsel_query) = 0;
 }; // class Database
 
 } // namespace Storage

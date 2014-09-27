@@ -33,7 +33,7 @@ public:
     SQLite(const boost::filesystem::path & _filepath);
     ~SQLite() override;
     void storeEmail(const Email & _email) override;
-    std::shared_ptr<DBObjectSet> query(const std::string & _dsel_query) override;
+    std::unique_ptr<DBObjectSet> query(const std::string & _dsel_query) override;
 
 public:
     static void shutdown();

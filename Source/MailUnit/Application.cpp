@@ -21,7 +21,7 @@
 #include <MailUnit/Server/TcpServer.h>
 #include <MailUnit/Smtp/ServerRequestHandler.h>
 #include <MailUnit/Mqp/ServerRequestHandler.h>
-#include <MailUnit/Storage/SQLite.h>
+#include <MailUnit/Storage/SQLite/SQLite.h>
 #include <MailUnit/Application.h>
 
 using namespace MailUnit;

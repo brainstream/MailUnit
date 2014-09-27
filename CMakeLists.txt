@@ -32,10 +32,10 @@ endif()
 
 message(STATUS "Compiler: " ${CMAKE_CXX_COMPILER_ID} " " ${CMAKE_CXX_COMPILER_VERSION})
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "4.7")
-        message("g++ 4.7 or greater is required")
+    if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "4.9")
+        message("g++ 4.9 or greater is required")
     else()
-        list(APPEND CMAKE_CXX_FLAGS "-std=c++11")
+        list(APPEND CMAKE_CXX_FLAGS "-std=c++14")
     endif()
 #elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
 #elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
@@ -133,8 +133,9 @@ set(SRC_SERVER
     Source/MailUnit/Smtp/StateMachine/DataState.cpp
     Source/MailUnit/Smtp/StateMachine/QuitState.h
     Source/MailUnit/Storage/Database.h
-    Source/MailUnit/Storage/SQLite.h
-    Source/MailUnit/Storage/SQLite.cpp
+    Source/MailUnit/Storage/SQLite/Query.h
+    Source/MailUnit/Storage/SQLite/SQLite.h
+    Source/MailUnit/Storage/SQLite/SQLite.cpp
     Source/MailUnit/Storage/DBObject.h
     Source/MailUnit/Mqp/ServerRequestHandler.h
     Source/MailUnit/Mqp/ServerRequestHandler.cpp

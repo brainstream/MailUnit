@@ -334,11 +334,11 @@ std::ostream & operator << (std::ostream & _stream, const Expression & _expressi
     return _stream;
 }
 
-std::shared_ptr<Expression> MailUnit::Storage::Dsel::parse(const std::string & _input)
+std::unique_ptr<Expression> MailUnit::Storage::Dsel::parse(const std::string & _input)
 {
     Grammar grammar;
     Expression * expression = new Expression();
-    std::shared_ptr<Expression> result = std::shared_ptr<Expression>(expression);
+    std::unique_ptr<Expression> result(expression);
     if(qi::phrase_parse(_input.begin(), _input.end(), grammar, qi::ascii::space, *expression))
     {
         return result;
