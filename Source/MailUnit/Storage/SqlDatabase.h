@@ -20,7 +20,47 @@
 
 #include <array>
 #include <tuple>
+#include <type_traits>
+#include <MailUnit/EnumMap.h>
 #include <MailUnit/Storage/Database.h>
+
+namespace MailUnit {
+namespace Storage {
+namespace SqlSchema {
+
+enum class MessageTable
+{
+    Column_Id,
+    Column_Subject,
+    Column_Data
+}; // enum class MessageTableSchema
+
+enum class ExchangeTable
+{
+    Column_Id,
+    Column_Mailbox,
+    Column_Message,
+    Column_Reason
+}; // enum class ExchangeTableSchema
+
+} // namespace SqlSchema
+} // namespace Storage
+} // namespace MailUnit
+
+BEGIN_ENUM_MAP(MailUnit::Storage::SqlSchema::MessageTable)
+    MAP_ENUM_ITEM(MailUnit::Storage::SqlSchema::MessageTable::Column_Id,      "Id")
+    MAP_ENUM_ITEM(MailUnit::Storage::SqlSchema::MessageTable::Column_Subject, "Subject")
+    MAP_ENUM_ITEM(MailUnit::Storage::SqlSchema::MessageTable::Column_Data,    "Data")
+END_ENUM_MAP
+
+BEGIN_ENUM_MAP(MailUnit::Storage::SqlSchema::ExchangeTable)
+    MAP_ENUM_ITEM(MailUnit::Storage::SqlSchema::ExchangeTable::Column_Id,      "Id")
+    MAP_ENUM_ITEM(MailUnit::Storage::SqlSchema::ExchangeTable::Column_Mailbox, "Mailbox")
+    MAP_ENUM_ITEM(MailUnit::Storage::SqlSchema::ExchangeTable::Column_Message, "Message")
+    MAP_ENUM_ITEM(MailUnit::Storage::SqlSchema::ExchangeTable::Column_Reason,  "Reason")
+END_ENUM_MAP
+
+#define SQL_COLUMN_NAME(column) ENUM_ITEM_NAME(column)
 
 namespace MailUnit {
 namespace Storage {

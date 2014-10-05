@@ -103,6 +103,7 @@ set(SRC_SERVER
     ${TESTABLE_SRC_SERVER}
     Source/MailUnit/Application.h
     Source/MailUnit/Application.cpp
+    Source/MailUnit/EnumMap.h
     Source/MailUnit/Config.h
     Source/MailUnit/Config.cpp
     Source/MailUnit/Logger.h
@@ -157,18 +158,19 @@ set(TESTS_SRC
     Tests/MailUnit/Edsl.cpp
 )
 
-set(DOXYGEN_SRC
+set(SQLITE_SRC
+    ThirdParty/SQLite/sqlite3.c
+    ThirdParty/SQLite/sqlite3ext.h
+    ThirdParty/SQLite/sqlite3.h
+)
+
+set(OTHER_FILES
+    .gitignore
     Doxygen/Doxyfile
     Doxygen/Pages/Main.dox
     Doxygen/Snippets/RFC/DateSpec.html
     Doxygen/Snippets/RFC/AddressSpec.html
     Doxygen/Snippets/RFC/IdentificationFieldsSpec.html
-)
-
-set(SQLITE_SRC
-    ThirdParty/SQLite/sqlite3.c
-    ThirdParty/SQLite/sqlite3ext.h
-    ThirdParty/SQLite/sqlite3.h
 )
 
 set(LIBS
@@ -194,4 +196,4 @@ if(ALLOW_TESTS)
     target_link_libraries(${TARGET_TESTS} ${LIBS} ${TARGET_LIB})
 endif(ALLOW_TESTS)
 
-add_custom_target(doxyfiles SOURCES ${DOXYGEN_SRC})
+add_custom_target(other SOURCES ${OTHER_FILES})
