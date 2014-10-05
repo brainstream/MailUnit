@@ -18,8 +18,8 @@
 #ifndef __MU_SERVER_REQUESTHANDLER_H__
 #define __MU_SERVER_REQUESTHANDLER_H__
 
-#include <boost/system/error_code.hpp>
 #include <LibMailUnit/Def.h>
+#include <boost/system/error_code.hpp>
 
 namespace MailUnit {
 namespace Server {

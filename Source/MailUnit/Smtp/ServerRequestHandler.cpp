@@ -15,6 +15,7 @@
  *                                                                                             *
  ***********************************************************************************************/
 
+#include <boost/noncopyable.hpp>
 #include <MailUnit/Application.h>
 #include <MailUnit/Email.h>
 #include <MailUnit/Smtp/ServerRequestHandler.h>
@@ -26,10 +27,8 @@ using namespace MailUnit::Smtp;
 
 namespace {
 
-class Session final : public std::enable_shared_from_this<Session>
+class Session final : public std::enable_shared_from_this<Session>, private boost::noncopyable
 {
-    MU_DISABLE_COPY(Session)
-
 public:
     inline Session(boost::asio::ip::tcp::socket _socket, std::shared_ptr<Storage::Database> _database);
     ~Session();

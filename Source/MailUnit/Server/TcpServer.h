@@ -20,7 +20,6 @@
 
 #include <memory>
 #include <boost/asio.hpp>
-#include <LibMailUnit/Def.h>
 #include <MailUnit/Server/RequestHandler.h>
 
 namespace MailUnit {

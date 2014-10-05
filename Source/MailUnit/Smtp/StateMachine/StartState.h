@@ -18,6 +18,7 @@
 #ifndef __MU_SMTP_STATEMACHINE_STARTSTATE_H__
 #define __MU_SMTP_STATEMACHINE_STARTSTATE_H__
 
+#include <LibMailUnit/Def.h>
 #include <MailUnit/Smtp/StateMachine/StateBase.h>
 
 namespace MailUnit {

@@ -15,39 +15,17 @@
  *                                                                                             *
  ***********************************************************************************************/
 
-#ifndef __MU_STORAGE_SQLITE_H__
-#define __MU_STORAGE_SQLITE_H__
+#include <MailUnit/Storage/SqlDatabase.h>
 
-#include <boost/filesystem/path.hpp>
-#include <SQLite/sqlite3.h>
-#include <MailUnit/Storage/Database.h>
+using namespace MailUnit::Storage;
 
-namespace MailUnit {
-namespace Storage {
-
-class SQLite final : public Database
+void SqlDatabase::storeEmail(const Email & _email)
 {
-    MU_DISABLE_COPY(SQLite)
+    // TODO: implement!
+}
 
-public:
-    SQLite(const boost::filesystem::path & _filepath);
-    ~SQLite() override;
-    void storeEmail(const Email & _email) override;
-    std::unique_ptr<DBObjectSet> query(const std::string & _dsel_query) override;
-
-public:
-    static void shutdown();
-
-private:
-    void prepareDatabase();
-    unsigned int insertMessage(const Email & _email);
-    void insertExchange(unsigned int _message_id, const Email & _email);
-
-private:
-    sqlite3 * mp_sqlite;
-}; // class SQLite
-
-} // namespace Storage
-} // namespace MailUnit
-
-#endif // __MU_STORAGE_SQLITE_H__
+std::unique_ptr<DBObjectSet> SqlDatabase::query(const std::string & _dsel_query)
+{
+    // TODO: implement!
+    return nullptr;
+}

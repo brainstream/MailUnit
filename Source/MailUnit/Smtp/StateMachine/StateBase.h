@@ -19,8 +19,8 @@
 #define __MU_SMTP_STATEMACHINE_STATEBASE_H__
 
 #include <string>
+#include <boost/noncopyable.hpp>
 #include <boost/msm/front/states.hpp>
-#include <LibMailUnit/Def.h>
 #include <MailUnit/Smtp/Message.h>
 #include <MailUnit/Smtp/ResponseCode.h>
 
@@ -28,19 +28,10 @@ namespace MailUnit {
 namespace Smtp {
 
 
-class StateBase
+class StateBase : private boost::noncopyable
 {
-    MU_DISABLE_COPY(StateBase)
-
 public:
-    StateBase()
-    {
-    }
-
-    virtual ~StateBase()
-    {
-    }
-
+    virtual ~StateBase() { }
     virtual void processInput(const std::string & _input, Message & _message) = 0;
     virtual bool isInputProcessingCompleted() const                           = 0;
     virtual bool isProtocolProcessingCompleted() const                        = 0;

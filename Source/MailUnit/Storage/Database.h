@@ -19,20 +19,16 @@
 #define __MU_STORAGE_DATABASE_H__
 
 #include <memory>
-#include <LibMailUnit/Def.h>
+#include <boost/noncopyable.hpp>
 #include <MailUnit/Email.h>
 #include <MailUnit/Storage/DBObject.h>
-#include <MailUnit/Exception.h>
+#include <MailUnit/Storage/DatabaseException.h>
 
 namespace MailUnit {
 namespace Storage {
 
-MU_EXCEPTION(DatabaseException)
-
-class Database
+class Database : private boost::noncopyable
 {
-    MU_DISABLE_COPY(Database)
-
 public:
     Database() { }
     virtual ~Database() { }

@@ -15,13 +15,17 @@
  *                                                                                             *
  ***********************************************************************************************/
 
+#if !defined __cplusplus || __cplusplus < 201300L
+#   error This project requires a C++14 compatible compiler!
+#endif // __cplusplus && __cplusplus >= 201300L
+
 #include <iostream>
 #include <boost/asio.hpp>
 #include <boost/scoped_ptr.hpp>
+#include <MailUnit/Storage/SqliteDatabase.h>
 #include <MailUnit/Server/TcpServer.h>
 #include <MailUnit/Smtp/ServerRequestHandler.h>
 #include <MailUnit/Mqp/ServerRequestHandler.h>
-#include <MailUnit/Storage/SQLite/SQLite.h>
 #include <MailUnit/Application.h>
 
 using namespace MailUnit;
@@ -79,7 +83,7 @@ void PrivateApplication::start()
     boost::asio::io_service service;
 
     // TODO: config
-    std::shared_ptr<Storage::Database> database(new Storage::SQLite("/home/brainstream/temp/mailunit.sqlite"));
+    std::shared_ptr<Storage::Database> database(new Storage::SqliteDatabase("/home/brainstream/temp/mailunit.sqlite"));
     // TODO: ip address from config
     boost::asio::ip::tcp::endpoint smtp_server_endpoint(boost::asio::ip::tcp::v4(), config().portNumber());
     startTcpServer(service, smtp_server_endpoint, std::make_shared<Smtp::ServerRequestHandler>(database));

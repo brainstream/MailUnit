@@ -41,24 +41,6 @@
 
 #define MU_UNUSED(var) (void)var
 
-#if defined __cplusplus && __cplusplus >= 201103L
-#   define MUCPP11
-#endif // __cplusplus && __cplusplus >= 201103L
-
-#ifdef MUCPP11
-#   define MU_DISABLE_COPY(name)                    \
-        name(const name &)                = delete; \
-        name(name &&)                     = delete; \
-        name & operator = (const name &)  = delete; \
-        name & operator = (name &&)       = delete;
-
-#   define MU_DEFAULT_COPY(name)                     \
-        name(const name &)                = default; \
-        name(name &&)                     = default; \
-        name & operator = (const name &)  = default; \
-        name & operator = (name &&)       = default;
-#endif // MUCPP11
-
 /**
  * @endcond
  */

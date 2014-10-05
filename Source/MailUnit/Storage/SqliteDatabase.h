@@ -15,61 +15,26 @@
  *                                                                                             *
  ***********************************************************************************************/
 
-#ifndef __MU_LOGGER_H__
-#define __MU_LOGGER_H__
+#ifndef __MU_STORAGE_SQLITEDATABASE_H__
+#define __MU_STORAGE_SQLITEDATABASE_H__
 
-#include <functional>
-#include <ostream>
-#include <boost/noncopyable.hpp>
-#include <boost/filesystem.hpp>
-#include <MailUnit/Exception.h>
-
+#include <MailUnit/Storage/SqlDatabase.h>
 
 namespace MailUnit {
+namespace Storage {
 
-enum class LogLevel
-{
-    Info,
-    Warning,
-    Error
-}; // enum class LogLevel
-
-
-MU_EXCEPTION(LoggerException)
-
-class Logger final : private boost::noncopyable
+class SqliteDatabase : public SqlDatabase
 {
 public:
-    Logger(const boost::filesystem::path & _filepath, LogLevel _min_level,
-        boost::uintmax_t _max_filesize = s_defult_max_filesize);
-    void info(const std::string & _message);
-    void warning(const std::string & _message);
-    void warning(const std::exception & _exception);
-    void warning(const std::string & _message, const std::exception & _exception);
-    void error(const std::string & _message);
-    void error(const std::exception & _exception);
-    void error(const std::string & _message, const std::exception & _exception);
+    SqliteDatabase(const std::string & _filename)
+    {
+        // TODO: implement!
+        (void)_filename;
+    }
 
-private:
-    void write(LogLevel _level, std::function<void(std::fstream &)> _callback);
-    void prepareFile();
-    void incrementFileVersion(const boost::filesystem::path & _path);
+}; // class SqliteDatabase
 
-public:
-    static const boost::uintmax_t s_min_filesize = 1024 * 1024;
-    static const boost::uintmax_t s_defult_max_filesize = 10 * 1024 * 1024;
-
-private:
-    LogLevel m_min_level;
-    boost::filesystem::path m_filepath;
-    boost::uintmax_t m_max_file_size;
-}; // class Logger
-
-
+} // namespace Storage
 } // namespace MailUnit
 
-
-std::ostream & operator << (std::ostream & _stream, MailUnit::LogLevel _level);
-
-
-#endif // __MU_LOGGER_H__
+#endif // __MU_STORAGE_SQLITEDATABASE_H__

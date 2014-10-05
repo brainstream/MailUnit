@@ -18,8 +18,8 @@
 #ifndef __MU_APPLICATION_H__
 #define __MU_APPLICATION_H__
 
+#include <boost/noncopyable.hpp>
 #include <boost/filesystem.hpp>
-#include <LibMailUnit/Def.h>
 #include <MailUnit/Config.h>
 #include <MailUnit/Logger.h>
 #include <MailUnit/Exception.h>
@@ -28,10 +28,8 @@ namespace MailUnit {
 
 MU_EXCEPTION(ApplicationException)
 
-class Application
+class Application : private boost::noncopyable
 {
-    MU_DISABLE_COPY(Application)
-
 public:
     Application(int _argc, const char **_argv);
     ~Application();

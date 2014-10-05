@@ -19,13 +19,12 @@
 #define __LIBMU_INTERNALMEMORY_H__
 
 #include <cstdlib>
+#include <boost/noncopyable.hpp>
 #include <LibMailUnit/Def.h>
 #include <LibMailUnit/Memory.h>
 
-struct MHandle
+struct MHandle : private boost::noncopyable
 {
-    MU_DISABLE_COPY(MHandle)
-
 public:
     explicit MHandle(void * _pointer) :
         mp_pointer(_pointer)

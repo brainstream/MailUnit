@@ -19,8 +19,8 @@
 #define __MU_CONFIG_H__
 
 #include <ostream>
+#include <boost/noncopyable.hpp>
 #include <boost/program_options.hpp>
-#include <LibMailUnit/Def.h>
 #include <MailUnit/Logger.h>
 
 namespace MailUnit {
@@ -36,10 +36,9 @@ std::ostream & operator << (std::ostream & _stream, const MailUnit::Config & _co
 namespace MailUnit {
 
 
-class Config final
+class Config final : private boost::noncopyable
 {
     friend std::ostream & ::operator << (std::ostream & _stream, const MailUnit::Config & _config);
-    MU_DISABLE_COPY(Config)
 
 public:
     Config(int argc, const char ** argv);

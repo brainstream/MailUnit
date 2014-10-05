@@ -18,6 +18,7 @@
 #include <memory>
 #include <sstream>
 #include <functional>
+#include <boost/noncopyable.hpp>
 #include <boost/algorithm/string.hpp>
 #include <MailUnit/Mqp/ServerRequestHandler.h>
 #include <MailUnit/Mqp/DBObjectCompressor.h>
@@ -28,10 +29,8 @@ using namespace MailUnit::Storage;
 
 namespace {
 
-class Session final : public std::enable_shared_from_this<Session>
+class Session final : public std::enable_shared_from_this<Session>, private boost::noncopyable
 {
-    MU_DISABLE_COPY(Session)
-
 public:
     inline explicit Session(boost::asio::ip::tcp::socket _socket, std::shared_ptr<Database> _database);
     ~Session();

@@ -132,10 +132,11 @@ set(SRC_SERVER
     Source/MailUnit/Smtp/StateMachine/DataState.h
     Source/MailUnit/Smtp/StateMachine/DataState.cpp
     Source/MailUnit/Smtp/StateMachine/QuitState.h
+    Source/MailUnit/Storage/DatabaseException.h
     Source/MailUnit/Storage/Database.h
-    Source/MailUnit/Storage/SQLite/Query.h
-    Source/MailUnit/Storage/SQLite/SQLite.h
-    Source/MailUnit/Storage/SQLite/SQLite.cpp
+    Source/MailUnit/Storage/SqlDatabase.h
+    Source/MailUnit/Storage/SqlDatabase.cpp
+    Source/MailUnit/Storage/SqliteDatabase.h
     Source/MailUnit/Storage/DBObject.h
     Source/MailUnit/Mqp/ServerRequestHandler.h
     Source/MailUnit/Mqp/ServerRequestHandler.cpp
