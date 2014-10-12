@@ -24,7 +24,7 @@
 #include <fstream>
 #include <boost/optional.hpp>
 #include <boost/noncopyable.hpp>
-#include <boost/filesystem/path.hpp>
+#include <boost/filesystem.hpp>
 
 namespace MailUnit {
 namespace Storage {
@@ -36,6 +36,12 @@ public:
         m_data_file_path(_data_file_path),
         m_data_out(_data_file_path.string())
     {
+    }
+
+    ~RawEmail()
+    {
+        m_data_out.close();
+        boost::filesystem::remove(m_data_file_path);
     }
 
     std::ostream & data()
