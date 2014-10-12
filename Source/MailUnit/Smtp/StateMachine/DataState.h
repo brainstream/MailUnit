@@ -44,14 +44,14 @@ private:
     }; // struct ReadState
 
 public:
-    void processInput(const std::string & _input, Message & _message)  override;
+    void processInput(const std::string & _input, Storage::RawEmail & _email) override;
 
-    bool isInputProcessingCompleted() const  override
+    bool isInputProcessingCompleted() const override
     {
         return m_read_state.data_accepted;
     }
 
-    bool isProtocolProcessingCompleted() const  override
+    bool isProtocolProcessingCompleted() const override
     {
         return false;
     }
@@ -61,7 +61,7 @@ public:
 
 private:
     void processHeader(const std::string & _input);
-    void processData(const std::string & _input, Message & _message);
+    void processData(const std::string & _input, Storage::RawEmail & _email);
 
 private:
     ReadState m_read_state;

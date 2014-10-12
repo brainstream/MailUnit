@@ -21,7 +21,7 @@
 #include <memory>
 #include <boost/asio.hpp>
 #include <MailUnit/Server/RequestHandler.h>
-#include <MailUnit/Storage/Database.h>
+#include <MailUnit/Storage/Repository.h>
 
 namespace MailUnit {
 namespace Smtp {
@@ -29,12 +29,12 @@ namespace Smtp {
 class ServerRequestHandler : public MailUnit::Server::RequestHandler<boost::asio::ip::tcp::socket>
 {
 public:
-    ServerRequestHandler(std::shared_ptr<MailUnit::Storage::Database> _database);
+    ServerRequestHandler(std::shared_ptr<MailUnit::Storage::Repository> _repository);
     void handleConnection(boost::asio::ip::tcp::socket _socket) override;
     bool handleError(const boost::system::error_code & _err_code) override;
 
 private:
-    std::shared_ptr<MailUnit::Storage::Database> m_database_ptr;
+    std::shared_ptr<MailUnit::Storage::Repository> m_repository_ptr;
 }; // class ServerRequestHandler
 
 } // namespace Smtp

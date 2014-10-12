@@ -25,7 +25,7 @@ template<typename EnumType>
 struct EnumMap
 {
     template<EnumType item>
-    static constexpr std::string name()
+    static std::string name()
     {
         static_assert(sizeof(item) == 0, "Default EnumMap has no implementation");
     }
@@ -49,11 +49,11 @@ struct EnumMap
 
 #define MAP_ENUM_ITEM(item, item_string)                                                 \
     template<Type impl_for>                                                              \
-    static constexpr typename std::enable_if<impl_for == item, std::string>::type name() \
+    static typename std::enable_if<impl_for == item, std::string>::type name() \
     {                                                                                    \
         return item_string;                                                              \
     }
 
-#define ENUM_ITEM_NAME(item) ::MailUnit::EnumMaps::EnumMap<decltype(item)>::name<item>()
+#define ENUM_ITEM_NAME(item) ::MailUnit::EnumMaps::EnumMap<typeof(item)>::name<item>()
 
 #endif // __MU_ENUMMAP_H__

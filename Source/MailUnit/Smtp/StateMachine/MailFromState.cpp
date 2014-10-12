@@ -27,10 +27,11 @@ MailFromState::MailFromState() :
 {
 }
 
-void MailFromState::processInput(const std::string & _input, Message & _message)
+void MailFromState::processInput(const std::string & _input, Storage::RawEmail & _email)
 {
-    if(internalProcessInput(_input) == ProcessResult::Success)
-        commandArgString(_message.from);
+    std::string from;
+    if(internalProcessInput(_input) == ProcessResult::Success && commandArgString(from))
+        _email.addFromAddress(from);
 }
 
 bool MailFromState::response(ResponseCode * _response) const

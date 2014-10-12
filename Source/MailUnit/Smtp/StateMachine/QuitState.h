@@ -27,18 +27,16 @@ namespace Smtp {
 class QuitState : public State
 {
 public:
-    void processInput(const std::string & _input, Message & _message)  override
+    void processInput(const std::string &, Storage::RawEmail &) override
     {
-        MU_UNUSED(_input);
-        MU_UNUSED(_message);
     }
 
-    bool isInputProcessingCompleted() const  override
+    bool isInputProcessingCompleted() const override
     {
         return true;
     }
 
-    bool isProtocolProcessingCompleted() const  override
+    bool isProtocolProcessingCompleted() const override
     {
         return true;
     }

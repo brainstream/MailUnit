@@ -15,26 +15,17 @@
  *                                                                                             *
  ***********************************************************************************************/
 
-#ifndef __MU_STORAGE_SQLITEDATABASE_H__
-#define __MU_STORAGE_SQLITEDATABASE_H__
+#ifndef __MU_STORAGE_STORAGEEXCEPTION_H__
+#define __MU_STORAGE_STORAGEEXCEPTION_H__
 
-#include <MailUnit/Storage/SqlDatabase.h>
+#include <MailUnit/Exception.h>
 
 namespace MailUnit {
 namespace Storage {
 
-class SqliteDatabase : public SqlDatabase
-{
-public:
-    SqliteDatabase(const std::string & _filename)
-    {
-        // TODO: implement!
-        (void)_filename;
-    }
-
-}; // class SqliteDatabase
+MU_EXCEPTION(StorageException)
 
 } // namespace Storage
 } // namespace MailUnit
 
-#endif // __MU_STORAGE_SQLITEDATABASE_H__
+#endif // __MU_STORAGE_STORAGEEXCEPTION_H__

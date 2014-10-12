@@ -23,12 +23,12 @@
 
 using namespace MailUnit::Smtp;
 
-void DataState::processInput(const std::string & _input, Message & _message)
+void DataState::processInput(const std::string & _input, Storage::RawEmail & _email)
 {
     if(m_read_state.error || m_read_state.data_accepted)
         return;
     if(m_read_state.header_accepted)
-        processData(_input, _message);
+        processData(_input, _email);
     else
         processHeader(_input);
 }
@@ -45,7 +45,7 @@ void DataState::processHeader(const std::string & _input)
         m_read_state.error = 1;
 }
 
-void DataState::processData(const std::string & _input, Message & _message)
+void DataState::processData(const std::string & _input, Storage::RawEmail & _email)
 {
     m_read_state.data_accepting = 1;
     m_data += _input;
@@ -56,7 +56,7 @@ void DataState::processData(const std::string & _input, Message & _message)
     }
     m_data += _input.substr(0, end_pos);
     m_read_state.data_accepted = 1;
-    _message.data = m_data.substr(sizeof(COMMAND) - 1);
+    _email.data() << m_data.substr(sizeof(COMMAND) - 1);
 }
 
 bool DataState::response(ResponseCode * _response) const

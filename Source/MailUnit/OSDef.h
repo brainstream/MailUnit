@@ -15,17 +15,22 @@
  *                                                                                             *
  ***********************************************************************************************/
 
-#include <MailUnit/Storage/SqlDatabase.h>
+#ifndef __MU_OSDEF_H__
+#define __MU_OSDEF_H__
 
-using namespace MailUnit::Storage;
+#include <boost/filesystem/path.hpp>
 
-void SqlDatabase::storeEmail(const Email & _email)
-{
-    // TODO: implement!
-}
+namespace MailUnit {
 
-std::unique_ptr<DBObjectSet> SqlDatabase::query(const std::string & _dsel_query)
-{
-    // TODO: implement!
-    return nullptr;
-}
+#ifdef BOOST_WINDOWS_API
+#   define MU_PATHISWIDECHAR
+#   define MU_PATHSTR(str) L ## str;
+#else
+#   define MU_PATHSTR(str) str
+#endif
+
+typedef typename boost::filesystem::path::string_type PathString;
+
+} // namespace MailUnit
+
+#endif // __MU_OSDEF_H__

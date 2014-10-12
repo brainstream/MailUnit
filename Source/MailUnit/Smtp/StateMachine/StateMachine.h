@@ -34,9 +34,9 @@ namespace Smtp {
 class Event
 {
 public:
-    Event(const std::string & _data, Message & _message) :
+    Event(const std::string & _data, Storage::RawEmail & _email) :
         m_data(_data),
-        mr_message(_message)
+        mr_email(_email)
     {
     }
 
@@ -45,24 +45,24 @@ public:
         return m_data;
     }
 
-    Message & message() const
+    Storage::RawEmail & email() const
     {
-        return mr_message;
+        return mr_email;
     }
 
 private:
     std::string m_data;
-    Message & mr_message;
+    Storage::RawEmail & mr_email;
 }; // class Event
 
-#define EVENT(name)                                           \
-    class name : public Event                                 \
-    {                                                         \
-    public:                                                   \
-        name(const std::string & _data, Message & _message) : \
-            Event(_data, _message)                            \
-        {                                                     \
-        }                                                     \
+#define EVENT(name)                                                   \
+    class name : public Event                                         \
+    {                                                                 \
+    public:                                                           \
+        name(const std::string & _data, Storage::RawEmail & _email) : \
+            Event(_data, _email)                                      \
+        {                                                             \
+        }                                                             \
     };
 
 EVENT(EhloEvent)

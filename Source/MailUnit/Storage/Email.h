@@ -15,31 +15,71 @@
  *                                                                                             *
  ***********************************************************************************************/
 
-#ifndef __MU_EMAIL_H__
-#define __MU_EMAIL_H__
+#ifndef __MU_STORAGE_EMAIL_H__
+#define __MU_STORAGE_EMAIL_H__
 
+#include <map>
 #include <vector>
 #include <string>
-#include <MailUnit/Smtp/Message.h>
+#include <fstream>
+#include <boost/optional.hpp>
+#include <boost/noncopyable.hpp>
+#include <boost/filesystem/path.hpp>
 
 namespace MailUnit {
+namespace Storage {
 
-struct EmailData
+class RawEmail : private boost::noncopyable
 {
-    std::vector<std::string> from_addresses;
-    std::vector<std::string> to_addresses;
-    std::vector<std::string> cc_addresses;
-    std::vector<std::string> bcc_addresses;
-    std::string subject;
-    std::string data;
-}; // struct EmailData
+public:
+    explicit RawEmail(const boost::filesystem::path & _data_file_path) :
+        m_data_file_path(_data_file_path),
+        m_data_out(_data_file_path.string())
+    {
+    }
+
+    std::ostream & data()
+    {
+        return m_data_out;
+    }
+
+    const boost::filesystem::path & dataFilePath() const
+    {
+        return m_data_file_path;
+    }
+
+    const std::vector<std::string> & fromAddresses() const
+    {
+        return m_from_addresses;
+    }
+
+    void addFromAddress(const std::string & _address)
+    {
+        m_from_addresses.push_back(_address);
+    }
+
+    const std::vector<std::string> & toAddresses() const
+    {
+        return m_to_addresses;
+    }
+
+    void addToAddress(const std::string & _address)
+    {
+        m_to_addresses.push_back(_address);
+    }
+
+private:
+    boost::filesystem::path m_data_file_path;
+    std::ofstream m_data_out;
+    std::vector<std::string> m_from_addresses;
+    std::vector<std::string> m_to_addresses;
+}; // class RawEmail
 
 class Email
 {
 public:
     enum class AddressType
     {
-        Invalid,
         From,
         To,
         Cc,
@@ -47,11 +87,10 @@ public:
     };
 
 public:
-    explicit Email(EmailData && _data);
-    explicit Email(const Smtp::Message & _smtp_message);
-    AddressType containsAddress(const std::string & _address);
+    Email(RawEmail & _raw, boost::filesystem::path & _data_file_path);
 
-public:
+    boost::optional<AddressType> containsAddress(const std::string & _address);
+
     const std::vector<std::string> & fromAddresses() const
     {
         return m_from_addresses;
@@ -77,14 +116,15 @@ public:
         return m_subject;
     }
 
-    const std::string & data() const
-    {
-        return m_data;
-    }
+    // TODO: filename?
+//    const std::string & data() const
+//    {
+//        return m_data;
+//    }
 
 private:
-    void parseSmtpHeaders(const Smtp::Message & _smtp_message);
-    void appendBccFromSmtpMessage(const Smtp::Message & _smtp_message);
+    void parseHeaders(std::fstream & _data);
+    void appendBcc(const RawEmail & _raw);
 
 private:
     std::vector<std::string> m_from_addresses;
@@ -92,9 +132,10 @@ private:
     std::vector<std::string> m_cc_addresses;
     std::vector<std::string> m_bcc_addresses;
     std::string m_subject;
-    std::string m_data;
 }; // class Email
 
+
+} // namespace Storage
 } // namespace MailUnit
 
-#endif // __MU_EMAIL_H__
+#endif // __MU_STORAGE_EMAIL_H__

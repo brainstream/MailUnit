@@ -21,7 +21,6 @@
 #include <boost/noncopyable.hpp>
 #include <boost/algorithm/string.hpp>
 #include <MailUnit/Mqp/ServerRequestHandler.h>
-#include <MailUnit/Mqp/DBObjectCompressor.h>
 #include <MailUnit/Application.h>
 
 using namespace MailUnit::Mqp;
@@ -32,7 +31,7 @@ namespace {
 class Session final : public std::enable_shared_from_this<Session>, private boost::noncopyable
 {
 public:
-    inline explicit Session(boost::asio::ip::tcp::socket _socket, std::shared_ptr<Database> _database);
+    inline explicit Session(boost::asio::ip::tcp::socket _socket, std::shared_ptr<Repository> _repository);
     ~Session();
     inline void start();
 
@@ -40,12 +39,11 @@ private:
     size_t findEndOfQuery(const char * _query_piece, size_t _length);
     void read();
     void processQuery();
-    void writeObjectSet(std::shared_ptr<DBObjectSet> _objects, DBObjectSet::ConstIterator _pos);
     void write(const std::string & _text, std::function<void()> _callback);
 
 private:
     boost::asio::ip::tcp::socket m_socket;
-    std::shared_ptr<Database> m_database_ptr;
+    std::shared_ptr<Repository> m_repository_ptr;
     static const size_t s_buffer_size = 256;
     char * mp_buffer;
     bool m_position_in_quoted_text;
@@ -57,7 +55,7 @@ private:
 void ServerRequestHandler::handleConnection(boost::asio::ip::tcp::socket _socket)
 {
     MailUnit::app().log().info("New connection accepted by the storage server");
-    std::make_shared<Session>(std::move(_socket), m_database_ptr)->start();
+    std::make_shared<Session>(std::move(_socket), m_repository_ptr)->start();
 }
 
 bool ServerRequestHandler::handleError(const boost::system::error_code & _err_code)
@@ -67,9 +65,9 @@ bool ServerRequestHandler::handleError(const boost::system::error_code & _err_co
     return false;
 }
 
-Session::Session(boost::asio::ip::tcp::socket _socket, std::shared_ptr<Database> _database) :
+Session::Session(boost::asio::ip::tcp::socket _socket, std::shared_ptr<Repository> _repository) :
     m_socket(std::move(_socket)),
-    m_database_ptr(_database),
+    m_repository_ptr(_repository),
     mp_buffer(new char[s_buffer_size]),
     m_position_in_quoted_text(false)
 {
@@ -108,34 +106,17 @@ void Session::processQuery()
     {
         std::string query(std::move(m_query));
         boost::algorithm::trim(query);
-        std::shared_ptr<DBObjectSet> objects = m_database_ptr->query(query);
-        writeObjectSet(objects, objects->cbegin());
+        // TODO: Write response!
+        // sometype emails = m_repository_ptr->findEmails(query);
+        // writeEmails(emails);
     }
-    catch(const DatabaseException & error)
+    catch(const StorageException & error)
     {
         std::shared_ptr<Session> self(shared_from_this());
         std::stringstream message;
         message << "ERROR " << error.what() << "\r\n";
         write(message.str(), [self]() {
             self->read();
-        });
-    }
-}
-
-void Session::writeObjectSet(std::shared_ptr<DBObjectSet> _objects, DBObjectSet::ConstIterator _pos)
-{
-    if(_objects->cend() == _pos)
-    {
-        read();
-    }
-    else
-    {
-        std::shared_ptr<Session> self(shared_from_this());
-        std::stringstream stream;
-        compressDBObject(*_pos, stream);
-        ++_pos;
-        write(stream.str(), [self, _objects, _pos]() {
-            self->writeObjectSet(_objects, _pos);
         });
     }
 }

@@ -19,7 +19,7 @@
 #define __MU_APPLICATION_H__
 
 #include <boost/noncopyable.hpp>
-#include <boost/filesystem.hpp>
+#include <boost/filesystem/path.hpp>
 #include <MailUnit/Config.h>
 #include <MailUnit/Logger.h>
 #include <MailUnit/Exception.h>

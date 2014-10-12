@@ -21,7 +21,7 @@
 #include <memory>
 #include <boost/asio.hpp>
 #include <MailUnit/Server/RequestHandler.h>
-#include <MailUnit/Storage/Database.h>
+#include <MailUnit/Storage/Repository.h>
 
 namespace MailUnit {
 namespace Mqp {
@@ -29,8 +29,8 @@ namespace Mqp {
 class ServerRequestHandler : public Server::RequestHandler<boost::asio::ip::tcp::socket>
 {
 public:
-    explicit ServerRequestHandler(std::shared_ptr<MailUnit::Storage::Database> _database) :
-        m_database_ptr(_database)
+    explicit ServerRequestHandler(std::shared_ptr<Storage::Repository> _repository) :
+        m_repository_ptr(_repository)
     {
     }
 
@@ -38,7 +38,7 @@ public:
     bool handleError(const boost::system::error_code & _err_code) override;
 
 private:
-    std::shared_ptr<MailUnit::Storage::Database> m_database_ptr;
+    std::shared_ptr<Storage::Repository> m_repository_ptr;
 }; // class ServerRequestHandler
 
 } // namespace Storage

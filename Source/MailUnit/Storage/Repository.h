@@ -15,64 +15,37 @@
  *                                                                                             *
  ***********************************************************************************************/
 
-#ifndef __MU_STORAGE_SQLDATABASE_H__
-#define __MU_STORAGE_SQLDATABASE_H__
+#ifndef __MU_STORAGE_REPOSITORY_H__
+#define __MU_STORAGE_REPOSITORY_H__
 
-#include <array>
-#include <tuple>
-#include <type_traits>
-#include <MailUnit/EnumMap.h>
-#include <MailUnit/Storage/Database.h>
-
-namespace MailUnit {
-namespace Storage {
-namespace SqlSchema {
-
-enum class MessageTable
-{
-    Column_Id,
-    Column_Subject,
-    Column_Data
-}; // enum class MessageTableSchema
-
-enum class ExchangeTable
-{
-    Column_Id,
-    Column_Mailbox,
-    Column_Message,
-    Column_Reason
-}; // enum class ExchangeTableSchema
-
-} // namespace SqlSchema
-} // namespace Storage
-} // namespace MailUnit
-
-BEGIN_ENUM_MAP(MailUnit::Storage::SqlSchema::MessageTable)
-    MAP_ENUM_ITEM(MailUnit::Storage::SqlSchema::MessageTable::Column_Id,      "Id")
-    MAP_ENUM_ITEM(MailUnit::Storage::SqlSchema::MessageTable::Column_Subject, "Subject")
-    MAP_ENUM_ITEM(MailUnit::Storage::SqlSchema::MessageTable::Column_Data,    "Data")
-END_ENUM_MAP
-
-BEGIN_ENUM_MAP(MailUnit::Storage::SqlSchema::ExchangeTable)
-    MAP_ENUM_ITEM(MailUnit::Storage::SqlSchema::ExchangeTable::Column_Id,      "Id")
-    MAP_ENUM_ITEM(MailUnit::Storage::SqlSchema::ExchangeTable::Column_Mailbox, "Mailbox")
-    MAP_ENUM_ITEM(MailUnit::Storage::SqlSchema::ExchangeTable::Column_Message, "Message")
-    MAP_ENUM_ITEM(MailUnit::Storage::SqlSchema::ExchangeTable::Column_Reason,  "Reason")
-END_ENUM_MAP
-
-#define SQL_COLUMN_NAME(column) ENUM_ITEM_NAME(column)
+#include <memory>
+#include <boost/filesystem/path.hpp>
+#include <MailUnit/OSDef.h>
+#include <MailUnit/Storage/StorageException.h>
+#include <MailUnit/Storage/Dsel.h>
+#include <MailUnit/Storage/Email.h>
 
 namespace MailUnit {
 namespace Storage {
 
-class SqlDatabase : public Database
+class Repository
 {
 public:
+    Repository(const boost::filesystem::path & _storage_direcotiry);
+    std::unique_ptr<RawEmail> createRawEmail();
+    void storeEmail(const RawEmail & _email);
     void storeEmail(const Email & _email);
-    std::unique_ptr<DBObjectSet> query(const std::string & _dsel_query);
-}; // class SqlDatabase
+    //void findEmails(Dsel::Expression & _query/* TODO: out???*/);
+
+private:
+    void initStorageDirectory();
+    boost::filesystem::path makeNewFileName(const MailUnit::PathString & _base, bool _temp);
+
+private:
+    boost::filesystem::path m_storage_direcotiry;
+}; // class Repository
 
 } // namespace Storage
 } // namespace MailUnit
 
-#endif // __MU_STORAGE_SQLDATABASE_H__
+#endif // __MU_STORAGE_REPOSITORY_H__

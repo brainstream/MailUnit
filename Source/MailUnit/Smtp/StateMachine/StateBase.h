@@ -21,8 +21,8 @@
 #include <string>
 #include <boost/noncopyable.hpp>
 #include <boost/msm/front/states.hpp>
-#include <MailUnit/Smtp/Message.h>
 #include <MailUnit/Smtp/ResponseCode.h>
+#include <MailUnit/Storage/Email.h>
 
 namespace MailUnit {
 namespace Smtp {
@@ -32,10 +32,10 @@ class StateBase : private boost::noncopyable
 {
 public:
     virtual ~StateBase() { }
-    virtual void processInput(const std::string & _input, Message & _message) = 0;
-    virtual bool isInputProcessingCompleted() const                           = 0;
-    virtual bool isProtocolProcessingCompleted() const                        = 0;
-    virtual bool response(ResponseCode * _response) const                     = 0;
+    virtual void processInput(const std::string & _input, Storage::RawEmail & _email) = 0;
+    virtual bool isInputProcessingCompleted() const                                   = 0;
+    virtual bool isProtocolProcessingCompleted() const                                = 0;
+    virtual bool response(ResponseCode * _response) const                             = 0;
 }; // class StateBase
 
 
@@ -45,7 +45,7 @@ public:
     template <typename EventT, typename FsmT>
     void on_entry(const EventT & _event, FsmT &)
     {
-        processInput(_event.data(), _event.message());
+        processInput(_event.data(), _event.email());
     }
 
     template <typename EventT, typename FsmT>

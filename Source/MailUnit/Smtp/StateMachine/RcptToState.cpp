@@ -27,13 +27,13 @@ RcptToState::RcptToState() :
 {
 }
 
-void RcptToState::processInput(const std::string & _input, Message & _message)
+void RcptToState::processInput(const std::string & _input, Storage::RawEmail & _email)
 {
     if(internalProcessInput(_input) == ProcessResult::Success)
     {
         std::string to;
         if(commandArgString(to))
-            _message.to.push_back(to);
+            _email.addToAddress(to);
     }
 }
 

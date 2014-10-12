@@ -103,21 +103,19 @@ set(SRC_SERVER
     ${TESTABLE_SRC_SERVER}
     Source/MailUnit/Application.h
     Source/MailUnit/Application.cpp
+    Source/MailUnit/OSDef.h
     Source/MailUnit/EnumMap.h
     Source/MailUnit/Config.h
     Source/MailUnit/Config.cpp
     Source/MailUnit/Logger.h
     Source/MailUnit/Logger.cpp
     Source/MailUnit/Exception.h
-    Source/MailUnit/Email.h
-    Source/MailUnit/Email.cpp
     Source/MailUnit/Server/RequestHandler.h
     Source/MailUnit/Server/TcpServer.h
     Source/MailUnit/Server/TcpServer.cpp
     Source/MailUnit/Smtp/ProtocolDef.h
     Source/MailUnit/Smtp/ResponseCode.h
     Source/MailUnit/Smtp/ResponseCode.cpp
-    Source/MailUnit/Smtp/Message.h
     Source/MailUnit/Smtp/ServerRequestHandler.h
     Source/MailUnit/Smtp/ServerRequestHandler.cpp
     Source/MailUnit/Smtp/StateMachine/StateMachine.h
@@ -133,16 +131,13 @@ set(SRC_SERVER
     Source/MailUnit/Smtp/StateMachine/DataState.h
     Source/MailUnit/Smtp/StateMachine/DataState.cpp
     Source/MailUnit/Smtp/StateMachine/QuitState.h
-    Source/MailUnit/Storage/DatabaseException.h
-    Source/MailUnit/Storage/Database.h
-    Source/MailUnit/Storage/SqlDatabase.h
-    Source/MailUnit/Storage/SqlDatabase.cpp
-    Source/MailUnit/Storage/SqliteDatabase.h
-    Source/MailUnit/Storage/DBObject.h
+    Source/MailUnit/Storage/StorageException.h
+    Source/MailUnit/Storage/Repository.h
+    Source/MailUnit/Storage/Repository.cpp
+    Source/MailUnit/Storage/Email.h
+    Source/MailUnit/Storage/Email.cpp
     Source/MailUnit/Mqp/ServerRequestHandler.h
     Source/MailUnit/Mqp/ServerRequestHandler.cpp
-    Source/MailUnit/Mqp/DBObjectCompressor.h
-    Source/MailUnit/Mqp/DBObjectCompressor.cpp
 )
 
 set(TESTS_SRC
@@ -187,7 +182,10 @@ target_compile_definitions(${TARGET_LIB} PRIVATE -D_MU_LIB)
 set_target_properties(${TARGET_LIB} PROPERTIES OUTPUT_NAME ${BINARY_NAME})
 
 add_executable(${TARGET_SERVER} ${SRC_SERVER})
-target_compile_definitions(${TARGET_SERVER} PRIVATE -D_MU_SERVER)
+target_compile_definitions(${TARGET_SERVER} PRIVATE
+    -D_MU_SERVER
+    -DBOOST_FILESYSTEM_NO_DEPRECATED
+)
 target_link_libraries(${TARGET_SERVER} ${LIBS} ${TARGET_LIB} ${TARGET_SQLITE} ${CMAKE_DL_LIBS})
 set_target_properties(${TARGET_SERVER} PROPERTIES OUTPUT_NAME ${BINARY_NAME})
 

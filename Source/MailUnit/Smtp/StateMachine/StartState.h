@@ -18,7 +18,6 @@
 #ifndef __MU_SMTP_STATEMACHINE_STARTSTATE_H__
 #define __MU_SMTP_STATEMACHINE_STARTSTATE_H__
 
-#include <LibMailUnit/Def.h>
 #include <MailUnit/Smtp/StateMachine/StateBase.h>
 
 namespace MailUnit {
@@ -28,18 +27,16 @@ namespace Smtp {
 class StartState : public State
 {
 public:
-    void processInput(const std::string & _input, Message & _message)  override
+    void processInput(const std::string &, Storage::RawEmail &) override
     {
-        MU_UNUSED(_input);
-        MU_UNUSED(_message);
     }
 
-    bool isInputProcessingCompleted() const  override
+    bool isInputProcessingCompleted() const override
     {
         return true;
     }
 
-    bool isProtocolProcessingCompleted() const  override
+    bool isProtocolProcessingCompleted() const override
     {
         return false;
     }

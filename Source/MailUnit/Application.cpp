@@ -22,7 +22,6 @@
 #include <iostream>
 #include <boost/asio.hpp>
 #include <boost/scoped_ptr.hpp>
-#include <MailUnit/Storage/SqliteDatabase.h>
 #include <MailUnit/Server/TcpServer.h>
 #include <MailUnit/Smtp/ServerRequestHandler.h>
 #include <MailUnit/Mqp/ServerRequestHandler.h>
@@ -83,14 +82,14 @@ void PrivateApplication::start()
     boost::asio::io_service service;
 
     // TODO: config
-    std::shared_ptr<Storage::Database> database(new Storage::SqliteDatabase("/home/brainstream/temp/mailunit.sqlite"));
+    std::shared_ptr<Storage::Repository> repo = std::make_shared<Storage::Repository>("/home/brainstream/temp/mailunit/");
     // TODO: ip address from config
     boost::asio::ip::tcp::endpoint smtp_server_endpoint(boost::asio::ip::tcp::v4(), config().portNumber());
-    startTcpServer(service, smtp_server_endpoint, std::make_shared<Smtp::ServerRequestHandler>(database));
+    startTcpServer(service, smtp_server_endpoint, std::make_shared<Smtp::ServerRequestHandler>(repo));
 
     // TODO: from config (including ip address)
     boost::asio::ip::tcp::endpoint storage_server_endpoint(boost::asio::ip::tcp::v4(), 5880);
-    startTcpServer(service, storage_server_endpoint, std::make_shared<Mqp::ServerRequestHandler>(database));
+    startTcpServer(service, storage_server_endpoint, std::make_shared<Mqp::ServerRequestHandler>(repo));
 
     service.run();
 }

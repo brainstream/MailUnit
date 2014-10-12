@@ -29,14 +29,14 @@ class RcptToState : public SingleLineCmdState
 public:
     RcptToState();
 
-    void processInput(const std::string & _input, Message & _message)  override;
+    void processInput(const std::string & _input, Storage::RawEmail & _email) override;
 
-    bool isInputProcessingCompleted() const  override
+    bool isInputProcessingCompleted() const override
     {
         return currentState() != ProcessResult::Incomplete;
     }
 
-    bool isProtocolProcessingCompleted() const  override
+    bool isProtocolProcessingCompleted() const override
     {
         return false;
     }
