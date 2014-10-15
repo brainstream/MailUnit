@@ -28,13 +28,16 @@
 namespace MailUnit {
 namespace Storage {
 
-class Repository
+class Repository final
 {
+private:
+    class Database;
+
 public:
     Repository(const boost::filesystem::path & _storage_direcotiry);
+    ~Repository();
     std::unique_ptr<RawEmail> createRawEmail();
-    void storeEmail(const RawEmail & _email);
-    void storeEmail(const Email & _email);
+    uint32_t storeEmail(const RawEmail & _raw_email);
     //void findEmails(Dsel::Expression & _query/* TODO: out???*/);
 
 private:
@@ -43,6 +46,7 @@ private:
 
 private:
     boost::filesystem::path m_storage_direcotiry;
+    Database * mp_database;
 }; // class Repository
 
 } // namespace Storage

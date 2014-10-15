@@ -93,7 +93,11 @@ public:
     };
 
 public:
-    Email(RawEmail & _raw, boost::filesystem::path & _data_file_path);
+    Email(const RawEmail & _raw, const boost::filesystem::path & _data_file_path);
+
+    Email(const Email &) = default;
+
+    Email & operator = (const Email &) = default;
 
     boost::optional<AddressType> containsAddress(const std::string & _address);
 

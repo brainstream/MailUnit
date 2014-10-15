@@ -38,7 +38,7 @@ void collectAddressesFromHeader(MU_MAIL_HEADERLIST _headers, const char * _heade
 } // namespace
 
 
-Email::Email(RawEmail & _raw, boost::filesystem::path & _data_file_path)
+Email::Email(const RawEmail & _raw, const boost::filesystem::path & _data_file_path)
 {
     std::ifstream raw_stream(_raw.dataFilePath().string());
     std::fstream data(_data_file_path.string(), std::ios_base::out | std::ios_base::in | std::ios_base::trunc);
