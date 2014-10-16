@@ -25,6 +25,7 @@
 #include <boost/optional.hpp>
 #include <boost/noncopyable.hpp>
 #include <boost/filesystem.hpp>
+#include <LibMailUnit/Def.h>
 
 namespace MailUnit {
 namespace Storage {
@@ -127,7 +128,7 @@ public:
     }
 
 private:
-    void parseHeaders(int _file);
+    void parseHeaders(MU_NATIVE_FILE _file);
     void appendBcc(const RawEmail & _raw);
 
 private:

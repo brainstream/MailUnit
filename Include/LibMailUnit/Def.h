@@ -27,7 +27,7 @@
  * @cond HIDDEN
  */
 
-#define MUCALL __stdcall
+
 #ifdef _WIN32
 #   ifdef _MU_LIB
 #       define MUAPI __declspec(dllexport) extern "C"
