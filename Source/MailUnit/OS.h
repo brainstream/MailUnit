@@ -15,45 +15,59 @@
  *                                                                                             *
  ***********************************************************************************************/
 
-#ifndef __MU_ENUMMAP_H__
-#define __MU_ENUMMAP_H__
+#ifndef __MU_OS_H__
+#define __MU_OS_H__
+
+#include <LibMailUnit/Def.h>
+#include <boost/noncopyable.hpp>
+#include <boost/filesystem/path.hpp>
 
 namespace MailUnit {
-namespace EnumMaps {
 
-template<typename EnumType>
-struct EnumMap
+#ifdef BOOST_WINDOWS_API
+#   define MU_PATHISWIDECHAR
+#   define MU_PATHSTR(str) L ## str;
+#else
+#   define MU_PATHSTR(str) str
+#endif
+
+typedef typename boost::filesystem::path::string_type PathString;
+
+constexpr int open_nf_read   = 0x01;
+constexpr int open_nf_write  = 0x02;
+constexpr int open_nf_create = 0x04;
+constexpr int open_nf_append = 0x08;
+
+MU_NATIVE_FILE openNativeFile(const boost::filesystem::path & _filepath, int _flags);
+void closeNativeFile(MU_NATIVE_FILE _file);
+
+class NativeFile final : private boost::noncopyable
 {
-    template<EnumType item>
-    static std::string name()
+public:
+    NativeFile(const boost::filesystem::path & _filepath, int _flags) :
+        m_file(openNativeFile(_filepath, _flags))
     {
-        static_assert(sizeof(item) == 0, "Default EnumMap has no implementation");
     }
-};
 
-} // namespace EnumMaps
+    ~NativeFile()
+    {
+        closeNativeFile(m_file);
+    }
+
+    operator MU_NATIVE_FILE () const
+    {
+        return m_file;
+    }
+
+    bool isOpen() const
+    {
+        return MU_INVALID_NATIVE_FILE != m_file;
+    }
+
+private:
+    MU_NATIVE_FILE m_file;
+}; // class NativeFile
+
 } // namespace MailUnit
 
-#define BEGIN_ENUM_MAP(type)        \
-    namespace MailUnit {            \
-    namespace EnumMaps {            \
-                                    \
-    template<> struct EnumMap<type> \
-    {                               \
-        typedef type Type;
-
-#define END_ENUM_MAP                          \
-    }; /* template<> struct EnumMap<type> */  \
-    }  /* namespace EnumMaps */               \
-    }  /* namespace MailUnit */
-
-#define MAP_ENUM_ITEM(item, item_string)                                                 \
-    template<Type impl_for>                                                              \
-    static typename std::enable_if<impl_for == item, std::string>::type name() \
-    {                                                                                    \
-        return item_string;                                                              \
-    }
-
-#define ENUM_ITEM_NAME(item) ::MailUnit::EnumMaps::EnumMap<typeof(item)>::name<item>()
-
-#endif // __MU_ENUMMAP_H__
+#endif // __MU_OS_H__

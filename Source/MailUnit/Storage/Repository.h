@@ -20,7 +20,7 @@
 
 #include <memory>
 #include <boost/filesystem/path.hpp>
-#include <MailUnit/OSDef.h>
+#include <MailUnit/OS.h>
 #include <MailUnit/Storage/StorageException.h>
 #include <MailUnit/Storage/Dsel.h>
 #include <MailUnit/Storage/Email.h>

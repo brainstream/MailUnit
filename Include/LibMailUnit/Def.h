@@ -27,16 +27,19 @@
  * @cond HIDDEN
  */
 
+#define MUCALL __stdcall
 #ifdef _WIN32
 #   ifdef _MU_LIB
 #       define MUAPI __declspec(dllexport) extern "C"
 #   else
 #       define MUAPI __declspec(dllimport) extern "C"
 #   endif
-#   define MU_NATIVE_FILE HFILE
+#   define MU_NATIVE_FILE HANDLE
+#   define MU_INVALID_NATIVE_FILE INVALID_HANDLE_VALUE
 #else
 #   define MUAPI extern "C"
 #   define MU_NATIVE_FILE int
+#   define MU_INVALID_NATIVE_FILE -1
 #endif
 
 #define MU_UNUSED(var) (void)var

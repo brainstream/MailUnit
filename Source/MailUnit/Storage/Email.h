@@ -86,10 +86,10 @@ class Email
 public:
     enum class AddressType
     {
-        From,
-        To,
-        Cc,
-        Bcc
+        From = 0,
+        To   = 1,
+        Cc   = 2,
+        Bcc  = 3
     };
 
 public:
@@ -99,7 +99,7 @@ public:
 
     Email & operator = (const Email &) = default;
 
-    boost::optional<AddressType> containsAddress(const std::string & _address);
+    boost::optional<AddressType> findAddress(const std::string & _address);
 
     const std::vector<std::string> & fromAddresses() const
     {
@@ -126,14 +126,8 @@ public:
         return m_subject;
     }
 
-    // TODO: filename?
-//    const std::string & data() const
-//    {
-//        return m_data;
-//    }
-
 private:
-    void parseHeaders(std::fstream & _data);
+    void parseHeaders(int _file);
     void appendBcc(const RawEmail & _raw);
 
 private:

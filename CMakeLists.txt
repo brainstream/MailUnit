@@ -103,8 +103,8 @@ set(SRC_SERVER
     ${TESTABLE_SRC_SERVER}
     Source/MailUnit/Application.h
     Source/MailUnit/Application.cpp
-    Source/MailUnit/OSDef.h
-    Source/MailUnit/EnumMap.h
+    Source/MailUnit/OS.h
+    Source/MailUnit/OS.cpp
     Source/MailUnit/Config.h
     Source/MailUnit/Config.cpp
     Source/MailUnit/Logger.h
