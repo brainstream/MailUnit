@@ -32,12 +32,6 @@ BOOST_FUSION_ADAPT_STRUCT(
 )
 
 BOOST_FUSION_ADAPT_STRUCT(
-    UnaryCondition,
-    (ConditionUnaryOperator, operator_)
-    (Identifier, identifier)
-)
-
-BOOST_FUSION_ADAPT_STRUCT(
     RightConditionSequence,
     (ConditionJoinOperator, operator_)
     (ConditionSequenceOperand, operand)
@@ -49,23 +43,7 @@ BOOST_FUSION_ADAPT_STRUCT(
     (std::vector<RightConditionSequence>, right)
 )
 
-BOOST_FUSION_ADAPT_STRUCT(
-    Expression,
-    (Target, target)
-    (Source, source)
-    (boost::optional<ConditionSequence>, conditions)
-)
-
 namespace {
-
-class SpecialTargetSymbols : public qi::symbols<char, SpecialTarget>
-{
-public:
-    SpecialTargetSymbols()
-    {
-        add("*", SpecialTarget::All);
-    }
-}; // class SpecialTargetSymbols
 
 class ConditionBinaryOperatorSymbols : public qi::symbols<char, ConditionBinaryOperator>
 {
@@ -82,15 +60,6 @@ public:
     }
 }; // class ConditionBinaryOperatorSymbols
 
-class ConditionUnaryOperatorSymbols : public qi::symbols<char, ConditionUnaryOperator>
-{
-public:
-    ConditionUnaryOperatorSymbols()
-    {
-        add("!", ConditionUnaryOperator::Not);
-    }
-}; // class ConditionUnaryOperatorSymbols
-
 class ConditionJoinOperatorSymbols : public qi::symbols<char, ConditionJoinOperator>
 {
 public:
@@ -103,7 +72,7 @@ public:
 }; // class ConditionJoinOperatorSymbols
 
 class Grammar :
-    public qi::grammar<typename std::string::const_iterator, Expression(), qi::ascii::space_type>
+    public qi::grammar<typename std::string::const_iterator, ConditionSequence(), qi::ascii::space_type>
 {
 private:
     template<typename Type>
@@ -114,39 +83,26 @@ public:
 
 private:
     Rule<std::string()> m_identifier;
-    Rule<std::vector<std::string>()> m_identifier_list;
-    Rule<Target()> m_target;
-    SpecialTargetSymbols m_special_target;
     Rule<ConditionValue()> m_condition_value;
     Rule<BinaryCondition()> m_binary_condition;
     ConditionBinaryOperatorSymbols m_binary_operator;
-    Rule<UnaryCondition()> m_unary_condition;
-    ConditionUnaryOperatorSymbols m_unary_operator;
     Rule<ConditionSequence()> m_bracketed_condition_sequence;
     Rule<ConditionSequenceOperand()> m_condition_sequence_operand;
     Rule<RightConditionSequence()> m_right_condition_sequence;
     ConditionJoinOperatorSymbols m_join_operator;
     Rule<ConditionSequence()> m_condition_sequence;
-    Rule<Expression()> m_expression;
 }; // class Grammar
 
 Grammar::Grammar() :
-    Grammar::base_type(m_expression)
+    Grammar::base_type(m_condition_sequence)
 {
-    m_identifier %= qi::lexeme[qi::ascii::alpha >> *qi::ascii::alnum];
-    m_identifier_list %= m_identifier % ',';
-    m_target %= m_special_target | m_identifier_list;
-    m_condition_value %= qi::int_ | ("'" >> qi::lexeme[*(qi::ascii::alnum | qi::ascii::blank)] >> "'");
-    m_binary_condition %= m_identifier > m_binary_operator > m_condition_value;
-    m_unary_condition %= m_unary_operator > m_identifier;
-    m_bracketed_condition_sequence %= "(" >> m_condition_sequence >> ")";
-    m_condition_sequence_operand %= m_binary_condition | m_unary_condition |
-        m_bracketed_condition_sequence;
-    m_right_condition_sequence %= qi::ascii::no_case[m_join_operator] >> m_condition_sequence_operand;
-    m_condition_sequence %= m_condition_sequence_operand >> *m_right_condition_sequence;
-    m_expression %= qi::ascii::no_case["select"] >> m_target >>
-        qi::ascii::no_case["from"] >> m_identifier >>
-        -(qi::ascii::no_case["where"] >> m_condition_sequence) >> ";";
+    m_identifier                   %= qi::lexeme[qi::ascii::alpha > *qi::ascii::alnum];
+    m_condition_value              %= qi::int_ | ("'" > qi::lexeme[*(qi::ascii::alnum | qi::ascii::blank)] > "'");
+    m_binary_condition             %= m_identifier > m_binary_operator > m_condition_value;
+    m_bracketed_condition_sequence %= "(" > m_condition_sequence > ")";
+    m_condition_sequence_operand   %= m_binary_condition | m_bracketed_condition_sequence;
+    m_right_condition_sequence     %= qi::ascii::no_case[m_join_operator] > m_condition_sequence_operand;
+    m_condition_sequence           %= m_condition_sequence_operand > *m_right_condition_sequence;
 }
 
 class GenericPriter : public boost::static_visitor<>
@@ -197,11 +153,6 @@ public:
     {
     }
 
-    void operator () (SpecialTarget _target)
-    {
-        mr_stream << _target;
-    }
-
     void operator () (const std::vector<Identifier> & _ids)
     {
         bool first = true;
@@ -220,20 +171,6 @@ private:
 }; // class TargetPrinter
 
 } // namespace
-
-std::ostream & operator << (std::ostream & _stream, SpecialTarget _target)
-{
-    if(_target == SpecialTarget::All)
-        _stream << "*";
-    return _stream;
-}
-
-std::ostream & operator << (std::ostream & _stream, const Target & _target)
-{
-    TargetPrinter printer(_stream);
-    boost::apply_visitor(printer, _target);
-    return _stream;
-}
 
 std::ostream & operator << (std::ostream & _stream, const ConditionValue & _value)
 {
@@ -268,17 +205,6 @@ std::ostream & operator << (std::ostream & _stream, ConditionBinaryOperator _ope
     return _stream;
 }
 
-std::ostream & operator << (std::ostream & _stream, ConditionUnaryOperator _operator)
-{
-    switch(_operator)
-    {
-    case ConditionUnaryOperator::Not:
-        _stream << '!';
-        break;
-    }
-    return _stream;
-}
-
 std::ostream & operator << (std::ostream & _stream, ConditionJoinOperator _operator)
 {
     switch(_operator)
@@ -296,12 +222,6 @@ std::ostream & operator << (std::ostream & _stream, ConditionJoinOperator _opera
 std::ostream & operator << (std::ostream & _stream, const BinaryCondition & _condition)
 {
     _stream << _condition.identifier << ' ' << _condition.operator_ << ' ' << _condition.value;
-    return _stream;
-}
-
-std::ostream & operator << (std::ostream & _stream, const UnaryCondition & _condition)
-{
-    _stream << _condition.operator_ << _condition.identifier;
     return _stream;
 }
 
@@ -325,27 +245,25 @@ std::ostream & operator << (std::ostream & _stream, const ConditionSequence & _c
     return _stream;
 }
 
-std::ostream & operator << (std::ostream & _stream, const Expression & _expression)
+std::unique_ptr<ConditionSequence> MailUnit::Storage::Edsl::parse(const std::string & _input)
 {
-    _stream << "SELECT " << _expression.target << " FROM " << _expression.source;
-    if(_expression.conditions.is_initialized())
-        _stream << " WHERE " << _expression.conditions.get();
-    _stream << ';';
-    return _stream;
-}
-
-std::unique_ptr<Expression> MailUnit::Storage::Edsl::parse(const std::string & _input)
-{
+    if(_input.end() == std::find_if_not(_input.begin(), _input.end(), std::isblank))
+    {
+        throw EdslException("Parse error: EDSL query is empty");
+    }
     Grammar grammar;
-    Expression * expression = new Expression();
-    std::unique_ptr<Expression> result(expression);
-    if(qi::phrase_parse(_input.begin(), _input.end(), grammar, qi::ascii::space, *expression))
+    ConditionSequence * condition_sequence = new ConditionSequence();
+    std::unique_ptr<ConditionSequence> result(condition_sequence);
+    try
     {
-        return result;
+        if(qi::phrase_parse(_input.begin(), _input.end(), grammar, qi::ascii::space, *condition_sequence))
+            return result;
     }
-    else
+    catch(...)
     {
-        return nullptr;
     }
+    std::stringstream message;
+    message << "Unable to parse EDSL query: \"" << _input << "\"";
+    throw EdslException(message.str());
 }
 

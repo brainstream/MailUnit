@@ -24,23 +24,17 @@
 #include <vector>
 #include <boost/variant.hpp>
 #include <boost/optional.hpp>
+#include <MailUnit/Exception.h>
 
 namespace MailUnit {
 namespace Storage {
 namespace Edsl {
 
+MU_EXCEPTION(EdslException)
+
 typedef std::string Identifier;
 
-enum class SpecialTarget
-{
-    All
-}; // enum class SpecialTarget
-
-typedef boost::variant<SpecialTarget, std::vector<Identifier>> Target;
-
 typedef boost::variant<int, std::string> ConditionValue;
-
-typedef Identifier Source;
 
 enum class ConditionBinaryOperator
 {
@@ -52,23 +46,12 @@ enum class ConditionBinaryOperator
     LessOrEqual
 }; // enum class ConditionBinaryOperator
 
-enum class ConditionUnaryOperator
-{
-    Not
-}; // enum class ConditionUnaryOperator
-
 struct BinaryCondition
 {
     Identifier identifier;
     ConditionBinaryOperator operator_;
     ConditionValue value;
 }; // struct SimpleCondition
-
-struct UnaryCondition
-{
-    ConditionUnaryOperator operator_;
-    Identifier identifier;
-}; // struct UnaryCondition
 
 enum class ConditionJoinOperator
 {
@@ -80,7 +63,6 @@ struct ConditionSequence;
 
 typedef boost::variant<
         BinaryCondition,
-        UnaryCondition,
         boost::recursive_wrapper<ConditionSequence>
     > ConditionSequenceOperand;
 
@@ -96,29 +78,17 @@ struct ConditionSequence
     std::vector<RightConditionSequence> right;
 }; // struct ConditionSequence
 
-struct Expression
-{
-    Target target;
-    Source source;
-    boost::optional<ConditionSequence> conditions;
-}; // struct Expression
-
-std::unique_ptr<Expression> parse(const std::string & _input);
+std::unique_ptr<ConditionSequence> parse(const std::string & _input);
 
 } // namespace Dsel
 } // namespace Storage
 } // namespace MailUnit
 
-std::ostream & operator << (std::ostream & _stream, MailUnit::Storage::Edsl::SpecialTarget _target);
-std::ostream & operator << (std::ostream & _stream, const MailUnit::Storage::Edsl::Target & _target);
 std::ostream & operator << (std::ostream & _stream, const MailUnit::Storage::Edsl::ConditionValue & _value);
 std::ostream & operator << (std::ostream & _stream, MailUnit::Storage::Edsl::ConditionBinaryOperator _operator);
-std::ostream & operator << (std::ostream & _stream, MailUnit::Storage::Edsl::ConditionUnaryOperator _operator);
 std::ostream & operator << (std::ostream & _stream, MailUnit::Storage::Edsl::ConditionJoinOperator _operator);
 std::ostream & operator << (std::ostream & _stream, const MailUnit::Storage::Edsl::BinaryCondition & _condition);
-std::ostream & operator << (std::ostream & _stream, const MailUnit::Storage::Edsl::UnaryCondition & _condition);
 std::ostream & operator << (std::ostream & _stream, const MailUnit::Storage::Edsl::ConditionSequenceOperand & _operand);
 std::ostream & operator << (std::ostream & _stream, const MailUnit::Storage::Edsl::ConditionSequence & _condition);
-std::ostream & operator << (std::ostream & _stream, const MailUnit::Storage::Edsl::Expression & _expression);
 
 #endif // __MU_STORAGE_EDSL_H__

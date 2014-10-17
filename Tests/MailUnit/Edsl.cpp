@@ -38,115 +38,91 @@ BOOST_AUTO_TEST_CASE(parseTest)
     const EdslTestQuery tests[] = {
         {
             false,
-            "select * fom Test;"
+            "",
         },
         {
             false,
-            "select from Test;"
+            " \t\v\b\r\n",
         },
         {
             false,
-            "select * from;"
+            "Number",
         },
         {
             false,
-            "celect * from Test;"
+            "Number =",
+        },
+        {
+            false,
+            "Number = X",
+        },
+        {
+            false,
+            "(Number = 123"
+        },
+        {
+            false,
+            "Name = 'BrokenString"
         },
         {
             true,
-            "select * from Test;",
-            "SELECT * FROM Test;"
+            "Number = 123",
+            "(Number = 123)"
         },
         {
             true,
-            "select\r\n*\tfrom\vTest;",
-            "SELECT * FROM Test;"
+            "Name = 'SomeValue'",
+            "(Name = 'SomeValue')"
         },
         {
             true,
-            "select * from Test where Number = 123;",
-            "SELECT * FROM Test WHERE (Number = 123);"
+            "Name = 'Some Value'",
+            "(Name = 'Some Value')"
         },
         {
             true,
-            "select * from Test where Name = 'SomeValue';",
-            "SELECT * FROM Test WHERE (Name = 'SomeValue');"
+            "Number = 123 AND Name <> 'Some Value'",
+            "(Number = 123 AND Name <> 'Some Value')"
         },
         {
             true,
-            "select * from Test where Name = 'Some Value';",
-            "SELECT * FROM Test WHERE (Name = 'Some Value');"
+            "Number = 123 or Name = 'Some Value'",
+            "(Number = 123 OR Name = 'Some Value')"
         },
         {
             true,
-            "select * from Test where Number = 123 AND Name <> 'Some Value';",
-            "SELECT * FROM Test WHERE (Number = 123 AND Name <> 'Some Value');"
+            "(Number = 123 and Name = 'Some Value') or Surname = 'Other'",
+            "((Number = 123 AND Name = 'Some Value') OR Surname = 'Other')"
         },
         {
             true,
-            "select * from Test where Number = 123 or Name = 'Some Value';",
-            "SELECT * FROM Test WHERE (Number = 123 OR Name = 'Some Value');"
+            "Surname = 'Other' or (Number > 123 and Name = 'Some Value')",
+            "(Surname = 'Other' OR (Number > 123 AND Name = 'Some Value'))"
         },
         {
             true,
-            "select * from Test where (Number = 123 and Name = 'Some Value') or Surname = 'Other';",
-            "SELECT * FROM Test WHERE ((Number = 123 AND Name = 'Some Value') OR Surname = 'Other');"
+            "(Age >= 12 and Surname = 'Other') or (Number < 123 and Name = 'Some Value')",
+            "((Age >= 12 AND Surname = 'Other') OR (Number < 123 AND Name = 'Some Value'))"
         },
         {
-            true,
-            "select * from Test where Surname = 'Other' or (Number > 123 and Name = 'Some Value');",
-            "SELECT * FROM Test WHERE (Surname = 'Other' OR (Number > 123 AND Name = 'Some Value'));"
+            false,
+            "(Age >= 12 and Surname = 'Other') or (Number < 123 and Name = ValueWithoutQuotes)"
         },
-        {
-            true,
-            "select * from Test where (Age >= 12 and Surname = 'Other') or (Number < 123 and Name = 'Some Value');",
-            "SELECT * FROM Test WHERE ((Age >= 12 AND Surname = 'Other') OR (Number < 123 AND Name = 'Some Value'));"
-        },
-        {
-            true,
-            "select * from Test where (Age >= 12 and Surname = 'Other') or (Number = 123 and Name = 'Some Value') or !Bool;",
-            "SELECT * FROM Test WHERE ((Age >= 12 AND Surname = 'Other') OR (Number = 123 AND Name = 'Some Value') OR !Bool);"
-        },
-        {
-            true,
-            "select * from Test where (Age >= 12 and Age <= 100 and Surname = 'Other') or (Number = 123 and Name = 'Some Value') or !Bool;",
-            "SELECT * FROM Test WHERE ((Age >= 12 AND Age <= 100 AND Surname = 'Other') OR (Number = 123 AND Name = 'Some Value') OR !Bool);"
-        },
-        {
-            true,
-            "select * from Test where ((Age >= 12 and Surname = 'Other') or !Bool) or (Number = 123 and Name = 'Some Value');",
-            "SELECT * FROM Test WHERE (((Age >= 12 AND Surname = 'Other') OR !Bool) OR (Number = 123 AND Name = 'Some Value'));"
-        },
-        {
-            true,
-            "select One from Test;",
-            "SELECT One FROM Test;"
-        },
-        {
-            true,
-            "select One, Two, Three from Test;",
-            "SELECT One, Two, Three FROM Test;"
-        },
-        {
-            true,
-            "select One,Two,Three from Test;",
-            "SELECT One, Two, Three FROM Test;"
-        }
     };
     for(auto test : tests)
     {
-        std::shared_ptr<Expression> expression = parse(test.query);
-        if(test.valid)
+        try
         {
+            std::shared_ptr<ConditionSequence> expression = parse(test.query);
+            BOOST_CHECK(test.valid);
             BOOST_CHECK(nullptr != expression);
             std::stringstream stream;
             stream << *expression;
             BOOST_CHECK_EQUAL(test.expected_result, stream.str());
         }
-        else
+        catch(const EdslException &)
         {
-            BOOST_CHECK(nullptr == expression);
-            continue;
+            BOOST_CHECK(!test.valid);
         }
     }
 }
