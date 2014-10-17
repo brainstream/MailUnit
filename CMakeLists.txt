@@ -95,8 +95,8 @@ set(SRC_LIB
 )
 
 set(TESTABLE_SRC_SERVER
-    Source/MailUnit/Storage/Dsel.h
-    Source/MailUnit/Storage/Dsel.cpp
+    Source/MailUnit/Storage/Edsl.h
+    Source/MailUnit/Storage/Edsl.cpp
 )
 
 set(SRC_SERVER

@@ -22,7 +22,7 @@
 #include <boost/filesystem/path.hpp>
 #include <MailUnit/OS.h>
 #include <MailUnit/Storage/StorageException.h>
-#include <MailUnit/Storage/Dsel.h>
+#include <MailUnit/Storage/Edsl.h>
 #include <MailUnit/Storage/Email.h>
 
 namespace MailUnit {

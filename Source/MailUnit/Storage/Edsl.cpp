@@ -19,9 +19,9 @@
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/phoenix_core.hpp>
 #include <boost/spirit/include/phoenix_operator.hpp>
-#include <MailUnit/Storage/Dsel.h>
+#include <MailUnit/Storage/Edsl.h>
 
-using namespace MailUnit::Storage::Dsel;
+using namespace MailUnit::Storage::Edsl;
 namespace qi = boost::spirit::qi;
 
 BOOST_FUSION_ADAPT_STRUCT(
@@ -334,7 +334,7 @@ std::ostream & operator << (std::ostream & _stream, const Expression & _expressi
     return _stream;
 }
 
-std::unique_ptr<Expression> MailUnit::Storage::Dsel::parse(const std::string & _input)
+std::unique_ptr<Expression> MailUnit::Storage::Edsl::parse(const std::string & _input)
 {
     Grammar grammar;
     Expression * expression = new Expression();

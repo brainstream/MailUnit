@@ -17,9 +17,9 @@
 
 #include <sstream>
 #include <boost/test/unit_test.hpp>
-#include <MailUnit/Storage/Dsel.h>
+#include <MailUnit/Storage/Edsl.h>
 
-using namespace MailUnit::Storage::Dsel;
+using namespace MailUnit::Storage::Edsl;
 
 namespace MailUnit {
 namespace Test {
