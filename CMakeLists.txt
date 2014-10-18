@@ -35,7 +35,7 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "4.9")
         message("g++ 4.9 or greater is required")
     else()
-        list(APPEND CMAKE_CXX_FLAGS "-std=c++14")
+        list(APPEND CMAKE_CXX_FLAGS "-std=c++14 -Wall")
     endif()
 #elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
 #elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
@@ -103,6 +103,7 @@ set(SRC_SERVER
     ${TESTABLE_SRC_SERVER}
     Source/MailUnit/Application.h
     Source/MailUnit/Application.cpp
+    Source/MailUnit/StringEx.h
     Source/MailUnit/OS.h
     Source/MailUnit/OS.cpp
     Source/MailUnit/Config.h

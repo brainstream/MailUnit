@@ -18,14 +18,16 @@
 #ifndef __MU_STORAGE_EMAIL_H__
 #define __MU_STORAGE_EMAIL_H__
 
-#include <map>
 #include <vector>
+#include <set>
 #include <string>
 #include <fstream>
 #include <boost/optional.hpp>
 #include <boost/noncopyable.hpp>
 #include <boost/filesystem.hpp>
 #include <LibMailUnit/Def.h>
+#include <MailUnit/StringEx.h>
+#include <MailUnit/Storage/StorageException.h>
 
 namespace MailUnit {
 namespace Storage {
@@ -85,7 +87,9 @@ private:
 class Email
 {
 public:
-    enum class AddressType
+    typedef std::set<std::string, StringLessICompare> AddressSet;
+
+    enum class AddressType : short
     {
         From = 0,
         To   = 1,
@@ -93,38 +97,41 @@ public:
         Bcc  = 3
     };
 
+    static const uint32_t new_object_id = static_cast<uint32_t>(-1);
+
 public:
+    Email(uint32_t _id, const boost::filesystem::path & _data_file_path, bool _parse_file);
+
     Email(const RawEmail & _raw, const boost::filesystem::path & _data_file_path);
 
     Email(const Email &) = default;
 
     Email & operator = (const Email &) = default;
 
+    uint32_t id() const
+    {
+        return m_id;
+    }
+
     boost::optional<AddressType> findAddress(const std::string & _address);
 
-    const std::vector<std::string> & fromAddresses() const
-    {
-        return m_from_addresses;
-    }
+    const AddressSet & addresses(AddressType _type) const;
 
-    const std::vector<std::string> & toAddresses() const
-    {
-        return m_to_addresses;
-    }
-
-    const std::vector<std::string> & ccAddresses() const
-    {
-        return m_cc_addresses;
-    }
-
-    const std::vector<std::string> & bccAddresses() const
-    {
-        return m_bcc_addresses;
-    }
+    bool addAddress(AddressType _type, const std::string & _address);
 
     const std::string & subject() const
     {
         return m_subject;
+    }
+
+    void setSubject(const std::string & _subject)
+    {
+        m_subject = _subject;
+    }
+
+    const boost::filesystem::path & dataFilePath() const
+    {
+        return m_data_file_path;
     }
 
 private:
@@ -132,10 +139,12 @@ private:
     void appendBcc(const RawEmail & _raw);
 
 private:
-    std::vector<std::string> m_from_addresses;
-    std::vector<std::string> m_to_addresses;
-    std::vector<std::string> m_cc_addresses;
-    std::vector<std::string> m_bcc_addresses;
+    uint32_t m_id;
+    boost::filesystem::path  m_data_file_path;
+    AddressSet m_from_addresses;
+    AddressSet m_to_addresses;
+    AddressSet m_cc_addresses;
+    AddressSet m_bcc_addresses;
     std::string m_subject;
 }; // class Email
 

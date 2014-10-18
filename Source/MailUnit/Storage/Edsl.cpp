@@ -19,6 +19,7 @@
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/phoenix_core.hpp>
 #include <boost/spirit/include/phoenix_operator.hpp>
+#include <boost/algorithm/string.hpp>
 #include <MailUnit/Storage/Edsl.h>
 
 using namespace MailUnit::Storage::Edsl;
@@ -247,7 +248,8 @@ std::ostream & operator << (std::ostream & _stream, const ConditionSequence & _c
 
 std::unique_ptr<ConditionSequence> MailUnit::Storage::Edsl::parse(const std::string & _input)
 {
-    if(_input.end() == std::find_if_not(_input.begin(), _input.end(), std::isblank))
+    std::string query = boost::algorithm::trim_copy(_input);
+    if(query.empty())
     {
         throw EdslException("Parse error: EDSL query is empty");
     }
@@ -256,7 +258,7 @@ std::unique_ptr<ConditionSequence> MailUnit::Storage::Edsl::parse(const std::str
     std::unique_ptr<ConditionSequence> result(condition_sequence);
     try
     {
-        if(qi::phrase_parse(_input.begin(), _input.end(), grammar, qi::ascii::space, *condition_sequence))
+        if(qi::phrase_parse(query.cbegin(), query.cend(), grammar, qi::ascii::space, *condition_sequence))
             return result;
     }
     catch(...)

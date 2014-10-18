@@ -19,9 +19,8 @@
 #include <sstream>
 #include <functional>
 #include <boost/noncopyable.hpp>
-#include <boost/algorithm/string.hpp>
-#include <MailUnit/Mqp/ServerRequestHandler.h>
 #include <MailUnit/Application.h>
+#include <MailUnit/Mqp/ServerRequestHandler.h>
 
 using namespace MailUnit::Mqp;
 using namespace MailUnit::Storage;
@@ -39,6 +38,7 @@ private:
     size_t findEndOfQuery(const char * _query_piece, size_t _length);
     void read();
     void processQuery();
+    void writeEmails(const std::vector<std::unique_ptr<Email>> & _emails);
     void write(const std::string & _text, std::function<void()> _callback);
 
 private:
@@ -104,21 +104,43 @@ void Session::processQuery()
 {
     try
     {
-        std::string query(std::move(m_query));
-        boost::algorithm::trim(query);
-        // TODO: Write response!
-        // sometype emails = m_repository_ptr->findEmails(query);
-        // writeEmails(emails);
+        std::vector<std::unique_ptr<Email>> emails;
+        m_repository_ptr->findEmails(std::move(m_query), emails);
+        writeEmails(emails);
     }
-    catch(const StorageException & error)
+    catch(const StorageException & error) // TODO: EdslException
     {
         std::shared_ptr<Session> self(shared_from_this());
         std::stringstream message;
-        message << "ERROR " << error.what() << "\r\n";
+        message << "ERROR: " << error.what() << "\r\n";
         write(message.str(), [self]() {
             self->read();
         });
     }
+}
+
+void Session::writeEmails(const std::vector<std::unique_ptr<Email>> & _emails)
+{
+    // TODO: BIG data!
+    std::stringstream data;
+    for(const std::unique_ptr<Email> & email : _emails)
+    {
+        data << "ID: " << email->id() << std::endl <<
+                "Subject: " << email->subject() << std::endl;
+        for(const std::string & address : email->addresses(Email::AddressType::From))
+            data << "\tFrom: " << address << std::endl;
+        for(const std::string & address : email->addresses(Email::AddressType::To))
+            data << "\tTo: " << address << std::endl;
+        for(const std::string & address : email->addresses(Email::AddressType::Cc))
+            data << "\tCC: " << address << std::endl;
+        for(const std::string & address : email->addresses(Email::AddressType::Bcc))
+            data << "\tBCC: " << address << std::endl;
+        data << std::endl;
+    }
+    std::shared_ptr<Session> self(shared_from_this());
+    write(data.str(), [self]() {
+        self->read();
+    });
 }
 
 void Session::write(const std::string & _text, std::function<void()> _callback)

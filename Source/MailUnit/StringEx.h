@@ -15,44 +15,22 @@
  *                                                                                             *
  ***********************************************************************************************/
 
-#ifndef __MU_STORAGE_REPOSITORY_H__
-#define __MU_STORAGE_REPOSITORY_H__
+#ifndef __MU_STRINGEX_H__
+#define __MU_STRINGEX_H__
 
-#include <memory>
-#include <vector>
-#include <boost/noncopyable.hpp>
-#include <boost/filesystem/path.hpp>
-#include <MailUnit/OS.h>
-#include <MailUnit/Storage/StorageException.h>
-#include <MailUnit/Storage/Email.h>
-
-struct sqlite3;
+#include <boost/algorithm/string.hpp>
 
 namespace MailUnit {
-namespace Storage {
 
-class Repository final : private boost::noncopyable
+struct StringLessICompare
 {
-public:
-    Repository(const boost::filesystem::path & _storage_direcotiry);
-    ~Repository();
-    std::unique_ptr<RawEmail> createRawEmail();
-    uint32_t storeEmail(const RawEmail & _raw_email);
-    void findEmails(const std::string & _edsl_query, std::vector<std::unique_ptr<Email> > & _result);
+    template<typename Char>
+    bool operator ()(const std::basic_string<Char> _left, const std::basic_string<Char> _right)
+    {
+        return boost::ilexicographical_compare(_left, _right);
+    }
+}; // struct StringLessICompare
 
-private:
-    void initStorageDirectory();
-    boost::filesystem::path makeNewFileName(const MailUnit::PathString & _base, bool _temp);
-    void prepareDatabase();
-    uint32_t insertMessage(const Email & _email, const std::string & _data_id);
-    void insertExchange(const Email & _email, uint32_t _message_id);
-
-private:
-    boost::filesystem::path m_storage_direcotiry;
-    sqlite3 * mp_sqlite;
-}; // class Repository
-
-} // namespace Storage
 } // namespace MailUnit
 
-#endif // __MU_STORAGE_REPOSITORY_H__
+#endif // __MU_STRINGEX_H__

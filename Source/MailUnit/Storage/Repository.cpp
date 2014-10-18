@@ -16,17 +16,18 @@
  ***********************************************************************************************/
 
 #include <sstream>
-#include <locale>
+#include <cstdint>
 #include <boost/algorithm/string.hpp>
+#include <boost/lexical_cast.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <boost/uuid/random_generator.hpp>
 #include <boost/uuid/uuid_io.hpp>
-#include <boost/noncopyable.hpp>
 #include <boost/scoped_ptr.hpp>
 #include <boost/locale/encoding.hpp>
 #include <SQLite/sqlite3.h>
 #include <MailUnit/Application.h>
 #include <MailUnit/Storage/Repository.h>
+#include <MailUnit/Storage/Edsl.h>
 
 using namespace MailUnit::Storage;
 namespace fs = boost::filesystem;
@@ -54,12 +55,12 @@ namespace {
     thread_local static class
     {
     public:
-        inline MailUnit::PathString generateUniqueFilename()
+        inline MailUnit::PathString genFilename()
         {
             return uuidToPathString(m_generator());
         }
 
-        inline boost::uuids::uuid generateUuid()
+        inline boost::uuids::uuid genUuid()
         {
             return m_generator();
         }
@@ -79,7 +80,7 @@ namespace {
 
     inline MailUnit::PathString generateUniqueFilename()
     {
-        return unique_id_generator.generateUniqueFilename();
+        return unique_id_generator.genFilename();
     }
 
     inline std::string getUtf8Filename(const fs::path & _path)
@@ -95,36 +96,43 @@ namespace {
     {
         return boost::replace_all_copy(_string, "'", "''");
     }
+
+    inline std::string formatSqliteError(const std::string & _message, int _error)
+    {
+        std::stringstream result;
+        result << _message << std::endl <<
+                  "SQLite error number: " << _error << std::endl <<
+                  "SQLite error message: " << sqlite3_errstr(_error);
+        return result.str();
+    }
+
+    inline Email * reverseFindEmail(std::vector<std::unique_ptr<Email>> & _emails, uint32_t _id)
+    {
+        auto it = std::find_if(_emails.rbegin(), _emails.rend(), [_id](const auto & email) {
+            return email->id() == _id;
+        });
+        return _emails.rend() == it ? nullptr : it->get();
+    }
 } // namespace
-
-class Repository::Database final : private boost::noncopyable
-{
-public:
-    explicit Database(const fs::path & _db_file_path);
-    ~Database();
-    uint32_t insertMessage(const Email & _email, const std::string & _data_id);
-    void insertExchange(const Email & _email, uint32_t _message_id);
-
-private:
-    inline std::string formatSqliteError(const std::string & _message, int _error);
-    void prepareDatabase();
-
-private:
-    sqlite3 * mp_sqlite;
-}; // class Repository::Database
 
 
 Repository::Repository(const fs::path & _storage_direcotiry) :
     m_storage_direcotiry(_storage_direcotiry.is_relative() ?
         fs::absolute(_storage_direcotiry, MailUnit::app().startDir()) : _storage_direcotiry)
 {
-    mp_database = new Database(makeNewFileName(db_filename, false));
     initStorageDirectory();
+    std::string db_utf8_filepath = getUtf8Filename(makeNewFileName(db_filename, false));
+    int result = sqlite3_open(db_utf8_filepath.c_str(), &mp_sqlite);
+    if(SQLITE_OK != result)
+    {
+        throw StorageException(formatSqliteError("Unable to connect to the SQLite database", result));
+    }
+    prepareDatabase();
 }
 
 Repository::~Repository()
 {
-    delete mp_database;
+    sqlite3_close(mp_sqlite);
 }
 
 void Repository::initStorageDirectory()
@@ -148,45 +156,7 @@ boost::filesystem::path Repository::makeNewFileName(const MailUnit::PathString &
     return m_storage_direcotiry / boost::filesystem::path(_temp ? _base + tmp_file_ext : _base);
 }
 
-std::unique_ptr<RawEmail> Repository::createRawEmail()
-{
-    return std::make_unique<RawEmail>(makeNewFileName(generateUniqueFilename(), true));
-}
-
-uint32_t Repository::storeEmail(const RawEmail & _raw_email)
-{
-    boost::uuids::uuid data_id = unique_id_generator.generateUuid();
-    fs::path data_filepath = makeNewFileName(unique_id_generator.uuidToPathString(data_id), false);
-    boost::scoped_ptr<Email> email(new Email(_raw_email, data_filepath));
-    uint32_t message_id = mp_database->insertMessage(*email, boost::uuids::to_string(data_id));
-    mp_database->insertExchange(*email, message_id);
-    return message_id;
-}
-
-Repository::Database::Database(const fs::path & _db_file_path)
-{
-    int result = sqlite3_open(getUtf8Filename(_db_file_path).c_str(), &mp_sqlite);
-    if(SQLITE_OK != result)
-    {
-        throw StorageException(formatSqliteError("Unable to connect to the SQLite database", result));
-    }
-    prepareDatabase();
-}
-
-Repository::Database::~Database()
-{
-    sqlite3_close(mp_sqlite);
-}
-
-std::string Repository::Database::formatSqliteError(const std::string & _message, int _error)
-{
-    std::stringstream result;
-    result << _message << std::endl <<
-              "SQLite error number: " << _error << std::endl <<
-              "SQLite error message: " << sqlite3_errstr(_error);
-}
-
-void Repository::Database::prepareDatabase()
+void Repository::prepareDatabase()
 {
     char * error = nullptr;
     int insert_result = sqlite3_exec(mp_sqlite, sql_init_db, nullptr, nullptr, &error);
@@ -199,7 +169,22 @@ void Repository::Database::prepareDatabase()
     }
 }
 
-uint32_t Repository::Database::insertMessage(const Email & _email, const std::string & _data_id)
+std::unique_ptr<RawEmail> Repository::createRawEmail()
+{
+    return std::make_unique<RawEmail>(makeNewFileName(generateUniqueFilename(), true));
+}
+
+uint32_t Repository::storeEmail(const RawEmail & _raw_email)
+{
+    boost::uuids::uuid data_id = unique_id_generator.genUuid();
+    fs::path data_filepath = makeNewFileName(unique_id_generator.uuidToPathString(data_id), false);
+    boost::scoped_ptr<Email> email(new Email(_raw_email, data_filepath));
+    uint32_t message_id = insertMessage(*email, boost::uuids::to_string(data_id));
+    insertExchange(*email, message_id);
+    return message_id;
+}
+
+uint32_t Repository::insertMessage(const Email & _email, const std::string & _data_id)
 {
     std::stringstream sql;
     sql << "INSERT INTO Message (Subject, DataId) VALUES ('" <<
@@ -225,22 +210,23 @@ uint32_t Repository::Database::insertMessage(const Email & _email, const std::st
     return message_id;
 }
 
-void Repository::Database::insertExchange(const Email & _email, uint32_t _message_id)
+void Repository::insertExchange(const Email & _email, uint32_t _message_id)
 {
-    std::vector<std::pair<Email::AddressType, const std::vector<std::string> *>> typed_addresses = {
-        { Email::AddressType::From, &_email.fromAddresses() },
-        { Email::AddressType::To,   &_email.toAddresses()   },
-        { Email::AddressType::Cc,   &_email.ccAddresses()   },
-        { Email::AddressType::Bcc,  &_email.bccAddresses()  }
+    Email::AddressType address_types[] = {
+        Email::AddressType::From,
+        Email::AddressType::To,
+        Email::AddressType::Cc,
+        Email::AddressType::Bcc
     };
     std::stringstream sql;
-    for(auto & typed_address : typed_addresses)
+    for(Email::AddressType address_type : address_types)
     {
-        for(auto & address : *typed_address.second)
+        const Email::AddressSet & address_set = _email.addresses(address_type);
+        for(const std::string & address : address_set)
         {
             sql << "INSERT INTO Exchange (Message, Mailbox, Reason) VALUES (" <<
                    _message_id << ", '" << prepareSqlValueString(address) << "', " <<
-                   static_cast<short>(typed_address.first) << ");\n";
+                   static_cast<short>(address_type) << ");\n";
         }
     }
     char * error = nullptr;
@@ -248,6 +234,47 @@ void Repository::Database::insertExchange(const Email & _email, uint32_t _messag
     if(SQLITE_OK != insert_result)
     {
         std::string er_string("Unable to store an exchange object:\n");
+        er_string += error;
+        sqlite3_free(error);
+        throw StorageException(formatSqliteError(er_string, insert_result));
+    }
+}
+
+void Repository::findEmails(const std::string & _edsl_query, std::vector<std::unique_ptr<Email>> & _result)
+{
+    std::string query = boost::algorithm::trim_copy(_edsl_query);
+    std::stringstream sql;
+    sql << "SELECT m.Id, m.DataId, m.Subject, e.Reason, e.Mailbox "
+           "FROM Message m "
+           "inner join Exchange e ON e.Message = m.Id";
+    if(!query.empty())
+    {
+        // TODO: append the WHERE part
+    }
+    struct CallbackArgs
+    {
+        Repository * repository;
+        std::vector<std::unique_ptr<Email>> * result;
+    } callback_args = { this, &_result };
+    char * error = nullptr;
+    int insert_result = sqlite3_exec(mp_sqlite, sql.str().c_str(),
+        [](void * pargs, int, char ** values, char **) {
+            CallbackArgs * args = static_cast<CallbackArgs *>(pargs);
+            uint32_t id = boost::lexical_cast<uint32_t>(values[0]);
+            Email * email = reverseFindEmail(*args->result, id);
+            if(nullptr == email)
+            {
+                std::string data_id = values[1];
+                email = new Email(id, args->repository->makeNewFileName(data_id, false), false);
+                args->result->push_back(std::unique_ptr<Email>(email));
+                email->setSubject(values[2]);
+            }
+            email->addAddress(static_cast<Email::AddressType>(boost::lexical_cast<short>(values[3])), values[4]);
+            return 0;
+        }, &callback_args, &error);
+    if(SQLITE_OK != insert_result)
+    {
+        std::string er_string("Unable to select e-mail objects:\n");
         er_string += error;
         sqlite3_free(error);
         throw StorageException(formatSqliteError(er_string, insert_result));
