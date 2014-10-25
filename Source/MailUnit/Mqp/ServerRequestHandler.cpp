@@ -144,8 +144,18 @@ void Session::writeEmails(std::shared_ptr<std::vector<std::unique_ptr<Email>>> _
                 // TODO: error
             }
             email_operation.addStep(std::make_unique<AsyncLambdaWriter<TcpSocket>>(
-                [&email_operation](std::ostream & _stream) {
-                    _stream << "HEADER" << MQP_ENDLINE << MQP_ENDLINE;
+                [&email_operation, &email](std::ostream & stream) {
+                    stream << "ID: " << email->id() << MQP_ENDLINE <<
+                            "SUBJECT: " << email->subject() << MQP_ENDLINE;
+                    for(const std::string & address : email->addresses(Email::AddressType::From))
+                        stream << "FROM: " << address << MQP_ENDLINE;
+                    for(const std::string & address : email->addresses(Email::AddressType::To))
+                        stream << "TO: " << address << MQP_ENDLINE;
+                    for(const std::string & address : email->addresses(Email::AddressType::Cc))
+                        stream << "CC: " << address << MQP_ENDLINE;
+                    for(const std::string & address : email->addresses(Email::AddressType::Bcc))
+                        stream << "BCC: " << address << MQP_ENDLINE;
+                    stream << MQP_ENDLINE;
                 }
             ));
             email_operation.addStep(std::make_unique<AsyncFileWriter<TcpSocket>>(file));
@@ -156,37 +166,6 @@ void Session::writeEmails(std::shared_ptr<std::vector<std::unique_ptr<Email>>> _
         // TODO: continue
         return true;
     });
-
-//    if(_begin == _end)
-//    {
-//        return;
-//    }
-
-//    std::shared_ptr<Session> self(shared_from_this());
-//    const std::unique_ptr<Email> & email = *_begin;
-//    std::shared_ptr<std::ifstream> file(new std::ifstream(email->dataFilePath().string()));
-//    if(!file->is_open())
-//    {
-//        // TODO: error
-//    }
-//    std::stringstream header;
-//    header << "ID: " << email->id() << MQP_ENDLINE <<
-//            "SUBJECT: " << email->subject() << MQP_ENDLINE;
-//    for(const std::string & address : email->addresses(Email::AddressType::From))
-//        header << "FROM: " << address << MQP_ENDLINE;
-//    for(const std::string & address : email->addresses(Email::AddressType::To))
-//        header << "TO: " << address << MQP_ENDLINE;
-//    for(const std::string & address : email->addresses(Email::AddressType::Cc))
-//        header << "CC: " << address << MQP_ENDLINE;
-//    for(const std::string & address : email->addresses(Email::AddressType::Bcc))
-//        header << "BCC: " << address << MQP_ENDLINE;
-//    header << MQP_ENDLINE;
-//    write(header.str(), [self, file, _begin, _end]() {
-//        writeFileAsync(self->m_socket, file, [self, _begin, _end](const boost::system::error_code &) {
-//            self->writeEmails(_begin + 1, _end);
-//            return true; // TODO: error
-//        });
-//    });
 }
 
 void Session::write(const std::string & _data, std::function<void()> _callback)

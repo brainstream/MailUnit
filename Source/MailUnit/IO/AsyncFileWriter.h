@@ -37,7 +37,7 @@ void writeFileAsync(Socket & _socket, std::shared_ptr<std::ifstream> _stream, As
         return;
     }
     boost::asio::async_write(_socket, boost::asio::buffer(chank, symbol_count),
-        [&_socket, _stream, &_callback](const boost::system::error_code & error_code, std::size_t) {
+        [&_socket, _stream, _callback](const boost::system::error_code & error_code, std::size_t) {
             if(error_code && !callAsioCallback(_callback, error_code))
                 return;
             writeFileAsync(_socket, _stream, _callback);

@@ -26,7 +26,7 @@ namespace IO {
 
 typedef std::function<bool(const boost::system::error_code &)> AsioCallback;
 
-inline bool callAsioCallback(AsioCallback & _callback,
+inline bool callAsioCallback(AsioCallback _callback,
     const boost::system::error_code & _error_code = boost::system::error_code())
 {
     if(_callback == nullptr)

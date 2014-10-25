@@ -84,7 +84,7 @@ void AsyncSequenceItemOperation<Item, Socket>::execute(Socket & _socket, AsioCal
     auto self = this->shared_from_this();
     AsyncOperation<Socket> * operation = m_current_operation->get();
     ++m_current_operation;
-    operation->run(_socket, [self, &_socket, &_callbak](const boost::system::error_code & error_code) {
+    operation->run(_socket, [self, &_socket, _callbak](const boost::system::error_code & error_code) {
         if(error_code && !callAsioCallback(_callbak, error_code))
             return false;
         self->execute(_socket, _callbak);
@@ -145,7 +145,7 @@ void AsyncSequenceOperation<Sequence, Socket>::execute(Socket & _socket, AsioCal
     m_item_operation(*operation);
     auto self = this->shared_from_this();
     operation->run(_socket,
-        [self, &_socket, &_complete_callback](const boost::system::error_code & error_code) {
+        [self, &_socket, _complete_callback](const boost::system::error_code & error_code) {
             if(error_code && !callAsioCallback(_complete_callback, error_code))
                 return false;
             self->execute(_socket, _complete_callback);

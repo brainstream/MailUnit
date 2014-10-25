@@ -50,7 +50,7 @@ void AsyncLambdaWriter<Socket>::run(Socket & _socket, AsioCallback _callback)
     std::ostream stream(&streambuf);
     m_lambda(stream);
     boost::asio::async_write(_socket, streambuf,
-        [&_callback](const boost::system::error_code & error_code, std::size_t) {
+        [_callback](const boost::system::error_code & error_code, std::size_t) {
             callAsioCallback(_callback, error_code);
         }
     );
