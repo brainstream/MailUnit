@@ -20,17 +20,26 @@
 #include <functional>
 #include <boost/noncopyable.hpp>
 #include <MailUnit/Application.h>
+#include <MailUnit/IO/AsyncLambdaWriter.h>
+#include <MailUnit/IO/AsyncFileWriter.h>
+#include <MailUnit/IO/AsyncSequenceOperation.h>
 #include <MailUnit/Mqp/ServerRequestHandler.h>
+
+#define MQP_ENDLINE "\r\n"
 
 using namespace MailUnit::Mqp;
 using namespace MailUnit::Storage;
+using namespace MailUnit::Server;
+using namespace MailUnit::IO;
+
+typedef typename boost::asio::ip::tcp::socket TcpSocket;
 
 namespace {
 
 class Session final : public std::enable_shared_from_this<Session>, private boost::noncopyable
 {
 public:
-    inline explicit Session(boost::asio::ip::tcp::socket _socket, std::shared_ptr<Repository> _repository);
+    inline explicit Session(TcpSocket _socket, std::shared_ptr<Repository> _repository);
     ~Session();
     inline void start();
 
@@ -38,11 +47,11 @@ private:
     size_t findEndOfQuery(const char * _query_piece, size_t _length);
     void read();
     void processQuery();
-    void writeEmails(const std::vector<std::unique_ptr<Email>> & _emails);
-    void write(const std::string & _text, std::function<void()> _callback);
+    void writeEmails(std::shared_ptr<std::vector<std::unique_ptr<Email> > > _emails);
+    void write(const std::string & _data, std::function<void()> _callback);
 
 private:
-    boost::asio::ip::tcp::socket m_socket;
+    TcpSocket m_socket;
     std::shared_ptr<Repository> m_repository_ptr;
     static const size_t s_buffer_size = 256;
     char * mp_buffer;
@@ -52,7 +61,7 @@ private:
 
 } // namespace
 
-void ServerRequestHandler::handleConnection(boost::asio::ip::tcp::socket _socket)
+void ServerRequestHandler::handleConnection(TcpSocket _socket)
 {
     MailUnit::app().log().info("New connection accepted by the storage server");
     std::make_shared<Session>(std::move(_socket), m_repository_ptr)->start();
@@ -65,7 +74,7 @@ bool ServerRequestHandler::handleError(const boost::system::error_code & _err_co
     return false;
 }
 
-Session::Session(boost::asio::ip::tcp::socket _socket, std::shared_ptr<Repository> _repository) :
+Session::Session(TcpSocket _socket, std::shared_ptr<Repository> _repository) :
     m_socket(std::move(_socket)),
     m_repository_ptr(_repository),
     mp_buffer(new char[s_buffer_size]),
@@ -104,9 +113,9 @@ void Session::processQuery()
 {
     try
     {
-        std::vector<std::unique_ptr<Email>> emails;
-        m_repository_ptr->findEmails(std::move(m_query), emails);
-        writeEmails(emails);
+        std::vector<std::unique_ptr<Email>> * emails = new std::vector<std::unique_ptr<Email>>();
+        m_repository_ptr->findEmails(std::move(m_query), *emails);
+        writeEmails(std::shared_ptr<std::vector<std::unique_ptr<Email>>>(emails));
     }
     catch(const StorageException & error) // TODO: EdslException
     {
@@ -119,33 +128,70 @@ void Session::processQuery()
     }
 }
 
-void Session::writeEmails(const std::vector<std::unique_ptr<Email>> & _emails)
+void Session::writeEmails(std::shared_ptr<std::vector<std::unique_ptr<Email>>> _emails)
 {
-    // TODO: BIG data!
-    std::stringstream data;
-    for(const std::unique_ptr<Email> & email : _emails)
-    {
-        data << "ID: " << email->id() << std::endl <<
-                "Subject: " << email->subject() << std::endl;
-        for(const std::string & address : email->addresses(Email::AddressType::From))
-            data << "\tFrom: " << address << std::endl;
-        for(const std::string & address : email->addresses(Email::AddressType::To))
-            data << "\tTo: " << address << std::endl;
-        for(const std::string & address : email->addresses(Email::AddressType::Cc))
-            data << "\tCC: " << address << std::endl;
-        for(const std::string & address : email->addresses(Email::AddressType::Bcc))
-            data << "\tBCC: " << address << std::endl;
-        data << std::endl;
-    }
-    std::shared_ptr<Session> self(shared_from_this());
-    write(data.str(), [self]() {
-        self->read();
+    using EmailSequenceOperation = AsyncSequenceOperation<
+        std::vector<std::unique_ptr<Email>>, TcpSocket>;
+    using EmailOperation = AsyncSequenceItemOperation<std::unique_ptr<Email>, TcpSocket>;
+
+    auto self = this->shared_from_this();
+    std::shared_ptr<EmailSequenceOperation> emails_operation = EmailSequenceOperation::create(_emails,
+        [self](EmailOperation & email_operation) {
+            const std::unique_ptr<Email> & email = email_operation.item();
+            std::shared_ptr<std::ifstream> file(new std::ifstream(email->dataFilePath().string()));
+            if(!file->is_open())
+            {
+                // TODO: error
+            }
+            email_operation.addStep(std::make_unique<AsyncLambdaWriter<TcpSocket>>(
+                [&email_operation](std::ostream & _stream) {
+                    _stream << "HEADER" << MQP_ENDLINE << MQP_ENDLINE;
+                }
+            ));
+            email_operation.addStep(std::make_unique<AsyncFileWriter<TcpSocket>>(file));
+            // TODO: self->finish()
+        }
+    );
+    emails_operation->run(m_socket, [](const boost::system::error_code &) {
+        // TODO: continue
+        return true;
     });
+
+//    if(_begin == _end)
+//    {
+//        return;
+//    }
+
+//    std::shared_ptr<Session> self(shared_from_this());
+//    const std::unique_ptr<Email> & email = *_begin;
+//    std::shared_ptr<std::ifstream> file(new std::ifstream(email->dataFilePath().string()));
+//    if(!file->is_open())
+//    {
+//        // TODO: error
+//    }
+//    std::stringstream header;
+//    header << "ID: " << email->id() << MQP_ENDLINE <<
+//            "SUBJECT: " << email->subject() << MQP_ENDLINE;
+//    for(const std::string & address : email->addresses(Email::AddressType::From))
+//        header << "FROM: " << address << MQP_ENDLINE;
+//    for(const std::string & address : email->addresses(Email::AddressType::To))
+//        header << "TO: " << address << MQP_ENDLINE;
+//    for(const std::string & address : email->addresses(Email::AddressType::Cc))
+//        header << "CC: " << address << MQP_ENDLINE;
+//    for(const std::string & address : email->addresses(Email::AddressType::Bcc))
+//        header << "BCC: " << address << MQP_ENDLINE;
+//    header << MQP_ENDLINE;
+//    write(header.str(), [self, file, _begin, _end]() {
+//        writeFileAsync(self->m_socket, file, [self, _begin, _end](const boost::system::error_code &) {
+//            self->writeEmails(_begin + 1, _end);
+//            return true; // TODO: error
+//        });
+//    });
 }
 
-void Session::write(const std::string & _text, std::function<void()> _callback)
+void Session::write(const std::string & _data, std::function<void()> _callback)
 {
-    m_socket.async_send(boost::asio::buffer(_text),
+    boost::asio::async_write(m_socket, boost::asio::buffer(_data),
         [_callback](const boost::system::error_code & ec, std::size_t length)
         {
             // TODO: error handling

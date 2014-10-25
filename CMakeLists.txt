@@ -111,6 +111,11 @@ set(SRC_SERVER
     Source/MailUnit/Logger.h
     Source/MailUnit/Logger.cpp
     Source/MailUnit/Exception.h
+    Source/MailUnit/IO/IODef.h
+    Source/MailUnit/IO/AsyncSequenceOperation.h
+    Source/MailUnit/IO/AsyncOperation.h
+    Source/MailUnit/IO/AsyncFileWriter.h
+    Source/MailUnit/IO/AsyncLambdaWriter.h
     Source/MailUnit/Server/RequestHandler.h
     Source/MailUnit/Server/TcpServer.h
     Source/MailUnit/Server/TcpServer.cpp
