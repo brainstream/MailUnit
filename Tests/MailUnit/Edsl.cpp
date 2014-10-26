@@ -108,6 +108,11 @@ BOOST_AUTO_TEST_CASE(parseTest)
             false,
             "(Age >= 12 and Surname = 'Other') or (Number < 123 and Name = ValueWithoutQuotes)"
         },
+        {
+            true,
+            "Subject = 'test' and (From = 'from@test' or To = 'to@test')",
+            "(Subject = 'test' AND (From = 'from@test' OR To = 'to@test'))"
+        }
     };
     for(auto test : tests)
     {

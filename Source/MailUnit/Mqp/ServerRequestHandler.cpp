@@ -101,11 +101,16 @@ void Session::read()
             if(ec) return; // TODO: log
             self->mp_buffer[length] = '\0';
             size_t end_pos = self->findEndOfQuery(self->mp_buffer, length);
-            self->m_query.append(self->mp_buffer, &self->mp_buffer[length - 1]);
-            if(end_pos != length)
-                self->processQuery();
-            else
+            if(end_pos == length)
+            {
+                self->m_query.append(self->mp_buffer, &self->mp_buffer[length - 1]);
                 self->read();
+            }
+            else
+            {
+                self->m_query.append(self->mp_buffer, &self->mp_buffer[end_pos]);
+                self->processQuery();
+            }
         });
 }
 
@@ -146,7 +151,8 @@ void Session::writeEmails(std::shared_ptr<std::vector<std::unique_ptr<Email>>> _
             email_operation.addStep(std::make_unique<AsyncLambdaWriter<TcpSocket>>(
                 [&email_operation, &email](std::ostream & stream) {
                     stream << "ID: " << email->id() << MQP_ENDLINE <<
-                            "SUBJECT: " << email->subject() << MQP_ENDLINE;
+                        "SIZE: " << boost::filesystem::file_size(email->dataFilePath()) << MQP_ENDLINE <<
+                        "SUBJECT: " << email->subject() << MQP_ENDLINE;
                     for(const std::string & address : email->addresses(Email::AddressType::From))
                         stream << "FROM: " << address << MQP_ENDLINE;
                     for(const std::string & address : email->addresses(Email::AddressType::To))
@@ -159,11 +165,10 @@ void Session::writeEmails(std::shared_ptr<std::vector<std::unique_ptr<Email>>> _
                 }
             ));
             email_operation.addStep(std::make_unique<AsyncFileWriter<TcpSocket>>(file));
-            // TODO: self->finish()
         }
     );
     emails_operation->run(m_socket, [](const boost::system::error_code &) {
-        // TODO: continue
+        // TODO: error
         return true;
     });
 }

@@ -98,7 +98,7 @@ Grammar::Grammar() :
     Grammar::base_type(m_condition_sequence)
 {
     m_identifier                   %= qi::lexeme[qi::ascii::alpha > *qi::ascii::alnum];
-    m_condition_value              %= qi::int_ | ("'" > qi::lexeme[*(qi::ascii::alnum | qi::ascii::blank)] > "'");
+    m_condition_value              %= qi::int_ | ("'" > qi::lexeme[*(~qi::ascii::char_('\''))] > "'");
     m_binary_condition             %= m_identifier > m_binary_operator > m_condition_value;
     m_bracketed_condition_sequence %= "(" > m_condition_sequence > ")";
     m_condition_sequence_operand   %= m_binary_condition | m_bracketed_condition_sequence;

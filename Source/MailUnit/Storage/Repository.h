@@ -20,6 +20,7 @@
 
 #include <memory>
 #include <vector>
+#include <ostream>
 #include <boost/noncopyable.hpp>
 #include <boost/filesystem/path.hpp>
 #include <MailUnit/OS.h>
@@ -46,6 +47,7 @@ private:
     void prepareDatabase();
     uint32_t insertMessage(const Email & _email, const std::string & _data_id);
     void insertExchange(const Email & _email, uint32_t _message_id);
+    void mapEdslToSqlWhere(const std::string & _edsl, std::ostream & _out);
 
 private:
     boost::filesystem::path m_storage_direcotiry;

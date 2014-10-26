@@ -33,86 +33,206 @@ using namespace MailUnit::Storage;
 namespace fs = boost::filesystem;
 
 namespace {
-    static const MailUnit::PathString tmp_file_ext = MU_PATHSTR(".tmp");
-    static const MailUnit::PathString db_filename = MU_PATHSTR("index.db");
-    static const char * const sql_init_db =
-        "CREATE TABLE IF NOT EXISTS Message(\n"
-        "    Id      INTEGER PRIMARY KEY AUTOINCREMENT,\n"
-        "    DataId  VARCHAR(36),\n"
-        "    Subject TEXT\n"
-        ");\n"
-        "CREATE TABLE IF NOT EXISTS Exchange(\n"
-        "    Id      INTEGER PRIMARY KEY AUTOINCREMENT,\n"
-        "    Mailbox VARCHAR(250),\n"
-        "    Message INTEGER,\n"
-        "    Reason  INTEGER,\n"
-        "    FOREIGN KEY(Message) REFERENCES Message(Id)\n"
-        ");\n"
-        "CREATE INDEX IF NOT EXISTS iMessageSubject  ON Message(Subject);\n"
-        "CREATE INDEX IF NOT EXISTS iExchangeMailbox ON Exchange(Mailbox);\n"
-        "CREATE INDEX IF NOT EXISTS iExchangeMessage ON Exchange(Message);";
 
-    thread_local static class
+static const MailUnit::PathString tmp_file_ext = MU_PATHSTR(".tmp");
+static const MailUnit::PathString db_filename = MU_PATHSTR("index.db");
+
+namespace TableMessage {
+static const std::string table_name     = "Message";
+static const std::string column_id      = "Id";
+static const std::string column_data_id = "DataId";
+static const std::string column_subject = "Subject";
+} // namespace TableMessage
+
+namespace TableExchange {
+static const std::string table_name     = "Exchange";
+static const std::string column_id      = "Id";
+static const std::string column_mailbox = "Mailbox";
+static const std::string column_message = "Message";
+static const std::string column_reason  = "Reason";
+} // namespace TableExchange
+
+inline std::string prepareSqlValueString(const std::string & _string)
+{
+    return boost::replace_all_copy(_string, "'", "''");
+}
+
+inline std::string formatSqliteError(const std::string & _message, int _error)
+{
+    std::stringstream result;
+    result << _message << std::endl <<
+        "SQLite error number: " << _error << std::endl <<
+        "SQLite error message: " << sqlite3_errstr(_error);
+    return result.str();
+}
+
+class EdsToSqlMapper : public boost::static_visitor<>
+{
+public:
+    explicit EdsToSqlMapper(std::ostream & _sql) :
+        mr_sql(_sql)
     {
-    public:
-        inline MailUnit::PathString genFilename()
-        {
-            return uuidToPathString(m_generator());
-        }
+    }
 
-        inline boost::uuids::uuid genUuid()
-        {
-            return m_generator();
-        }
+    void mapToSqlWhereClause(const Edsl::ConditionSequence & _sequence);
 
-        inline MailUnit::PathString uuidToPathString(const boost::uuids::uuid & _uuid) const
+    void operator ()(const Edsl::BinaryCondition & _bin_condition);
+
+    void operator ()(const Edsl::ConditionSequence & _sequence)
+    {
+        mr_sql << " (";
+        mapToSqlWhereClause(_sequence);
+        mr_sql << ") ";
+    }
+
+private:
+    void addMailboxCause(Edsl::ConditionBinaryOperator _operator,
+        Email::AddressType _address_type, const std::string & _address);
+
+private:
+    std::ostream & mr_sql;
+}; // class EdsToSqlMapper
+
+void EdsToSqlMapper::mapToSqlWhereClause(const Edsl::ConditionSequence & _sequence)
+{
+    boost::apply_visitor(*this, _sequence.operand);
+    for(const Edsl::RightConditionSequence & right : _sequence.right)
+    {
+        switch(right.operator_)
         {
+        case Edsl::ConditionJoinOperator::And:
+            mr_sql << " AND ";
+            break;
+        case Edsl::ConditionJoinOperator::Or:
+            mr_sql << " OR ";
+            break;
+        }
+        boost::apply_visitor(*this, right.operand);
+    }
+}
+
+void EdsToSqlMapper::operator ()(const Edsl::BinaryCondition & _bin_condition)
+{
+    if(boost::algorithm::iequals("FROM", _bin_condition.identifier))
+    {
+        addMailboxCause(_bin_condition.operator_, Email::AddressType::From,
+            boost::get<std::string>(_bin_condition.value));
+    }
+    else if(boost::algorithm::iequals("TO", _bin_condition.identifier))
+    {
+        addMailboxCause(_bin_condition.operator_, Email::AddressType::To,
+            boost::get<std::string>(_bin_condition.value));
+    }
+    else if(boost::algorithm::iequals("CC", _bin_condition.identifier))
+    {
+        addMailboxCause(_bin_condition.operator_, Email::AddressType::Cc,
+            boost::get<std::string>(_bin_condition.value));
+    }
+    else if(boost::algorithm::iequals("BCC", _bin_condition.identifier))
+    {
+        addMailboxCause(_bin_condition.operator_, Email::AddressType::Bcc,
+            boost::get<std::string>(_bin_condition.value));
+    }
+    else if(boost::algorithm::iequals("SUBJECT", _bin_condition.identifier))
+    {
+        mr_sql << TableMessage::table_name << '.' << TableMessage::column_subject;
+        if(_bin_condition.operator_ == Edsl::ConditionBinaryOperator::Equal)
+        {
+            mr_sql << " = '";
+        }
+        else if(_bin_condition.operator_ == Edsl::ConditionBinaryOperator::NotEqual)
+        {
+            mr_sql << " <> '";
+        }
+        else
+        {
+            std::stringstream message;
+            message << '"' << _bin_condition.operator_ << "\" is not supported operator for Subject causes";
+            throw StorageException(message.str());
+        }
+        mr_sql << boost::get<std::string>(_bin_condition.value) << "' ";
+    }
+}
+
+void EdsToSqlMapper::addMailboxCause(Edsl::ConditionBinaryOperator _operator,
+    Email::AddressType _address_type, const std::string & _address)
+{
+    if(_operator == Edsl::ConditionBinaryOperator::Equal)
+    {
+        mr_sql << " (";
+    }
+    else if(_operator == Edsl::ConditionBinaryOperator::NotEqual)
+    {
+        mr_sql << " ( NOT (";
+    }
+    else
+    {
+        std::stringstream message;
+        message << '"' << _operator << "\" is not supported operator for Mailbox causes";
+        throw StorageException(message.str());
+    }
+    mr_sql <<
+        TableExchange::table_name << '.' << TableExchange::column_reason << " = " <<
+        static_cast<uint16_t>(_address_type) << " AND " <<
+        TableExchange::table_name << '.' << TableExchange::column_mailbox << " = '" << _address;
+    if(_operator == Edsl::ConditionBinaryOperator::Equal)
+    {
+        mr_sql << "') ";
+    }
+    else if(_operator == Edsl::ConditionBinaryOperator::NotEqual)
+    {
+        mr_sql << "')) ";
+    }
+}
+
+thread_local static class
+{
+public:
+    inline MailUnit::PathString genFilename()
+    {
+        return uuidToPathString(m_generator());
+    }
+
+    inline boost::uuids::uuid genUuid()
+    {
+        return m_generator();
+    }
+
+    inline MailUnit::PathString uuidToPathString(const boost::uuids::uuid & _uuid) const
+    {
 #ifdef MU_PATHISWIDECHAR
-            return boost::uuids::to_wstring(_uuid);
+        return boost::uuids::to_wstring(_uuid);
 #else
-            return boost::uuids::to_string(_uuid);
+        return boost::uuids::to_string(_uuid);
 #endif
-        }
-
-    private:
-        boost::uuids::random_generator m_generator;
-    } unique_id_generator;
-
-    inline MailUnit::PathString generateUniqueFilename()
-    {
-        return unique_id_generator.genFilename();
     }
 
-    inline std::string getUtf8Filename(const fs::path & _path)
-    {
+private:
+    boost::uuids::random_generator m_generator;
+} unique_id_generator;
+
+inline MailUnit::PathString generateUniqueFilename()
+{
+    return unique_id_generator.genFilename();
+}
+
+inline std::string getUtf8Filename(const fs::path & _path)
+{
 #ifdef MU_PATHISWIDECHAR
-        return boost::locale::conv::utf_to_utf<char>(_path.string());
+    return boost::locale::conv::utf_to_utf<char>(_path.string());
 #else
-        return _path.string();
+    return _path.string();
 #endif
-    }
+}
 
-    inline std::string prepareSqlValueString(const std::string & _string)
-    {
-        return boost::replace_all_copy(_string, "'", "''");
-    }
+inline Email * reverseFindEmail(std::vector<std::unique_ptr<Email>> & _emails, uint32_t _id)
+{
+    auto it = std::find_if(_emails.rbegin(), _emails.rend(), [_id](const auto & email) {
+        return email->id() == _id;
+    });
+    return _emails.rend() == it ? nullptr : it->get();
+}
 
-    inline std::string formatSqliteError(const std::string & _message, int _error)
-    {
-        std::stringstream result;
-        result << _message << std::endl <<
-                  "SQLite error number: " << _error << std::endl <<
-                  "SQLite error message: " << sqlite3_errstr(_error);
-        return result.str();
-    }
-
-    inline Email * reverseFindEmail(std::vector<std::unique_ptr<Email>> & _emails, uint32_t _id)
-    {
-        auto it = std::find_if(_emails.rbegin(), _emails.rend(), [_id](const auto & email) {
-            return email->id() == _id;
-        });
-        return _emails.rend() == it ? nullptr : it->get();
-    }
 } // namespace
 
 
@@ -158,8 +278,29 @@ boost::filesystem::path Repository::makeNewFileName(const MailUnit::PathString &
 
 void Repository::prepareDatabase()
 {
+    std::stringstream sql;
+    sql <<
+        "CREATE TABLE IF NOT EXISTS " << TableMessage::table_name << "(\n" <<
+        TableMessage::column_id <<  " INTEGER PRIMARY KEY AUTOINCREMENT,\n" <<
+        TableMessage::column_data_id << " VARCHAR(36),\n" <<
+        TableMessage::column_subject << " TEXT\n);\n" <<
+
+        "CREATE TABLE IF NOT EXISTS " << TableExchange::table_name << "(\n" <<
+        TableExchange::column_id << " INTEGER PRIMARY KEY AUTOINCREMENT,\n" <<
+        TableExchange::column_mailbox <<  " VARCHAR(250),\n" <<
+        TableExchange::column_message << " INTEGER,\n" <<
+        TableExchange::column_reason << " INTEGER,\n" <<
+        "FOREIGN KEY(" << TableExchange::column_message << ") REFERENCES " <<
+        TableMessage::table_name << "(" << TableMessage::column_id << ")\n);\n" <<
+
+        "CREATE INDEX IF NOT EXISTS iMessageSubject ON " << TableMessage::table_name <<
+        "(" << TableMessage::column_subject << ");\n" <<
+        "CREATE INDEX IF NOT EXISTS iExchangeMailbox ON " << TableExchange::table_name <<
+        "(" << TableExchange::column_mailbox << ");\n" <<
+        "CREATE INDEX IF NOT EXISTS iExchangeMessage ON " << TableExchange::table_name <<
+        "(" << TableExchange::column_message << ");";
     char * error = nullptr;
-    int insert_result = sqlite3_exec(mp_sqlite, sql_init_db, nullptr, nullptr, &error);
+    int insert_result = sqlite3_exec(mp_sqlite, sql.str().c_str(), nullptr, nullptr, &error);
     if(SQLITE_OK != insert_result)
     {
         std::string er_string("Unable to initialize SQLite database:\n");
@@ -187,9 +328,10 @@ uint32_t Repository::storeEmail(const RawEmail & _raw_email)
 uint32_t Repository::insertMessage(const Email & _email, const std::string & _data_id)
 {
     std::stringstream sql;
-    sql << "INSERT INTO Message (Subject, DataId) VALUES ('" <<
-                          prepareSqlValueString(_email.subject()) << "','" << _data_id <<
-                          "');\nSELECT last_insert_rowid();";
+    sql << "INSERT INTO " << TableMessage::table_name << " (" <<
+        TableMessage::column_subject << ", " << TableMessage::column_data_id << ") VALUES ('" <<
+        prepareSqlValueString(_email.subject()) << "','" << _data_id <<
+        "');\nSELECT last_insert_rowid();";
     uint32_t message_id;
     char * error = nullptr;
     int insert_result = sqlite3_exec(mp_sqlite, sql.str().c_str(),
@@ -224,9 +366,12 @@ void Repository::insertExchange(const Email & _email, uint32_t _message_id)
         const Email::AddressSet & address_set = _email.addresses(address_type);
         for(const std::string & address : address_set)
         {
-            sql << "INSERT INTO Exchange (Message, Mailbox, Reason) VALUES (" <<
-                   _message_id << ", '" << prepareSqlValueString(address) << "', " <<
-                   static_cast<short>(address_type) << ");\n";
+            sql << "INSERT INTO " << TableExchange::table_name << "  (" <<
+                TableExchange::column_message << ", " <<
+                TableExchange::column_mailbox << ", " <<
+                TableExchange::column_reason << ") VALUES (" <<
+                _message_id << ", '" << prepareSqlValueString(address) << "', " <<
+                static_cast<short>(address_type) << ");\n";
         }
     }
     char * error = nullptr;
@@ -242,15 +387,18 @@ void Repository::insertExchange(const Email & _email, uint32_t _message_id)
 
 void Repository::findEmails(const std::string & _edsl_query, std::vector<std::unique_ptr<Email>> & _result)
 {
-    std::string query = boost::algorithm::trim_copy(_edsl_query);
     std::stringstream sql;
-    sql << "SELECT m.Id, m.DataId, m.Subject, e.Reason, e.Mailbox "
-           "FROM Message m "
-           "inner join Exchange e ON e.Message = m.Id";
-    if(!query.empty())
-    {
-        // TODO: append the WHERE part
-    }
+    sql << "SELECT " <<
+           TableMessage::table_name  << '.' << TableMessage::column_id       << ',' <<
+           TableMessage::table_name  << '.' << TableMessage::column_data_id  << ',' <<
+           TableMessage::table_name  << '.' << TableMessage::column_subject  << ',' <<
+           TableExchange::table_name << '.' << TableExchange::column_reason  << ',' <<
+           TableExchange::table_name << '.' << TableExchange::column_mailbox <<
+           " FROM " << TableMessage::table_name <<
+           " INNER JOIN " <<TableExchange::table_name << " ON " <<
+           TableExchange::table_name << '.' << TableExchange::column_message << '=' <<
+           TableMessage::table_name << '.' << TableMessage::column_id << std::endl;
+    mapEdslToSqlWhere(_edsl_query, sql);
     struct CallbackArgs
     {
         Repository * repository;
@@ -279,4 +427,17 @@ void Repository::findEmails(const std::string & _edsl_query, std::vector<std::un
         sqlite3_free(error);
         throw StorageException(formatSqliteError(er_string, insert_result));
     }
+}
+
+void Repository::mapEdslToSqlWhere(const std::string & _edsl, std::ostream & _out)
+{
+    std::string query = boost::algorithm::trim_copy(_edsl);
+    if(query.empty())
+    {
+        return;
+    }
+    std::unique_ptr<Edsl::ConditionSequence> conditions = Edsl::parse(query);
+    _out << " WHERE ";
+    EdsToSqlMapper mapper(_out);
+    mapper.mapToSqlWhereClause(*conditions);
 }
