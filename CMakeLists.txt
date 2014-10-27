@@ -18,11 +18,12 @@
 cmake_minimum_required(VERSION 2.8)
 
 project(MailUnit)
-set(BINARY_NAME      mailunit)
-set(TARGET_SERVER    mailunit-server)
-set(TARGET_LIB       mailunit-lib)
-set(TARGET_TESTS     mailunit-tests)
-set(TARGET_SQLITE    sqlite)
+set(BINARY_NAME       mailunit)
+set(TARGET_SERVER_LIB mailunit-server-lib)
+set(TARGET_SERVER     mailunit-server)
+set(TARGET_LIB        mailunit-lib)
+set(TARGET_TESTS      mailunit-tests)
+set(TARGET_SQLITE     sqlite)
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     message(STATUS "Application will be built in the Debug configuration")
@@ -43,18 +44,21 @@ else()
     message(FATAL_ERROR "Unsupported compiler")
 endif()
 
+
 find_package(Threads REQUIRED)
 
-#### Begin Boost ####
-if(ALLOW_TESTS)
+####
+# Begin the Boost libraries initialization
+####
+if(ENABLE_TESTS)
     set(BOOST_TEST unit_test_framework)
-endif(ALLOW_TESTS)
+endif(ENABLE_TESTS)
 if(WIN32)
     set(Boost_USE_STATIC_LIBS ON)
-else()
+else(WIN32)
     set(Boost_USE_STATIC_LIBS OFF)
     add_definitions(-DBOOST_TEST_DYN_LINK)
-endif()
+endif(WIN32)
 set(Boost_USE_MULTITHREADED ON)
 find_package(Boost REQUIRED COMPONENTS
     system
@@ -65,7 +69,19 @@ find_package(Boost REQUIRED COMPONENTS
     iostreams
     ${BOOST_TEST}
 )
-#### End Boost ####
+add_definitions(-DBOOST_FILESYSTEM_NO_DEPRECATED)
+####
+# End the Boost libraries initialization
+####
+
+
+
+
+#######################################################
+#                                                     #
+#                     SOURCES                         #
+#                                                     #
+#######################################################
 
 include_directories(
     ${CMAKE_CURRENT_LIST_DIR}/Source
@@ -94,15 +110,8 @@ set(SRC_LIB
     Source/LibMailUnit/Mail/MailboxGroup.cpp
 )
 
-set(TESTABLE_SRC_SERVER
-    Source/MailUnit/Storage/Edsl.h
-    Source/MailUnit/Storage/Edsl.cpp
-)
-
-set(SRC_SERVER
-    ${TESTABLE_SRC_SERVER}
+set(SRC_SERVER_LIB
     Source/MailUnit/Application.h
-    Source/MailUnit/Application.cpp
     Source/MailUnit/StringEx.h
     Source/MailUnit/OS.h
     Source/MailUnit/OS.cpp
@@ -138,6 +147,8 @@ set(SRC_SERVER
     Source/MailUnit/Smtp/StateMachine/DataState.cpp
     Source/MailUnit/Smtp/StateMachine/QuitState.h
     Source/MailUnit/Storage/StorageException.h
+    Source/MailUnit/Storage/Edsl.h
+    Source/MailUnit/Storage/Edsl.cpp
     Source/MailUnit/Storage/Repository.h
     Source/MailUnit/Storage/Repository.cpp
     Source/MailUnit/Storage/Email.h
@@ -146,8 +157,11 @@ set(SRC_SERVER
     Source/MailUnit/Mqp/ServerRequestHandler.cpp
 )
 
-set(TESTS_SRC
-    ${TESTABLE_SRC_SERVER}
+set(SRC_SERVER
+    Source/MailUnit/Application.cpp
+)
+
+set(SRC_TESTS
     Tests/Main.cpp
     Tests/TestFixture.h
     Tests/TestFixture.cpp
@@ -159,7 +173,7 @@ set(TESTS_SRC
     Tests/MailUnit/Edsl.cpp
 )
 
-set(SQLITE_SRC
+set(SRC_SQLITE
     ThirdParty/SQLite/sqlite3.c
     ThirdParty/SQLite/sqlite3ext.h
     ThirdParty/SQLite/sqlite3.h
@@ -174,30 +188,83 @@ set(OTHER_FILES
     Doxygen/Snippets/RFC/IdentificationFieldsSpec.html
 )
 
-set(LIBS
-    ${Boost_LIBRARIES}
-    ${CMAKE_THREAD_LIBS_INIT}
-)
 
-add_library(${TARGET_SQLITE} STATIC ${SQLITE_SRC})
+
+
+
+#######################################################
+#                                                     #
+#                     TARGETS                         #
+#                                                     #
+#######################################################
+
+#
+# sqlite
+#
+add_library(${TARGET_SQLITE} STATIC ${SRC_SQLITE})
 target_compile_definitions(${TARGET_SQLITE} PRIVATE -DSQLITE_THREADSAFE=1)
 
+#
+# libmailunit
+#
 add_library(${TARGET_LIB} SHARED ${SRC_LIB})
 target_link_libraries(${TARGET_LIB} ${LIBS})
 target_compile_definitions(${TARGET_LIB} PRIVATE -D_MU_LIB)
 set_target_properties(${TARGET_LIB} PROPERTIES OUTPUT_NAME ${BINARY_NAME})
 
+#
+# mailunit-server-lib
+#
+add_library(${TARGET_SERVER_LIB} STATIC ${SRC_SERVER_LIB})
+target_link_libraries(${TARGET_SERVER_LIB}
+    ${TARGET_SQLITE}
+)
+
+#
+# mailunit-server
+#
 add_executable(${TARGET_SERVER} ${SRC_SERVER})
+add_dependencies(${TARGET_SERVER}
+    ${TARGET_LIB}
+    ${TARGET_SQLITE}
+    ${TARGET_SERVER_LIB}
+)
 target_compile_definitions(${TARGET_SERVER} PRIVATE
     -D_MU_SERVER
-    -DBOOST_FILESYSTEM_NO_DEPRECATED
 )
-target_link_libraries(${TARGET_SERVER} ${LIBS} ${TARGET_LIB} ${TARGET_SQLITE} ${CMAKE_DL_LIBS})
-set_target_properties(${TARGET_SERVER} PROPERTIES OUTPUT_NAME ${BINARY_NAME})
+target_link_libraries(${TARGET_SERVER}
+    ${CMAKE_DL_LIBS}
+    ${CMAKE_THREAD_LIBS_INIT}
+    ${Boost_LIBRARIES}
+    ${TARGET_LIB}
+    ${TARGET_SERVER_LIB}
+)
+set_target_properties(${TARGET_SERVER} PROPERTIES
+    OUTPUT_NAME ${BINARY_NAME}
+)
 
-if(ALLOW_TESTS)
-    add_executable(${TARGET_TESTS} ${TESTS_SRC})
-    target_link_libraries(${TARGET_TESTS} ${LIBS} ${TARGET_LIB})
-endif(ALLOW_TESTS)
+#
+# mailunit-tests
+#
+if(ENABLE_TESTS)
+    add_executable(${TARGET_TESTS} ${SRC_TESTS})
+    add_dependencies(${TARGET_TESTS}
+        ${TARGET_LIB}
+        ${TARGET_SQLITE}
+        ${TARGET_SERVER_LIB}
+    )
+    target_compile_definitions(${TARGET_TESTS} PRIVATE
+        -D_MU_TESTS
+    )
+    target_link_libraries(${TARGET_TESTS}
+        ${CMAKE_THREAD_LIBS_INIT}
+        ${Boost_LIBRARIES}
+        ${TARGET_LIB}
+        ${TARGET_SERVER_LIB}
+    )
+endif(ENABLE_TESTS)
 
+#
+# misc.
+#
 add_custom_target(other SOURCES ${OTHER_FILES})

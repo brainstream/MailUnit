@@ -31,7 +31,7 @@ namespace MailUnit {
 #   define MU_PATHSTR(str) str
 #endif
 
-typedef typename boost::filesystem::path::string_type PathString;
+typedef boost::filesystem::path::string_type PathString;
 
 constexpr int open_nf_read   = 0x01;
 constexpr int open_nf_write  = 0x02;
