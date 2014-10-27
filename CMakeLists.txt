@@ -83,13 +83,6 @@ add_definitions(-DBOOST_FILESYSTEM_NO_DEPRECATED)
 #                                                     #
 #######################################################
 
-include_directories(
-    ${CMAKE_CURRENT_LIST_DIR}/Source
-    ${CMAKE_CURRENT_LIST_DIR}/Include
-    ${CMAKE_CURRENT_LIST_DIR}/ThirdParty
-    ${Boost_INCLUDE_DIRS}
-)
-
 set(SRC_LIB
     Include/LibMailUnit/MailUnit.h
     Include/LibMailUnit/Def.h
@@ -198,24 +191,46 @@ set(OTHER_FILES
 #                                                     #
 #######################################################
 
+set(COMMON_INCLUDE_DIRS
+    ${CMAKE_CURRENT_LIST_DIR}/Source
+    ${CMAKE_CURRENT_LIST_DIR}/Include
+    ${CMAKE_CURRENT_LIST_DIR}/ThirdParty
+    ${Boost_INCLUDE_DIRS}
+)
+
 #
 # sqlite
 #
 add_library(${TARGET_SQLITE} STATIC ${SRC_SQLITE})
-target_compile_definitions(${TARGET_SQLITE} PRIVATE -DSQLITE_THREADSAFE=1)
+target_include_directories(${TARGET_SQLITE} PRIVATE
+    ${CMAKE_CURRENT_LIST_DIR}/ThirdParty
+)
+target_compile_definitions(${TARGET_SQLITE} PRIVATE
+    -DSQLITE_THREADSAFE=1
+)
 
 #
 # libmailunit
 #
 add_library(${TARGET_LIB} SHARED ${SRC_LIB})
+set_target_properties(${TARGET_LIB} PROPERTIES
+    OUTPUT_NAME ${BINARY_NAME}
+)
+target_include_directories(${TARGET_LIB} PRIVATE
+    ${COMMON_INCLUDE_DIRS}
+)
+target_compile_definitions(${TARGET_LIB} PRIVATE
+    -D_MU_LIB
+)
 target_link_libraries(${TARGET_LIB} ${LIBS})
-target_compile_definitions(${TARGET_LIB} PRIVATE -D_MU_LIB)
-set_target_properties(${TARGET_LIB} PROPERTIES OUTPUT_NAME ${BINARY_NAME})
 
 #
 # mailunit-server-lib
 #
 add_library(${TARGET_SERVER_LIB} STATIC ${SRC_SERVER_LIB})
+target_include_directories(${TARGET_SERVER_LIB} PRIVATE
+    ${COMMON_INCLUDE_DIRS}
+)
 target_link_libraries(${TARGET_SERVER_LIB}
     ${TARGET_SQLITE}
 )
@@ -224,10 +239,16 @@ target_link_libraries(${TARGET_SERVER_LIB}
 # mailunit-server
 #
 add_executable(${TARGET_SERVER} ${SRC_SERVER})
+set_target_properties(${TARGET_SERVER} PROPERTIES
+    OUTPUT_NAME ${BINARY_NAME}
+)
 add_dependencies(${TARGET_SERVER}
     ${TARGET_LIB}
     ${TARGET_SQLITE}
     ${TARGET_SERVER_LIB}
+)
+target_include_directories(${TARGET_SERVER} PRIVATE
+    ${COMMON_INCLUDE_DIRS}
 )
 target_compile_definitions(${TARGET_SERVER} PRIVATE
     -D_MU_SERVER
@@ -239,15 +260,15 @@ target_link_libraries(${TARGET_SERVER}
     ${TARGET_LIB}
     ${TARGET_SERVER_LIB}
 )
-set_target_properties(${TARGET_SERVER} PROPERTIES
-    OUTPUT_NAME ${BINARY_NAME}
-)
 
 #
 # mailunit-tests
 #
 if(ENABLE_TESTS)
     add_executable(${TARGET_TESTS} ${SRC_TESTS})
+    target_include_directories(${TARGET_TESTS} PRIVATE
+        ${COMMON_INCLUDE_DIRS}
+    )
     add_dependencies(${TARGET_TESTS}
         ${TARGET_LIB}
         ${TARGET_SQLITE}
