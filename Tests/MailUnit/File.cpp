@@ -34,7 +34,7 @@ BOOST_AUTO_TEST_SUITE(File)
 BOOST_AUTO_TEST_CASE(openNewReadonlyFileTest)
 {
     boost::filesystem::path path = tempFilepath();
-    OS::File file(path, nf_open_create);
+    OS::File file(path, nf_open_create, false);
     BOOST_CHECK_EQUAL(MU_INVALID_NATIVE_FILE, file.native());
     BOOST_CHECK(boost::filesystem::exists(path) == false);
 }
@@ -42,7 +42,7 @@ BOOST_AUTO_TEST_CASE(openNewReadonlyFileTest)
 BOOST_AUTO_TEST_CASE(openNewWriteOnlyFileTest)
 {
     boost::filesystem::path path = tempFilepath();
-    OS::File file(path, nf_open_create | nf_open_write);
+    OS::File file(path, nf_open_create | nf_open_write, false);
     BOOST_CHECK_NE(MU_INVALID_NATIVE_FILE, file.native());
     BOOST_CHECK(boost::filesystem::exists(path) == true);
     boost::filesystem::perms perms = boost::filesystem::status(path).permissions();
@@ -57,7 +57,7 @@ BOOST_AUTO_TEST_CASE(openNewWriteOnlyFileTest)
 BOOST_AUTO_TEST_CASE(openNewReadWriteOnlyFileTest)
 {
     boost::filesystem::path path = tempFilepath();
-    OS::File file(path, nf_open_create | nf_open_write | nf_open_read);
+    OS::File file(path, nf_open_create | nf_open_write | nf_open_read, false);
     BOOST_CHECK_NE(MU_INVALID_NATIVE_FILE, file.native());
     BOOST_CHECK(boost::filesystem::exists(path) == true);
     boost::filesystem::perms perms = boost::filesystem::status(path).permissions();
@@ -87,7 +87,7 @@ boost::filesystem::path createAndWriteTestConten()
 BOOST_AUTO_TEST_CASE(openExistentReadOnlyFileTest)
 {
     boost::filesystem::path path = createAndWriteTestConten();
-    OS::File file(path, nf_open_read);
+    OS::File file(path, nf_open_read, false);
     BOOST_CHECK_NE(MU_INVALID_NATIVE_FILE, file.native());
     BOOST_CHECK(boost::filesystem::exists(path) == true);
     closeNativeFile(file);
@@ -102,7 +102,7 @@ BOOST_AUTO_TEST_CASE(openExistentReadOnlyFileTest)
 BOOST_AUTO_TEST_CASE(openExistentAppendFileTest)
 {
     boost::filesystem::path path = createAndWriteTestConten();
-    OS::File file(path, nf_open_write | nf_open_append);
+    OS::File file(path, nf_open_write | nf_open_append, false);
     BOOST_CHECK_NE(MU_INVALID_NATIVE_FILE, file.native());
     BOOST_CHECK(boost::filesystem::exists(path) == true);
     size_t size = boost::filesystem::file_size(path);
@@ -120,7 +120,7 @@ BOOST_AUTO_TEST_CASE(openExistentAppendFileTest)
 BOOST_AUTO_TEST_CASE(openExistentTruncateFileTest)
 {
     boost::filesystem::path path = createAndWriteTestConten();
-    OS::File file(path, nf_open_write | nf_open_create);
+    OS::File file(path, nf_open_write | nf_open_create, false);
     BOOST_CHECK_NE(MU_INVALID_NATIVE_FILE, file.native());
     BOOST_CHECK(boost::filesystem::exists(path) == true);
     size_t size = boost::filesystem::file_size(path);
@@ -133,6 +133,49 @@ BOOST_AUTO_TEST_CASE(openExistentTruncateFileTest)
     BOOST_CHECK_EQUAL(MU_INVALID_NATIVE_FILE, file.native());
     deleteFile(path);
     BOOST_CHECK(boost::filesystem::exists(path) == false);
+}
+
+BOOST_AUTO_TEST_CASE(autocloseTrueTest)
+{
+    MU_NATIVE_FILE native_file = MU_INVALID_NATIVE_FILE;
+    boost::filesystem::path path = tempFilepath();
+    {
+        OS::File file(path, nf_open_create | nf_open_write | nf_open_read, true);
+        native_file = file.native();
+        boost::iostreams::file_descriptor fd(native_file, boost::iostreams::never_close_handle);
+        fd.write(test_content.c_str(), test_content.size());
+        size_t size = boost::filesystem::file_size(path);
+        BOOST_CHECK_EQUAL(test_content.size(), size);
+    }
+    boost::iostreams::file_descriptor fd(native_file, boost::iostreams::never_close_handle);
+    BOOST_CHECK_THROW(fd.write(test_content.c_str(), test_content.size()), std::exception);
+    deleteFile(path);
+}
+
+BOOST_AUTO_TEST_CASE(autocloseFalseTest)
+{
+    MU_NATIVE_FILE native_file = MU_INVALID_NATIVE_FILE;
+    boost::filesystem::path path = tempFilepath();
+    {
+        OS::File file(path, nf_open_create | nf_open_write | nf_open_read, false);
+        native_file = file.native();
+        boost::iostreams::file_descriptor fd(native_file, boost::iostreams::never_close_handle);
+        fd.write(test_content.c_str(), test_content.size());
+        size_t size = boost::filesystem::file_size(path);
+        BOOST_CHECK_EQUAL(test_content.size(), size);
+    }
+    {
+        boost::iostreams::file_descriptor fd(native_file, boost::iostreams::never_close_handle);
+        BOOST_CHECK_NO_THROW(fd.write(test_content.c_str(), test_content.size()));
+        size_t size = boost::filesystem::file_size(path);
+        BOOST_CHECK_EQUAL(test_content.size() * 2, size);
+        closeNativeFile(native_file);
+    }
+    {
+        boost::iostreams::file_descriptor fd(native_file, boost::iostreams::never_close_handle);
+        BOOST_CHECK_THROW(fd.write(test_content.c_str(), test_content.size()), std::exception);
+    }
+    deleteFile(path);
 }
 
 BOOST_AUTO_TEST_CASE(tempFileTest)

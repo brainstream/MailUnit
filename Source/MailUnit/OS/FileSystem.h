@@ -61,8 +61,8 @@ inline boost::filesystem::path tempFilepath()
 class File
 {
 public:
-    File(const boost::filesystem::path & _filepath, uint16_t _flags) :
-        File(openNativeFile(_filepath, _flags), true)
+    File(const boost::filesystem::path & _filepath, uint16_t _flags, bool _autoclose = true) :
+        File(openNativeFile(_filepath, _flags), _autoclose)
     {
     }
 
