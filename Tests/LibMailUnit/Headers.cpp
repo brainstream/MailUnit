@@ -16,15 +16,19 @@
  ***********************************************************************************************/
 
 #include <boost/test/unit_test.hpp>
+#include <MailUnit/OS/FileSystem.h>
 #include <LibMailUnit/Mail/Headers.h>
-#include "../TestFixture.h"
+
+using namespace MailUnit::OS;
+namespace fs = boost::filesystem;
+namespace ios = boost::iostreams;
 
 namespace LibMailUnit {
 namespace Test {
 
-BOOST_FIXTURE_TEST_SUITE(Headers, TestFixture)
+BOOST_AUTO_TEST_SUITE(Headers)
 
-BOOST_AUTO_TEST_CASE(ParseString)
+BOOST_AUTO_TEST_CASE(parseString)
 {
     const std::string raw_headers =
         "Name:Simple value\r\n"
@@ -63,7 +67,7 @@ BOOST_AUTO_TEST_CASE(ParseString)
     muFree(headers);
 }
 
-BOOST_AUTO_TEST_CASE(ParseFileTest)
+BOOST_AUTO_TEST_CASE(parseFileTest)
 {
     const std::string raw_headers =
         "Name:Simple value\r\n"
@@ -75,9 +79,13 @@ BOOST_AUTO_TEST_CASE(ParseFileTest)
         "Name:Simple value 2\r\n"
         "\r\n"
         "Error:String beyond header";
-    MU_NATIVE_FILE file = createTempFile(raw_headers);
-    MU_MAIL_HEADERLIST headers = muMailHeadersParseFile(file);
-    releaseFile(file);
+    MU_MAIL_HEADERLIST headers = MU_INVALID_HANDLE;
+    {
+        TempFile temp_file;
+        temp_file.write(raw_headers);
+        temp_file.seek(0, std::ios_base::beg);
+        headers = muMailHeadersParseFile(temp_file);
+    }
     BOOST_CHECK_NE(MU_INVALID_HANDLE, headers);
     BOOST_CHECK_EQUAL(3, muMailHeadersCount(headers));
 

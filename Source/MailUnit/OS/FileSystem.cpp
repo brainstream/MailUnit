@@ -15,35 +15,38 @@
  *                                                                                             *
  ***********************************************************************************************/
 
-#include <MailUnit/OS.h>
-#ifdef _WIN32
-#   include <windows.h>
+#include <MailUnit/OS/FileSystem.h>
+#ifdef BOOST_WINDOWS_API
+#   include <Windows.h>
 #else
+#   include <unistd.h>
 #   include <fcntl.h>
 #endif
 
+using namespace MailUnit::OS;
+namespace fs = boost::filesystem;
 
-MU_NATIVE_FILE MailUnit::openNativeFile(const boost::filesystem::path & _filepath, int _flags)
+MU_NATIVE_FILE File::openNativeFile(const fs::path & _filepath, uint16_t _nf_flags)
 {
 #ifdef _WIN32
     int desired_access = 0;
-    int share_flags = FILE_SHARE_READ;
+    int share_nf_flags = FILE_SHARE_READ;
     int create_flag = OPEN_EXISTING;
-    if(_flags & open_nf_read && _flags & open_nf_write)
+    if(_nf_flags & nf_open_read && _nf_flags & nf_open_write)
         desired_access = GENERIC_ALL;
-    else if(_flags & open_nf_read)
+    else if(_nf_flags & nf_open_read)
         desired_access = GENERIC_READ;
-    else if(_flags & open_nf_write)
+    else if(_nf_flags & nf_open_write)
         desired_access = GENERIC_WRITE;
     else
         return INVALID_HANDLE_VALUE;
-    if(_flags & open_nf_write)
+    if(_nf_flags & nf_open_write)
     {
-        if(_flags & open_nf_create && _flags & open_nf_append)
+        if(_nf_flags & nf_open_create && _nf_flags & nf_open_append)
             create_flag = CREATE_NEW;
-        else if(_flags & open_nf_create)
+        else if(_nf_flags & nf_open_create)
             create_flag = CREATE_ALWAYS;
-        else if(_flags & open_nf_append)
+        else if(_nf_flags & nf_open_append)
             create_flag = OPEN_EXISTING;
         else
             create_flag = TRUNCATE_EXISTING;
@@ -51,35 +54,37 @@ MU_NATIVE_FILE MailUnit::openNativeFile(const boost::filesystem::path & _filepat
     int file_attrs = FILE_ATTRIBUTE_NORMAL;
     if(desired_access == GENERIC_READ)
         file_attrs |= FILE_ATTRIBUTE_READONLY;
-    return CreateFileW(_filepath.c_str(), desired_access, share_flags, NULL, create_flag, file_attrs, NULL);
+    return CreateFileW(_filepath.c_str(), desired_access, share_nf_flags, NULL, create_flag, file_attrs, NULL);
 #else
-    int open_flags = 0;
-    if(_flags & open_nf_read && _flags & open_nf_write)
-        open_flags = O_RDWR;
-    else if(_flags & open_nf_read)
-        open_flags = O_RDONLY;
-    else if(_flags & open_nf_write)
-        open_flags = O_WRONLY;
+    int flags = 0;
+    int mode = 0;
+    if(_nf_flags & nf_open_read && _nf_flags & nf_open_write)
+        flags = O_RDWR;
+    else if(_nf_flags & nf_open_write)
+        flags = O_WRONLY;
     else
-        return -1;
-    if(_flags & open_nf_write)
+        flags = O_RDONLY;
+    if(_nf_flags & nf_open_write)
     {
-        if(_flags & open_nf_create)
-            open_flags |= O_CREAT;
-        if(_flags & open_nf_append)
-            open_flags |= O_APPEND;
+        mode = S_IWUSR | S_IRUSR;
+        if(_nf_flags & nf_open_create)
+            flags |= O_CREAT;
+        if(_nf_flags & nf_open_append)
+            flags |= O_APPEND;
         else
-            open_flags |= O_TRUNC;
+            flags |= O_TRUNC;
     }
-    return open(_filepath.c_str(), open_flags);
+    return open(_filepath.c_str(), flags, mode);
 #endif
 }
 
-void MailUnit::closeNativeFile(MU_NATIVE_FILE _file)
+void MailUnit::OS::closeNativeFile(MU_NATIVE_FILE _native_file)
 {
+    if(MU_INVALID_NATIVE_FILE == _native_file)
+        return;
 #ifdef _WIN32
-    CloseHandle(_file);
+    CloseHandle(_native_file);
 #else
-    close(_file);
+    close(_native_file);
 #endif
 }

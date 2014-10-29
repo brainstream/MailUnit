@@ -1,6 +1,6 @@
 #include <sstream>
 #include <algorithm>
-#include <MailUnit/OS.h>
+#include <MailUnit/OS/FileSystem.h>
 #include <MailUnit/Storage/Email.h>
 #include <LibMailUnit/MailUnit.h>
 
@@ -50,7 +50,7 @@ Email::Email(uint32_t _id, const boost::filesystem::path & _data_file_path, bool
     }
     if(_parse_file)
     {
-        NativeFile file(m_data_file_path, open_nf_read);
+        OS::File file(m_data_file_path, OS::nf_open_read);
         parseHeaders(file);
     }
 }
@@ -60,7 +60,7 @@ Email::Email(const RawEmail & _raw, const boost::filesystem::path & _data_file_p
     m_data_file_path(_data_file_path)
 {
     fs::copy(_raw.dataFilePath(), m_data_file_path);
-    NativeFile file(m_data_file_path, open_nf_read);
+    OS::File file(m_data_file_path, OS::nf_open_read);
     parseHeaders(file);
     appendBcc(_raw);
 }

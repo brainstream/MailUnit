@@ -34,8 +34,8 @@ namespace fs = boost::filesystem;
 
 namespace {
 
-static const MailUnit::PathString tmp_file_ext = MU_PATHSTR(".tmp");
-static const MailUnit::PathString db_filename = MU_PATHSTR("index.db");
+static const MailUnit::OS::PathString tmp_file_ext = MU_PATHSTR(".tmp");
+static const MailUnit::OS::PathString db_filename = MU_PATHSTR("index.db");
 
 namespace TableMessage {
 static const std::string table_name     = "Message";
@@ -188,7 +188,7 @@ void EdsToSqlMapper::addMailboxCause(Edsl::ConditionBinaryOperator _operator,
 thread_local static class
 {
 public:
-    inline MailUnit::PathString genFilename()
+    inline MailUnit::OS::PathString genFilename()
     {
         return uuidToPathString(m_generator());
     }
@@ -198,7 +198,7 @@ public:
         return m_generator();
     }
 
-    inline MailUnit::PathString uuidToPathString(const boost::uuids::uuid & _uuid) const
+    inline MailUnit::OS::PathString uuidToPathString(const boost::uuids::uuid & _uuid) const
     {
 #ifdef MU_PATHISWIDECHAR
         return boost::uuids::to_wstring(_uuid);
@@ -211,7 +211,7 @@ private:
     boost::uuids::random_generator m_generator;
 } unique_id_generator;
 
-inline MailUnit::PathString generateUniqueFilename()
+inline MailUnit::OS::PathString generateUniqueFilename()
 {
     return unique_id_generator.genFilename();
 }
@@ -271,7 +271,7 @@ void Repository::initStorageDirectory()
     }
 }
 
-boost::filesystem::path Repository::makeNewFileName(const MailUnit::PathString & _base, bool _temp)
+boost::filesystem::path Repository::makeNewFileName(const MailUnit::OS::PathString & _base, bool _temp)
 {
     return m_storage_direcotiry / boost::filesystem::path(_temp ? _base + tmp_file_ext : _base);
 }

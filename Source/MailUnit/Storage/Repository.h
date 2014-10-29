@@ -23,7 +23,7 @@
 #include <ostream>
 #include <boost/noncopyable.hpp>
 #include <boost/filesystem/path.hpp>
-#include <MailUnit/OS.h>
+#include <MailUnit/OS/FileSystem.h>
 #include <MailUnit/Storage/StorageException.h>
 #include <MailUnit/Storage/Email.h>
 
@@ -43,7 +43,7 @@ public:
 
 private:
     void initStorageDirectory();
-    boost::filesystem::path makeNewFileName(const MailUnit::PathString & _base, bool _temp);
+    boost::filesystem::path makeNewFileName(const MailUnit::OS::PathString & _base, bool _temp);
     void prepareDatabase();
     uint32_t insertMessage(const Email & _email, const std::string & _data_id);
     void insertExchange(const Email & _email, uint32_t _message_id);

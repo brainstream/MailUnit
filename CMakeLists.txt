@@ -106,8 +106,8 @@ set(SRC_LIB
 set(SRC_SERVER_LIB
     Source/MailUnit/Application.h
     Source/MailUnit/StringEx.h
-    Source/MailUnit/OS.h
-    Source/MailUnit/OS.cpp
+    Source/MailUnit/OS/FileSystem.h
+    Source/MailUnit/OS/FileSystem.cpp
     Source/MailUnit/Config.h
     Source/MailUnit/Config.cpp
     Source/MailUnit/Logger.h
@@ -156,14 +156,13 @@ set(SRC_SERVER
 
 set(SRC_TESTS
     Tests/Main.cpp
-    Tests/TestFixture.h
-    Tests/TestFixture.cpp
     Tests/LibMailUnit/Memory.cpp
     Tests/LibMailUnit/Headers.cpp
     Tests/LibMailUnit/MessageId.cpp
     Tests/LibMailUnit/DateTime.cpp
     Tests/LibMailUnit/Address.cpp
     Tests/MailUnit/Edsl.cpp
+    Tests/MailUnit/File.cpp
 )
 
 set(SRC_SQLITE
