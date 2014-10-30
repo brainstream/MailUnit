@@ -29,10 +29,11 @@
 
 
 #ifdef _WIN32
+#   include <windows.h>
 #   ifdef _MU_LIB
-#       define MUAPI __declspec(dllexport) extern "C"
+#       define MUAPI extern "C" __declspec(dllexport)
 #   else
-#       define MUAPI __declspec(dllimport) extern "C"
+#       define MUAPI extern "C" __declspec(dllimport)
 #   endif
 #   define MU_NATIVE_FILE HANDLE
 #   define MU_INVALID_NATIVE_FILE INVALID_HANDLE_VALUE

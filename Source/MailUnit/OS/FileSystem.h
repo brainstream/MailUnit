@@ -22,11 +22,12 @@
 #include <utility>
 #include <boost/filesystem.hpp>
 #include <boost/iostreams/device/file_descriptor.hpp>
+#include <boost/locale/encoding.hpp>
 #include <LibMailUnit/Def.h>
 
 #ifdef BOOST_WINDOWS_API
 #   define MU_PATHISWIDECHAR
-#   define MU_PATHSTR(str) L ## str;
+#   define MU_PATHSTR(str) L ## str
 #else
 #   define MU_PATHSTR(str) str
 #endif
@@ -56,6 +57,15 @@ inline void deleteFile(const boost::filesystem::path & _filepath)
 inline boost::filesystem::path tempFilepath()
 {
     return boost::filesystem::temp_directory_path() / boost::filesystem::unique_path();
+}
+
+inline PathString utf8ToPathString(const std::string & _mb_string)
+{
+#ifdef MU_PATHISWIDECHAR
+    return boost::locale::conv::utf_to_utf<wchar_t>(_mb_string);
+#else
+    return _mb_string;
+#endif
 }
 
 class File

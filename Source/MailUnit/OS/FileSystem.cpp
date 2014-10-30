@@ -88,3 +88,4 @@ void MailUnit::OS::closeNativeFile(MU_NATIVE_FILE _native_file)
     close(_native_file);
 #endif
 }
+

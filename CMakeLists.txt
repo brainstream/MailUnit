@@ -74,6 +74,10 @@ add_definitions(-DBOOST_FILESYSTEM_NO_DEPRECATED)
 # End the Boost libraries initialization
 ####
 
+if(WIN32)
+    # Windows sockets
+    set(WINSOCKET_LIBS ws2_32 mswsock)
+endif(WIN32)
 
 
 
@@ -221,7 +225,11 @@ target_include_directories(${TARGET_LIB} PRIVATE
 target_compile_definitions(${TARGET_LIB} PRIVATE
     -D_MU_LIB
 )
-target_link_libraries(${TARGET_LIB} ${LIBS})
+target_link_libraries(${TARGET_LIB}
+    ${CMAKE_DL_LIBS}
+    ${CMAKE_THREAD_LIBS_INIT}
+    ${Boost_LIBRARIES}
+)
 
 #
 # mailunit-server-lib
@@ -232,6 +240,7 @@ target_include_directories(${TARGET_SERVER_LIB} PRIVATE
 )
 target_link_libraries(${TARGET_SERVER_LIB}
     ${TARGET_SQLITE}
+    ${TARGET_LIB}
 )
 
 #
@@ -258,6 +267,7 @@ target_link_libraries(${TARGET_SERVER}
     ${Boost_LIBRARIES}
     ${TARGET_LIB}
     ${TARGET_SERVER_LIB}
+    ${WINSOCKET_LIBS}
 )
 
 #

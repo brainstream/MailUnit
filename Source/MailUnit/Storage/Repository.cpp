@@ -412,7 +412,7 @@ void Repository::findEmails(const std::string & _edsl_query, std::vector<std::un
             Email * email = reverseFindEmail(*args->result, id);
             if(nullptr == email)
             {
-                std::string data_id = values[1];
+                MailUnit::OS::PathString data_id = MailUnit::OS::utf8ToPathString(values[1]);
                 email = new Email(id, args->repository->makeNewFileName(data_id, false), false);
                 args->result->push_back(std::unique_ptr<Email>(email));
                 email->setSubject(values[2]);
