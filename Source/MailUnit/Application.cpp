@@ -82,7 +82,13 @@ void PrivateApplication::start()
     boost::asio::io_service service;
 
     // TODO: config
-    std::shared_ptr<Storage::Repository> repo = std::make_shared<Storage::Repository>("/home/brainstream/temp/mailunit/");
+    std::shared_ptr<Storage::Repository> repo = std::make_shared<Storage::Repository>(
+            #ifdef _WIN32
+                L"D:\\temp\\mailunit\\"
+            #else
+                "/home/brainstream/temp/mailunit/"
+            #endif
+                );
     // TODO: ip address from config
     boost::asio::ip::tcp::endpoint smtp_server_endpoint(boost::asio::ip::tcp::v4(), config().portNumber());
     startTcpServer(service, smtp_server_endpoint, std::make_shared<Smtp::ServerRequestHandler>(repo));
