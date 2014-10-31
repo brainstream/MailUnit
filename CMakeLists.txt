@@ -77,6 +77,9 @@ add_definitions(-DBOOST_FILESYSTEM_NO_DEPRECATED)
 if(WIN32)
     # Windows sockets
     set(WINSOCKET_LIBS ws2_32 mswsock)
+    set(LIBPREFIX)
+else(WIN32)
+    set(LIBPREFIX lib)
 endif(WIN32)
 
 
@@ -218,6 +221,7 @@ target_compile_definitions(${TARGET_SQLITE} PRIVATE
 add_library(${TARGET_LIB} SHARED ${SRC_LIB})
 set_target_properties(${TARGET_LIB} PROPERTIES
     OUTPUT_NAME ${BINARY_NAME}
+    PREFIX "${LIBPREFIX}"
 )
 target_include_directories(${TARGET_LIB} PRIVATE
     ${COMMON_INCLUDE_DIRS}
