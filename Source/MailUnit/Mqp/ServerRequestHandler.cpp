@@ -140,8 +140,9 @@ void Session::writeEmails(std::shared_ptr<std::vector<std::unique_ptr<Email>>> _
     using EmailOperation = AsyncSequenceItemOperation<std::unique_ptr<Email>, TcpSocket>;
 
     auto self = this->shared_from_this();
+    size_t total_count = _emails->size();
     std::shared_ptr<EmailSequenceOperation> emails_operation = EmailSequenceOperation::create(_emails,
-        [self](EmailOperation & email_operation) {
+        [self, total_count](EmailOperation & email_operation) {
             const std::unique_ptr<Email> & email = email_operation.item();
             std::shared_ptr<std::ifstream> file(new std::ifstream(email->dataFilePath().string()));
             if(!file->is_open())
@@ -149,9 +150,11 @@ void Session::writeEmails(std::shared_ptr<std::vector<std::unique_ptr<Email>>> _
                 // TODO: error
             }
             email_operation.addStep(std::make_unique<AsyncLambdaWriter<TcpSocket>>(
-                [&email_operation, &email](std::ostream & stream) {
-                    stream << "ID: " << email->id() << MQP_ENDLINE <<
+                [&email_operation, &email, total_count](std::ostream & stream) {
+                    stream <<
+                        "ITEM: " << email_operation.itemIndex() + 1 << '/' << total_count << MQP_ENDLINE <<
                         "SIZE: " << boost::filesystem::file_size(email->dataFilePath()) << MQP_ENDLINE <<
+                        "ID: " << email->id() << MQP_ENDLINE <<
                         "SUBJECT: " << email->subject() << MQP_ENDLINE;
                     for(const std::string & address : email->addresses(Email::AddressType::From))
                         stream << "FROM: " << address << MQP_ENDLINE;

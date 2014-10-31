@@ -30,22 +30,28 @@ class AsyncSequenceItemOperation :
     public std::enable_shared_from_this<AsyncSequenceItemOperation<Item, Socket>>
 {
 private:
-    explicit AsyncSequenceItemOperation(const Item & _item) :
-        mr_item(_item)
+    AsyncSequenceItemOperation(const Item & _item, size_t _index) :
+        mr_item(_item),
+        m_item_index(_index)
     {
         m_current_operation = m_operations.end();
     }
 
 public:
-    static std::shared_ptr<AsyncSequenceItemOperation<Item, Socket>> create(const Item & _item)
+    static std::shared_ptr<AsyncSequenceItemOperation<Item, Socket>> create(const Item & _item, size_t _index)
     {
         return std::shared_ptr<AsyncSequenceItemOperation<Item, Socket>>(
-            new AsyncSequenceItemOperation<Item, Socket>(_item));
+            new AsyncSequenceItemOperation<Item, Socket>(_item, _index));
     }
 
     const Item & item() const
     {
         return mr_item;
+    }
+
+    size_t itemIndex() const
+    {
+        return m_item_index;
     }
 
     void addStep(std::unique_ptr<AsyncOperation<Socket>> && _operation)
@@ -69,6 +75,7 @@ private:
 
 private:
     const Item & mr_item;
+    const size_t m_item_index;
     std::list<std::unique_ptr<AsyncOperation<Socket>>> m_operations;
     typename std::list<std::unique_ptr<AsyncOperation<Socket>>>::iterator m_current_operation;
 }; // class AsyncSequenceItemOperation
@@ -140,7 +147,8 @@ void AsyncSequenceOperation<Sequence, Socket>::execute(Socket & _socket, AsioCal
         callAsioCallback(_complete_callback);
         return;
     }
-    auto operation = AsyncSequenceItemOperation<ValueType, Socket>::create(*m_current_item);
+    auto operation = AsyncSequenceItemOperation<ValueType, Socket>::create(
+        *m_current_item, m_current_item - m_sequence_ptr->begin());
     ++m_current_item;
     m_item_operation(*operation);
     auto self = this->shared_from_this();
