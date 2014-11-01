@@ -36,7 +36,7 @@ Config::Config(int argc, const char ** argv) :
     m_log_max_size(Logger::s_defult_max_filesize),
     m_port_number(5870),
     m_thread_count(1),
-    m_log_level(LogLevel::Info)
+    m_log_level(LogLevel::info)
 {
     mp_description = new bpo::options_description("Options");
     mp_description->add_options()
@@ -54,11 +54,11 @@ Config::Config(int argc, const char ** argv) :
     m_show_help = var_map.count(LOPT_HELP) > 0;
     m_log_to_stdout = var_map.count(LOPT_LOGSTDOUT) > 0;
     if(var_map.count(LOPT_LOGLEVEL_ERROR) > 0)
-        m_log_level = LogLevel::Error;
+        m_log_level = LogLevel::error;
     else if(var_map.count(LOPT_LOGLEVEL_WARNING) > 0)
-        m_log_level = LogLevel::Warning;
+        m_log_level = LogLevel::warning;
     else
-        m_log_level = LogLevel::Info;
+        m_log_level = LogLevel::info;
     if(var_map.count(LOPT_THREADCOUNT) > 0)
     {
         m_thread_count = var_map[LOPT_THREADCOUNT].as<uint16_t>();

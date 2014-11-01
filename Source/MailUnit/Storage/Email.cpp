@@ -109,13 +109,13 @@ boost::optional<Email::AddressType> Email::findAddress(const std::string & _addr
         return boost::algorithm::iequals(_address, _other);
     };
     if(std::find_if(m_from_addresses.begin(), m_from_addresses.end(), predicate) != m_from_addresses.end())
-        return AddressType::From;
+        return AddressType::from;
     if(std::find_if(m_to_addresses.begin(), m_to_addresses.end(), predicate) != m_to_addresses.end())
-        return AddressType::To;
+        return AddressType::to;
     if(std::find_if(m_cc_addresses.begin(), m_cc_addresses.end(), predicate) != m_cc_addresses.end())
-        return AddressType::Cc;
+        return AddressType::cc;
     if(std::find_if(m_bcc_addresses.begin(), m_bcc_addresses.end(), predicate) != m_bcc_addresses.end())
-        return AddressType::Bcc;
+        return AddressType::bcc;
     return nullptr;
 }
 
@@ -123,13 +123,13 @@ const Email::AddressSet & Email::addresses(Email::AddressType _type) const
 {
     switch(_type)
     {
-    case AddressType::From:
+    case AddressType::from:
         return m_from_addresses;
-    case AddressType::To:
+    case AddressType::to:
         return m_to_addresses;
-    case AddressType::Cc:
+    case AddressType::cc:
         return m_cc_addresses;
-    case AddressType::Bcc:
+    case AddressType::bcc:
         return m_bcc_addresses;
     default:
         throw StorageException("Invalid address type");
@@ -142,16 +142,16 @@ bool Email::addAddress(Email::AddressType _type, const std::string & _address)
     AddressSet * addresses = nullptr;
     switch(_type)
     {
-    case AddressType::From:
+    case AddressType::from:
         addresses = &m_from_addresses;
         break;
-    case AddressType::To:
+    case AddressType::to:
         addresses = &m_to_addresses;
         break;
-    case AddressType::Cc:
+    case AddressType::cc:
         addresses = &m_cc_addresses;
         break;
-    case AddressType::Bcc:
+    case AddressType::bcc:
         addresses = &m_bcc_addresses;
         break;
     }

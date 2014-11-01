@@ -91,10 +91,10 @@ public:
 
     enum class AddressType : short
     {
-        From = 0,
-        To   = 1,
-        Cc   = 2,
-        Bcc  = 3
+        from = 0,
+        to   = 1,
+        cc   = 2,
+        bcc  = 3
     };
 
     static const uint32_t new_object_id = static_cast<uint32_t>(-1);

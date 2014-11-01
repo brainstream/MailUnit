@@ -35,13 +35,13 @@ std::ostream & operator << (std::ostream & _stream, LogLevel _level)
 {
     switch(_level)
     {
-    case LogLevel::Info:
+    case LogLevel::info:
         _stream << "INFO";
         break;
-    case LogLevel::Warning:
+    case LogLevel::warning:
         _stream << "WARNING";
         break;
-    case LogLevel::Error:
+    case LogLevel::error:
         _stream << "ERROR";
         break;
     }
@@ -59,7 +59,7 @@ Logger::Logger(const boost::filesystem::path & _filepath, LogLevel _min_level,
 
 void Logger::info(const std::string & _message)
 {
-    write(LogLevel::Info, [_message](std::fstream & _stream)
+    write(LogLevel::info, [_message](std::fstream & _stream)
     {
         _stream << _message;
     });
@@ -67,7 +67,7 @@ void Logger::info(const std::string & _message)
 
 void Logger::warning(const std::string & _message)
 {
-    write(LogLevel::Warning, [_message](std::fstream & _stream)
+    write(LogLevel::warning, [_message](std::fstream & _stream)
     {
         _stream << _message;
     });
@@ -75,7 +75,7 @@ void Logger::warning(const std::string & _message)
 
 void Logger::warning(const std::exception & _exception)
 {
-    write(LogLevel::Warning, [_exception](std::fstream & _stream)
+    write(LogLevel::warning, [_exception](std::fstream & _stream)
     {
         _stream << "An exception has occurred:" << _exception.what();
     });
@@ -83,7 +83,7 @@ void Logger::warning(const std::exception & _exception)
 
 void Logger::warning(const std::string & _message, const std::exception & _exception)
 {
-    write(LogLevel::Warning, [_message, _exception](std::fstream & _stream)
+    write(LogLevel::warning, [_message, _exception](std::fstream & _stream)
     {
         _stream << _message << std::endl << "Exception message: " << _exception.what();
     });
@@ -91,7 +91,7 @@ void Logger::warning(const std::string & _message, const std::exception & _excep
 
 void Logger::error(const std::string & _message)
 {
-    write(LogLevel::Error, [_message](std::fstream & _stream)
+    write(LogLevel::error, [_message](std::fstream & _stream)
     {
         _stream << _message;
     });
@@ -99,7 +99,7 @@ void Logger::error(const std::string & _message)
 
 void Logger::error(const std::exception & _exception)
 {
-    write(LogLevel::Error, [_exception](std::fstream & _stream)
+    write(LogLevel::error, [_exception](std::fstream & _stream)
     {
         _stream << "An exception has occurred:" << _exception.what();
     });
@@ -107,7 +107,7 @@ void Logger::error(const std::exception & _exception)
 
 void Logger::error(const std::string & _message, const std::exception & _exception)
 {
-    write(LogLevel::Error, [_message, _exception](std::fstream & _stream)
+    write(LogLevel::error, [_message, _exception](std::fstream & _stream)
     {
         _stream << _message << std::endl << "Exception message: " << _exception.what();
     });

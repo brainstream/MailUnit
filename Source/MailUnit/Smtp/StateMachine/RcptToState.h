@@ -33,7 +33,7 @@ public:
 
     bool isInputProcessingCompleted() const override
     {
-        return currentState() != ProcessResult::Incomplete;
+        return currentState() != ProcessResult::incomplete;
     }
 
     bool isProtocolProcessingCompleted() const override

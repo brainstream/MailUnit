@@ -156,13 +156,13 @@ void Session::writeEmails(std::shared_ptr<std::vector<std::unique_ptr<Email>>> _
                         "SIZE: " << boost::filesystem::file_size(email->dataFilePath()) << MQP_ENDLINE <<
                         "ID: " << email->id() << MQP_ENDLINE <<
                         "SUBJECT: " << email->subject() << MQP_ENDLINE;
-                    for(const std::string & address : email->addresses(Email::AddressType::From))
+                    for(const std::string & address : email->addresses(Email::AddressType::from))
                         stream << "FROM: " << address << MQP_ENDLINE;
-                    for(const std::string & address : email->addresses(Email::AddressType::To))
+                    for(const std::string & address : email->addresses(Email::AddressType::to))
                         stream << "TO: " << address << MQP_ENDLINE;
-                    for(const std::string & address : email->addresses(Email::AddressType::Cc))
+                    for(const std::string & address : email->addresses(Email::AddressType::cc))
                         stream << "CC: " << address << MQP_ENDLINE;
-                    for(const std::string & address : email->addresses(Email::AddressType::Bcc))
+                    for(const std::string & address : email->addresses(Email::AddressType::bcc))
                         stream << "BCC: " << address << MQP_ENDLINE;
                     stream << MQP_ENDLINE;
                 }

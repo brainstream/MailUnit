@@ -29,7 +29,7 @@ RcptToState::RcptToState() :
 
 void RcptToState::processInput(const std::string & _input, Storage::RawEmail & _email)
 {
-    if(internalProcessInput(_input) == ProcessResult::Success)
+    if(internalProcessInput(_input) == ProcessResult::success)
     {
         std::string to;
         if(commandArgString(to))
@@ -41,9 +41,9 @@ bool RcptToState::response(ResponseCode * _response) const
 {
     switch(currentState())
     {
-    case ProcessResult::Incomplete:
+    case ProcessResult::incomplete:
         return false;
-    case ProcessResult::Error:
+    case ProcessResult::error:
         *_response = ResponseCode::InvalidParameters;
         return true;
     default:

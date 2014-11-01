@@ -29,9 +29,9 @@ namespace MailUnit {
 
 enum class LogLevel
 {
-    Info,
-    Warning,
-    Error
+    info,
+    warning,
+    error
 }; // enum class LogLevel
 
 

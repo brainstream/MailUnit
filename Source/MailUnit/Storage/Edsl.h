@@ -38,12 +38,12 @@ typedef boost::variant<int, std::string> ConditionValue;
 
 enum class ConditionBinaryOperator
 {
-    Equal,
-    NotEqual,
-    Greater,
-    Less,
-    GreaterOrEqual,
-    LessOrEqual
+    equal,
+    not_equal,
+    greater,
+    less,
+    greater_or_equal,
+    less_or_equal
 }; // enum class ConditionBinaryOperator
 
 struct BinaryCondition
@@ -55,8 +55,8 @@ struct BinaryCondition
 
 enum class ConditionJoinOperator
 {
-    And,
-    Or
+    and_,
+    or_
 }; // enum class ConditionJoinOperator
 
 struct ConditionSequence;

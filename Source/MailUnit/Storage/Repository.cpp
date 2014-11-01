@@ -100,10 +100,10 @@ void EdsToSqlMapper::mapToSqlWhereClause(const Edsl::ConditionSequence & _sequen
     {
         switch(right.operator_)
         {
-        case Edsl::ConditionJoinOperator::And:
+        case Edsl::ConditionJoinOperator::and_:
             mr_sql << " AND ";
             break;
-        case Edsl::ConditionJoinOperator::Or:
+        case Edsl::ConditionJoinOperator::or_:
             mr_sql << " OR ";
             break;
         }
@@ -115,32 +115,32 @@ void EdsToSqlMapper::operator ()(const Edsl::BinaryCondition & _bin_condition)
 {
     if(boost::algorithm::iequals("FROM", _bin_condition.identifier))
     {
-        addMailboxCause(_bin_condition.operator_, Email::AddressType::From,
+        addMailboxCause(_bin_condition.operator_, Email::AddressType::from,
             boost::get<std::string>(_bin_condition.value));
     }
     else if(boost::algorithm::iequals("TO", _bin_condition.identifier))
     {
-        addMailboxCause(_bin_condition.operator_, Email::AddressType::To,
+        addMailboxCause(_bin_condition.operator_, Email::AddressType::to,
             boost::get<std::string>(_bin_condition.value));
     }
     else if(boost::algorithm::iequals("CC", _bin_condition.identifier))
     {
-        addMailboxCause(_bin_condition.operator_, Email::AddressType::Cc,
+        addMailboxCause(_bin_condition.operator_, Email::AddressType::cc,
             boost::get<std::string>(_bin_condition.value));
     }
     else if(boost::algorithm::iequals("BCC", _bin_condition.identifier))
     {
-        addMailboxCause(_bin_condition.operator_, Email::AddressType::Bcc,
+        addMailboxCause(_bin_condition.operator_, Email::AddressType::bcc,
             boost::get<std::string>(_bin_condition.value));
     }
     else if(boost::algorithm::iequals("SUBJECT", _bin_condition.identifier))
     {
         mr_sql << TableMessage::table_name << '.' << TableMessage::column_subject;
-        if(_bin_condition.operator_ == Edsl::ConditionBinaryOperator::Equal)
+        if(_bin_condition.operator_ == Edsl::ConditionBinaryOperator::equal)
         {
             mr_sql << " = '";
         }
-        else if(_bin_condition.operator_ == Edsl::ConditionBinaryOperator::NotEqual)
+        else if(_bin_condition.operator_ == Edsl::ConditionBinaryOperator::not_equal)
         {
             mr_sql << " <> '";
         }
@@ -157,11 +157,11 @@ void EdsToSqlMapper::operator ()(const Edsl::BinaryCondition & _bin_condition)
 void EdsToSqlMapper::addMailboxCause(Edsl::ConditionBinaryOperator _operator,
     Email::AddressType _address_type, const std::string & _address)
 {
-    if(_operator == Edsl::ConditionBinaryOperator::Equal)
+    if(_operator == Edsl::ConditionBinaryOperator::equal)
     {
         mr_sql << " (";
     }
-    else if(_operator == Edsl::ConditionBinaryOperator::NotEqual)
+    else if(_operator == Edsl::ConditionBinaryOperator::not_equal)
     {
         mr_sql << " ( NOT (";
     }
@@ -175,11 +175,11 @@ void EdsToSqlMapper::addMailboxCause(Edsl::ConditionBinaryOperator _operator,
         TableExchange::table_name << '.' << TableExchange::column_reason << " = " <<
         static_cast<uint16_t>(_address_type) << " AND " <<
         TableExchange::table_name << '.' << TableExchange::column_mailbox << " = '" << _address;
-    if(_operator == Edsl::ConditionBinaryOperator::Equal)
+    if(_operator == Edsl::ConditionBinaryOperator::equal)
     {
         mr_sql << "') ";
     }
-    else if(_operator == Edsl::ConditionBinaryOperator::NotEqual)
+    else if(_operator == Edsl::ConditionBinaryOperator::not_equal)
     {
         mr_sql << "')) ";
     }
@@ -355,10 +355,10 @@ uint32_t Repository::insertMessage(const Email & _email, const std::string & _da
 void Repository::insertExchange(const Email & _email, uint32_t _message_id)
 {
     Email::AddressType address_types[] = {
-        Email::AddressType::From,
-        Email::AddressType::To,
-        Email::AddressType::Cc,
-        Email::AddressType::Bcc
+        Email::AddressType::from,
+        Email::AddressType::to,
+        Email::AddressType::cc,
+        Email::AddressType::bcc
     };
     std::stringstream sql;
     for(Email::AddressType address_type : address_types)

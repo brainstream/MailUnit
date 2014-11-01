@@ -29,9 +29,9 @@ class SingleLineCmdState : public State
 protected:
     enum class ProcessResult
     {
-        Error,
-        Success,
-        Incomplete
+        error,
+        success,
+        incomplete
     }; // enum class ProcessResult
 
 protected:

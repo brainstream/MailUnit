@@ -30,7 +30,7 @@ MailFromState::MailFromState() :
 void MailFromState::processInput(const std::string & _input, Storage::RawEmail & _email)
 {
     std::string from;
-    if(internalProcessInput(_input) == ProcessResult::Success && commandArgString(from))
+    if(internalProcessInput(_input) == ProcessResult::success && commandArgString(from))
         _email.addFromAddress(from);
 }
 
@@ -38,9 +38,9 @@ bool MailFromState::response(ResponseCode * _response) const
 {
     switch(currentState())
     {
-    case ProcessResult::Incomplete:
+    case ProcessResult::incomplete:
         return false;
-    case ProcessResult::Error:
+    case ProcessResult::error:
         *_response = ResponseCode::InvalidParameters;
         return true;
     default:

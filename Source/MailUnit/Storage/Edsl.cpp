@@ -52,12 +52,12 @@ public:
     ConditionBinaryOperatorSymbols()
     {
         add
-            ("=" , ConditionBinaryOperator::Equal)
-            ("<>", ConditionBinaryOperator::NotEqual)
-            (">" , ConditionBinaryOperator::Greater)
-            ("<" , ConditionBinaryOperator::Less)
-            (">=", ConditionBinaryOperator::GreaterOrEqual)
-            ("<=", ConditionBinaryOperator::LessOrEqual);
+            ("=" , ConditionBinaryOperator::equal)
+            ("<>", ConditionBinaryOperator::not_equal)
+            (">" , ConditionBinaryOperator::greater)
+            ("<" , ConditionBinaryOperator::less)
+            (">=", ConditionBinaryOperator::greater_or_equal)
+            ("<=", ConditionBinaryOperator::less_or_equal);
     }
 }; // class ConditionBinaryOperatorSymbols
 
@@ -67,8 +67,8 @@ public:
     ConditionJoinOperatorSymbols()
     {
         add
-            ("and", ConditionJoinOperator::And)
-            ("or" , ConditionJoinOperator::Or);
+            ("and", ConditionJoinOperator::and_)
+            ("or" , ConditionJoinOperator::or_);
     }
 }; // class ConditionJoinOperatorSymbols
 
@@ -184,22 +184,22 @@ std::ostream & operator << (std::ostream & _stream, ConditionBinaryOperator _ope
 {
     switch(_operator)
     {
-    case ConditionBinaryOperator::Equal:
+    case ConditionBinaryOperator::equal:
         _stream << "=";
         break;
-    case ConditionBinaryOperator::NotEqual:
+    case ConditionBinaryOperator::not_equal:
         _stream << "<>";
         break;
-    case ConditionBinaryOperator::Greater:
+    case ConditionBinaryOperator::greater:
         _stream << ">";
         break;
-    case ConditionBinaryOperator::Less:
+    case ConditionBinaryOperator::less:
         _stream << "<";
         break;
-    case ConditionBinaryOperator::GreaterOrEqual:
+    case ConditionBinaryOperator::greater_or_equal:
         _stream << ">=";
         break;
-    case ConditionBinaryOperator::LessOrEqual:
+    case ConditionBinaryOperator::less_or_equal:
         _stream << "<=";
         break;
     }
@@ -210,10 +210,10 @@ std::ostream & operator << (std::ostream & _stream, ConditionJoinOperator _opera
 {
     switch(_operator)
     {
-    case ConditionJoinOperator::And:
+    case ConditionJoinOperator::and_:
         _stream << "AND";
         break;
-    case ConditionJoinOperator::Or:
+    case ConditionJoinOperator::or_:
         _stream << "OR";
         break;
     }
