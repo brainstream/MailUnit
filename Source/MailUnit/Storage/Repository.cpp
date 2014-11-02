@@ -238,7 +238,7 @@ inline Email * reverseFindEmail(std::vector<std::unique_ptr<Email>> & _emails, u
 
 Repository::Repository(const fs::path & _storage_direcotiry) :
     m_storage_direcotiry(_storage_direcotiry.is_relative() ?
-        fs::absolute(_storage_direcotiry, MailUnit::app().startDir()) : _storage_direcotiry)
+        fs::absolute(_storage_direcotiry, MailUnit::app().config().app_dir) : _storage_direcotiry)
 {
     initStorageDirectory();
     std::string db_utf8_filepath = getUtf8Filename(makeNewFileName(db_filename, false));

@@ -21,78 +21,59 @@
 #include <ostream>
 #include <boost/noncopyable.hpp>
 #include <boost/program_options.hpp>
+#include <boost/filesystem/path.hpp>
 #include <MailUnit/Logger.h>
 
 namespace MailUnit {
 
-class Config;
-
-} // namespace MailUnit
-
-
-std::ostream & operator << (std::ostream & _stream, const MailUnit::Config & _config);
-
-
-namespace MailUnit {
-
-
-class Config final : private boost::noncopyable
+struct Config
 {
-    friend std::ostream & ::operator << (std::ostream & _stream, const MailUnit::Config & _config);
+    boost::filesystem::path app_dir;
+    bool show_help;
+    bool use_stdlog;
+    boost::uintmax_t log_max_size;
+    boost::filesystem::path log_filepath;
+    uint16_t smtp_port;
+    uint16_t mqp_port;
+    uint16_t thread_count;
+    LogLevel log_level;
+}; // struct Config
 
+
+class ConfigLoader final : private boost::noncopyable
+{
 public:
-    Config(int argc, const char ** argv);
-    ~Config();
+    ConfigLoader(int _argc, const char ** _argv, const boost::filesystem::path & _app_dir);
 
-    bool showHelp() const
+    ~ConfigLoader();
+
+    std::shared_ptr<const Config> config() const
     {
-        return m_show_help;
+        return std::const_pointer_cast<const Config>(m_config_ptr);
     }
 
-    uint16_t portNumber() const
+    void flush()
     {
-        return m_port_number;
+        boost::program_options::notify(*mp_var_map);
     }
 
-    bool logToStdout() const
+    void print(std::ostream & _stream) const
     {
-        return m_log_to_stdout;
-    }
-
-    boost::uintmax_t logMaxSize() const
-    {
-        return m_log_max_size;
-    }
-
-    std::string logFilename() const
-    {
-        return m_log_filename;
-    }
-
-    uint16_t threadCount() const
-    {
-        return m_thread_count;
-    }
-
-    LogLevel logLevel() const
-    {
-        return m_log_level;
+        _stream << *mp_cmd_line_description;
     }
 
 private:
-    boost::program_options::options_description * mp_description;
-    bool m_show_help;
-    bool m_log_to_stdout;
-    boost::uintmax_t m_log_max_size;
-    std::string m_log_filename;
-    uint16_t m_port_number;
-    uint16_t m_thread_count;
-    LogLevel m_log_level;
-}; // class Config
-
+    std::shared_ptr<Config> m_config_ptr;
+    boost::program_options::variables_map * mp_var_map;
+    boost::program_options::options_description * mp_cmd_line_description;
+}; // class ConfigLoader
 
 } // namespace MailUnit
 
-
+inline std::ostream & operator << (std::ostream & _stream, const MailUnit::ConfigLoader & _config_loader)
+{
+    _config_loader.print(_stream);
+    return _stream;
+}
 
 #endif // __MU_CONFIG_H__

@@ -15,79 +15,81 @@
  *                                                                                             *
  ***********************************************************************************************/
 
+#include <istream>
+#include <boost/algorithm/string.hpp>
 #include <MailUnit/Config.h>
+#include <MailUnit/OS/FileSystem.h>
 
-#define LOPT_HELP              "help"
-#define SOPT_HELP              "h"
-#define LOPT_PORT              "port"
-#define SOPT_PORT              "p"
-#define LOPT_LOGSIZE           "lsize"
-#define LOPT_LOGFILE           "lfile"
-#define LOPT_LOGSTDOUT         "lstdout"
-#define LOPT_LOGLEVEL_ERROR    "llerror"
-#define LOPT_LOGLEVEL_WARNING  "llwarning"
-#define LOPT_LOGLEVEL_INFO     "llinfo"
-#define LOPT_THREADCOUNT       "threads"
+#define LOPT_HELP         "help"
+#define SOPT_HELP         "h"
+#define LOPT_SMTP_PORT    "smtp-port"
+#define SOPT_SMTP_PORT    "s"
+#define LOPT_MQP_PORT     "mqp-port"
+#define SOPT_MQP_PORT     "m"
+#define LOPT_LOGSIZE      "log-size"
+#define LOPT_LOGFILE      "log-file"
+#define LOPT_STDLOG       "log-std"
+#define LOPT_LOGLEVEL     "log-level"
+
+#define LOG_LEVEL_INFO    "info"
+#define LOG_LEVEL_WARNING "warning"
+#define LOG_LEVEL_ERROR   "error"
 
 using namespace MailUnit;
 namespace bpo = boost::program_options;
 
-Config::Config(int argc, const char ** argv) :
-    m_log_max_size(Logger::s_defult_max_filesize),
-    m_port_number(5870),
-    m_thread_count(1),
-    m_log_level(LogLevel::info)
+namespace MailUnit {
+
+void validate(boost::any & _out_value, const std::vector<std::string> & _in_values, LogLevel *, int)
 {
-    mp_description = new bpo::options_description("Options");
-    mp_description->add_options()
-        (LOPT_HELP "," SOPT_HELP, "Print this help")
-        (LOPT_PORT "," SOPT_PORT, bpo::value<uint16_t>(), "Port number")
-        (LOPT_LOGSIZE, bpo::value<boost::uintmax_t>(), "Maximum size of each log file")
-        (LOPT_LOGFILE, bpo::value<std::string>(), "Log filename")
-        (LOPT_LOGSTDOUT, "Use stdout for logging")
-        (LOPT_LOGLEVEL_ERROR, "Minimum log level: Error")
-        (LOPT_LOGLEVEL_WARNING, "Minimum log level: Warning")
-        (LOPT_LOGLEVEL_INFO, "Minimum log level: Info (default)")
-        (LOPT_THREADCOUNT, bpo::value<uint16_t>(), "Thread count");
-    bpo::variables_map var_map;
-    bpo::store(bpo::parse_command_line(argc, argv, *mp_description), var_map);
-    m_show_help = var_map.count(LOPT_HELP) > 0;
-    m_log_to_stdout = var_map.count(LOPT_LOGSTDOUT) > 0;
-    if(var_map.count(LOPT_LOGLEVEL_ERROR) > 0)
-        m_log_level = LogLevel::error;
-    else if(var_map.count(LOPT_LOGLEVEL_WARNING) > 0)
-        m_log_level = LogLevel::warning;
+    bpo::validators::check_first_occurrence(_out_value);
+    const std::string & input = bpo::validators::get_single_string(_in_values);
+    if(boost::iequals(input, LOG_LEVEL_ERROR))
+        _out_value = boost::any(LogLevel::error);
+    else if(boost::iequals(input, LOG_LEVEL_WARNING))
+        _out_value = boost::any(LogLevel::warning);
+    else if(boost::iequals(input, LOG_LEVEL_INFO))
+        _out_value = boost::any(LogLevel::info);
     else
-        m_log_level = LogLevel::info;
-    if(var_map.count(LOPT_THREADCOUNT) > 0)
-    {
-        m_thread_count = var_map[LOPT_THREADCOUNT].as<uint16_t>();
-        if(m_thread_count == 0)
-            m_thread_count = 1;
-    }
-    if(var_map.count(LOPT_PORT) > 0)
-    {
-        m_port_number = var_map[LOPT_PORT].as<uint16_t>();
-    }
-    if(var_map.count(LOPT_LOGSIZE) > 0)
-    {
-        m_log_max_size = var_map[LOPT_LOGSIZE].as<boost::uintmax_t>();
-        if(m_log_max_size < Logger::s_min_filesize)
-            m_log_max_size = Logger::s_min_filesize;
-    }
-    if(var_map.count(LOPT_LOGFILE) > 0)
-    {
-        m_log_filename = var_map[LOPT_LOGFILE].as<std::string>();
-    }
+        throw bpo::validation_error(bpo::validation_error::invalid_option_value);
 }
 
-Config::~Config()
+} // namespace MailUnit
+
+ConfigLoader::ConfigLoader(int _argc, const char ** _argv, const boost::filesystem::path & _app_dir) :
+    m_config_ptr(new Config),
+    mp_var_map(new bpo::variables_map),
+    mp_cmd_line_description(new bpo::options_description("Options"))
 {
-    delete mp_description;
+    MailUnit::OS::PathString log_file;
+    mp_cmd_line_description->add_options()
+        (LOPT_HELP "," SOPT_HELP, "Print this help")
+        (LOPT_SMTP_PORT "," SOPT_SMTP_PORT, bpo::value(&m_config_ptr->smtp_port)->required(),
+            "SMTP server port number")
+        (LOPT_MQP_PORT "," SOPT_MQP_PORT, bpo::value(&m_config_ptr->mqp_port)->required(),
+            "MQP server port number")
+        (LOPT_LOGSIZE, bpo::value(&m_config_ptr->thread_count)->default_value(1),
+            "Maximum size of each log file")
+        (LOPT_LOGFILE, bpo::value(&log_file), "Log filename")
+        (LOPT_STDLOG, "Use stdlog")
+        (LOPT_LOGLEVEL,
+            bpo::value(&m_config_ptr->log_level)->default_value(LogLevel::error, LOG_LEVEL_ERROR),
+            "Log level. Valid values: " LOG_LEVEL_INFO ", " LOG_LEVEL_WARNING ", " LOG_LEVEL_ERROR);
+    bpo::store(bpo::parse_command_line(_argc, _argv, *mp_cmd_line_description), *mp_var_map);
+    m_config_ptr->show_help = mp_var_map->count(LOPT_HELP) > 0;
+    m_config_ptr->use_stdlog = mp_var_map->count(LOPT_STDLOG) > 0;
+
+    if(!log_file.empty())
+    {
+        m_config_ptr->log_filepath = log_file;
+        if(m_config_ptr->log_filepath.is_relative())
+            m_config_ptr->log_filepath = _app_dir / m_config_ptr->log_filepath;
+    }
+    m_config_ptr->app_dir = _app_dir;
 }
 
-std::ostream & operator << (std::ostream & _stream, const Config & _config)
+ConfigLoader::~ConfigLoader()
 {
-    _stream << *_config.mp_description;
-    return _stream;
+    delete mp_cmd_line_description;
+    delete mp_var_map;
 }

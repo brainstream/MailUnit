@@ -264,6 +264,7 @@ target_include_directories(${TARGET_SERVER} PRIVATE
 )
 target_compile_definitions(${TARGET_SERVER} PRIVATE
     -D_MU_SERVER
+    -D_MU_BINARY_NAME=${BINARY_NAME}
 )
 target_link_libraries(${TARGET_SERVER}
     ${CMAKE_DL_LIBS}

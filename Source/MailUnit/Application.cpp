@@ -22,6 +22,7 @@
 #include <iostream>
 #include <boost/asio.hpp>
 #include <boost/scoped_ptr.hpp>
+#include <boost/preprocessor/stringize.hpp>
 #include <MailUnit/Server/TcpServer.h>
 #include <MailUnit/Smtp/ServerRequestHandler.h>
 #include <MailUnit/Mqp/ServerRequestHandler.h>
@@ -35,30 +36,63 @@ namespace {
 class PrivateApplication : public Application
 {
 public:
-    inline PrivateApplication(int _argc, const char ** _argv);
+    explicit PrivateApplication(std::shared_ptr<const Config> _config) :
+        Application(_config)
+    {
+    }
+
     void start();
 }; // class PrivateApplication
+
+void printUsage(const ConfigLoader & _config_loader)
+{
+    std::cout << "Usage: " BOOST_PP_STRINGIZE(_MU_BINARY_NAME) << " [options]" <<
+        std::endl << std::endl << _config_loader << std::endl;
+}
+
+std::shared_ptr<const Config> processConfig(int _argc, const char ** _argv,
+    const boost::filesystem::path & _app_dir)
+{
+    boost::scoped_ptr<ConfigLoader> config_loader;
+    try
+    {
+        std::shared_ptr<const Config> config;
+        config_loader.reset(new ConfigLoader(_argc, _argv, _app_dir));
+        config = config_loader->config();
+        if(config->show_help)
+        {
+            printUsage(*config_loader);
+            return nullptr;
+        }
+        config_loader->flush();
+        return config;
+    }
+    catch(std::exception & error)
+    {
+        std::cerr << error.what() << std::endl << std::endl;
+        if(config_loader)
+            printUsage(*config_loader);
+        throw;
+    }
+}
 
 PrivateApplication * global_app = nullptr;
 
 } // namespace
 
 
-Application::Application(int _argc, const char ** _argv) :
-    mp_config(nullptr),
-    mp_logger(nullptr),
-    mr_start_dir(boost::filesystem::initial_path())
+Application::Application(std::shared_ptr<const Config> _config) :
+    m_config_ptr(_config),
+    mp_logger(nullptr)
 {
     try
     {
-        mp_config = new Config(_argc, _argv);
-        // TODO: use config isntead.
         // TODO: log to stdout
-        mp_logger = new Logger(mp_config->logFilename(), mp_config->logLevel(), mp_config->logMaxSize());
+        mp_logger = new Logger(m_config_ptr->log_filepath,
+            m_config_ptr->log_level, m_config_ptr->log_max_size);
     }
     catch(std::exception & err)
     {
-        delete mp_config;
         delete mp_logger;
         throw ApplicationException(err.what());
     }
@@ -66,13 +100,7 @@ Application::Application(int _argc, const char ** _argv) :
 
 Application::~Application()
 {
-    delete mp_config;
     delete mp_logger;
-}
-
-PrivateApplication::PrivateApplication(int _argc, const char ** _argv) :
-    Application(_argc, _argv)
-{
 }
 
 void PrivateApplication::start()
@@ -89,12 +117,12 @@ void PrivateApplication::start()
                 "/home/brainstream/temp/mailunit/"
             #endif
                 );
-    // TODO: ip address from config
-    boost::asio::ip::tcp::endpoint smtp_server_endpoint(boost::asio::ip::tcp::v4(), config().portNumber());
+    // TODO: interface from config
+    boost::asio::ip::tcp::endpoint smtp_server_endpoint(boost::asio::ip::tcp::v4(), config().smtp_port);
     startTcpServer(service, smtp_server_endpoint, std::make_shared<Smtp::ServerRequestHandler>(repo));
 
-    // TODO: from config (including ip address)
-    boost::asio::ip::tcp::endpoint storage_server_endpoint(boost::asio::ip::tcp::v4(), 5880);
+    // TODO: interface from config
+    boost::asio::ip::tcp::endpoint storage_server_endpoint(boost::asio::ip::tcp::v4(), config().mqp_port);
     startTcpServer(service, storage_server_endpoint, std::make_shared<Mqp::ServerRequestHandler>(repo));
 
     service.run();
@@ -107,17 +135,25 @@ Application & MailUnit::app()
     return *global_app;
 }
 
+
 int main(int _argc, const char ** _argv)
 {
+    std::shared_ptr<const Config> config;
     try
     {
-        boost::scoped_ptr<PrivateApplication> app(new PrivateApplication(_argc, _argv));
+        config = processConfig(_argc, _argv, boost::filesystem::initial_path());
+        if(nullptr == config)
+            return EXIT_SUCCESS;
+    }
+    catch(...)
+    {
+        return EXIT_FAILURE;
+    }
+    try
+    {
+        boost::scoped_ptr<PrivateApplication> app(new PrivateApplication(config));
         global_app = app.get();
-        if(app->config().showHelp())
-            std::cout << app->config() << std::endl;
-        else
-            app->start();
-        // TODO: finalizer with the SQLite::shutdownd call
+        app->start();
         return EXIT_SUCCESS;
     }
     catch(std::exception & error)
@@ -130,4 +166,5 @@ int main(int _argc, const char ** _argv)
         std::cerr << "Unknown error has occurred" << std::endl;
         return EXIT_FAILURE;
     }
+
 }

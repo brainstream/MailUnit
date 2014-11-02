@@ -31,12 +31,12 @@ MU_EXCEPTION(ApplicationException)
 class Application : private boost::noncopyable
 {
 public:
-    Application(int _argc, const char **_argv);
+    explicit Application(std::shared_ptr<const Config> _config);
     ~Application();
 
     const Config & config() const
     {
-        return *mp_config;
+        return *m_config_ptr;
     }
 
     Logger & log()
@@ -44,15 +44,9 @@ public:
         return *mp_logger;
     }
 
-    const boost::filesystem::path & startDir() const
-    {
-        return mr_start_dir;
-    }
-
 private:
-    Config * mp_config;
+    std::shared_ptr<const Config> m_config_ptr;
     Logger * mp_logger;
-    const boost::filesystem::path & mr_start_dir;
 }; // class Application
 
 Application & app();
