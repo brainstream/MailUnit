@@ -19,7 +19,7 @@
 #include <sstream>
 #include <functional>
 #include <boost/noncopyable.hpp>
-#include <MailUnit/Application.h>
+#include <MailUnit/Def.h>
 #include <MailUnit/IO/AsyncLambdaWriter.h>
 #include <MailUnit/IO/AsyncFileWriter.h>
 #include <MailUnit/IO/AsyncSequenceOperation.h>
@@ -63,14 +63,13 @@ private:
 
 void ServerRequestHandler::handleConnection(TcpSocket _socket)
 {
-    MailUnit::app().log().info("New connection accepted by the storage server");
+    logger->info("New connection accepted by the storage server");
     std::make_shared<Session>(std::move(_socket), m_repository_ptr)->start();
 }
 
 bool ServerRequestHandler::handleError(const boost::system::error_code & _err_code)
 {
-    MailUnit::app().log().error(std::string("The storage server has stopped due an error: ") +
-        _err_code.message());
+    logger->error(std::string("The storage server has stopped due an error: ") + _err_code.message());
     return false;
 }
 

@@ -25,7 +25,6 @@
 #include <boost/scoped_ptr.hpp>
 #include <boost/locale/encoding.hpp>
 #include <SQLite/sqlite3.h>
-#include <MailUnit/Application.h>
 #include <MailUnit/Storage/Repository.h>
 #include <MailUnit/Storage/Edsl.h>
 
@@ -237,8 +236,7 @@ inline Email * reverseFindEmail(std::vector<std::unique_ptr<Email>> & _emails, u
 
 
 Repository::Repository(const fs::path & _storage_direcotiry) :
-    m_storage_direcotiry(_storage_direcotiry.is_relative() ?
-        fs::absolute(_storage_direcotiry, MailUnit::app().config().app_dir) : _storage_direcotiry)
+    m_storage_direcotiry(_storage_direcotiry)
 {
     initStorageDirectory();
     std::string db_utf8_filepath = getUtf8Filename(makeNewFileName(db_filename, false));

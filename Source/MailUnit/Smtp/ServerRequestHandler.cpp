@@ -17,7 +17,7 @@
 
 #include <boost/noncopyable.hpp>
 #include <boost/scoped_ptr.hpp>
-#include <MailUnit/Application.h>
+#include <MailUnit/Def.h>
 #include <MailUnit/Smtp/ServerRequestHandler.h>
 #include <MailUnit/Smtp/ProtocolDef.h>
 #include <MailUnit/Smtp/StateMachine/StateMachine.h>
@@ -60,14 +60,13 @@ ServerRequestHandler::ServerRequestHandler(std::shared_ptr<Storage::Repository> 
 
 void ServerRequestHandler::handleConnection(boost::asio::ip::tcp::socket _socket)
 {
-    app().log().info("New connection accepted by the SMTP server");
+    logger->info("New connection accepted by the SMTP server");
     std::make_shared<Session>(std::move(_socket), m_repository_ptr)->start();
 }
 
 bool ServerRequestHandler::handleError(const boost::system::error_code & _err_code)
 {
-    MailUnit::app().log().error(std::string("The SMTP server has stopped due an error: ") +
-        _err_code.message());
+    logger->error(std::string("The SMTP server has stopped due an error: ") + _err_code.message());
     return false;
 }
 
@@ -108,12 +107,12 @@ void Session::saveEmail()
 {
     try
     {
-        app().log().info("Message received"); // TODO: more details
+        logger->info("Message received"); // TODO: more details
         m_repository_ptr->storeEmail(*m_raw_email_ptr);
     }
     catch(const Storage::StorageException & error)
     {
-        app().log().error("An error occurred during an attempt to "
+        logger->error("An error occurred during an attempt to "
             "save an e-mail into the database", error);
     }
 }

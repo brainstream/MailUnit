@@ -139,10 +139,6 @@ void Logger::write(LogLevel _level, std::function<void(std::fstream &)> _callbac
 
 void Logger::prepareFile()
 {
-    if(!boost::filesystem::exists(m_filepath))
-    {
-        return;
-    }
     boost::system::error_code error;
     boost::filesystem::path parent_dir = m_filepath.parent_path();
     if(!boost::filesystem::exists(parent_dir))
@@ -152,6 +148,10 @@ void Logger::prepareFile()
         {
             throw LoggerException(error.message());
         }
+    }
+    if(!boost::filesystem::exists(m_filepath))
+    {
+        return;
     }
     boost::uintmax_t size = boost::filesystem::file_size(m_filepath, error);
     if(error)

@@ -15,42 +15,91 @@
  *                                                                                             *
  ***********************************************************************************************/
 
-#ifndef __MU_APPLICATION_H__
-#define __MU_APPLICATION_H__
+#ifndef __MU_DEFERRED_POINTER_H__
+#define __MU_DEFERRED_POINTER_H__
 
-#include <boost/noncopyable.hpp>
-#include <boost/filesystem/path.hpp>
-#include <MailUnit/Config.h>
-#include <MailUnit/Logger.h>
-#include <MailUnit/Exception.h>
+#include <cstdlib>
 
 namespace MailUnit {
 
-MU_EXCEPTION(ApplicationException)
-
-class Application : private boost::noncopyable
+template<typename Type>
+class DeferredPointer
 {
 public:
-    explicit Application(std::shared_ptr<const Config> _config);
-    ~Application();
-
-    const Config & config() const
+    DeferredPointer() :
+        mp_pointer(static_cast<Type *>(malloc(sizeof(Type)))),
+        m_constructed(false)
     {
-        return *m_config_ptr;
     }
 
-    Logger & log()
+    ~DeferredPointer()
     {
-        return *mp_logger;
+        destruct();
+        free(mp_pointer);
+    }
+
+    template<typename... CtorArgs>
+    void construct(CtorArgs... _ctor_args)
+    {
+        destruct();
+        new(mp_pointer) Type(_ctor_args...);
+        m_constructed = true;
+    }
+
+    void destruct()
+    {
+        if(m_constructed)
+        {
+            mp_pointer->~Type();
+            m_constructed = false;
+        }
+    }
+
+    bool constructed() const
+    {
+        return m_constructed;
+    }
+
+    operator bool ()
+    {
+        return m_constructed;
+    }
+
+    operator Type * ()
+    {
+        return get();
+    }
+
+    operator const Type * () const
+    {
+        return get();
+    }
+
+    const Type * get() const
+    {
+        return m_constructed ? mp_pointer : nullptr;
+    }
+
+    Type * get()
+    {
+        return m_constructed ? mp_pointer : nullptr;
+    }
+
+    const Type * unsafeGet() const
+    {
+        return mp_pointer;
+    }
+
+    Type * unsafeGet()
+    {
+        return mp_pointer;
     }
 
 private:
-    std::shared_ptr<const Config> m_config_ptr;
-    Logger * mp_logger;
-}; // class Application
-
-Application & app();
+    Type * mp_pointer;
+    bool m_constructed;
+}; // class DeferredPointer
 
 } // namespace MailUnit
 
-#endif // __MU_APPLICATION_H__
+#endif // __MU_DEFERRED_POINTER_H__
