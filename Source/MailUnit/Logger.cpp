@@ -48,7 +48,6 @@ std::ostream & operator << (std::ostream & _stream, LogLevel _level)
     return _stream;
 }
 
-
 Logger::Logger(const boost::filesystem::path & _filepath, LogLevel _min_level,
         boost::uintmax_t _max_filesize /*= s_defult_max_filesize*/) :
     m_min_level(_min_level),
@@ -57,63 +56,7 @@ Logger::Logger(const boost::filesystem::path & _filepath, LogLevel _min_level,
 {
 }
 
-void Logger::info(const std::string & _message)
-{
-    write(LogLevel::info, [_message](std::fstream & _stream)
-    {
-        _stream << _message;
-    });
-}
-
-void Logger::warning(const std::string & _message)
-{
-    write(LogLevel::warning, [_message](std::fstream & _stream)
-    {
-        _stream << _message;
-    });
-}
-
-void Logger::warning(const std::exception & _exception)
-{
-    write(LogLevel::warning, [_exception](std::fstream & _stream)
-    {
-        _stream << "An exception has occurred:" << _exception.what();
-    });
-}
-
-void Logger::warning(const std::string & _message, const std::exception & _exception)
-{
-    write(LogLevel::warning, [_message, _exception](std::fstream & _stream)
-    {
-        _stream << _message << std::endl << "Exception message: " << _exception.what();
-    });
-}
-
-void Logger::error(const std::string & _message)
-{
-    write(LogLevel::error, [_message](std::fstream & _stream)
-    {
-        _stream << _message;
-    });
-}
-
-void Logger::error(const std::exception & _exception)
-{
-    write(LogLevel::error, [_exception](std::fstream & _stream)
-    {
-        _stream << "An exception has occurred:" << _exception.what();
-    });
-}
-
-void Logger::error(const std::string & _message, const std::exception & _exception)
-{
-    write(LogLevel::error, [_message, _exception](std::fstream & _stream)
-    {
-        _stream << _message << std::endl << "Exception message: " << _exception.what();
-    });
-}
-
-void Logger::write(LogLevel _level, std::function<void(std::fstream &)> _callback)
+void Logger::write(LogLevel _level, const std::string & _message)
 {
     if(m_filepath.empty() || _level < m_min_level)
     {
@@ -125,9 +68,8 @@ void Logger::write(LogLevel _level, std::function<void(std::fstream &)> _callbac
         log_mutex.lock();
         prepareFile();
         std::fstream stream(m_filepath.string(), std::fstream::out | std::ios_base::app);
-        stream << boost::posix_time::to_simple_string(time)<< " [" << _level << "]: ";
-        _callback(stream);
-        stream << std::endl;
+        stream << boost::posix_time::to_simple_string(time) <<
+            " [" << _level << "]: " << _message << std::endl;
     }
     catch(...)
     {

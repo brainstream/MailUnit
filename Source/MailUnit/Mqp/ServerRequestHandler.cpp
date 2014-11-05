@@ -63,13 +63,13 @@ private:
 
 void ServerRequestHandler::handleConnection(TcpSocket _socket)
 {
-    logger->info("New connection accepted by the storage server");
+    LOG_INFO << "New connection accepted by the storage server";
     std::make_shared<Session>(std::move(_socket), m_repository_ptr)->start();
 }
 
 bool ServerRequestHandler::handleError(const boost::system::error_code & _err_code)
 {
-    logger->error(std::string("The storage server has stopped due an error: ") + _err_code.message());
+    LOG_ERROR << "The storage server has stopped due an error: " << _err_code.message();
     return false;
 }
 

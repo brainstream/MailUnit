@@ -18,8 +18,7 @@
 #ifndef __MU_LOGGER_H__
 #define __MU_LOGGER_H__
 
-#include <functional>
-#include <ostream>
+#include <sstream>
 #include <boost/noncopyable.hpp>
 #include <boost/filesystem.hpp>
 #include <MailUnit/Exception.h>
@@ -42,16 +41,9 @@ class Logger final : private boost::noncopyable
 public:
     Logger(const boost::filesystem::path & _filepath, LogLevel _min_level,
         boost::uintmax_t _max_filesize = s_defult_max_filesize);
-    void info(const std::string & _message);
-    void warning(const std::string & _message);
-    void warning(const std::exception & _exception);
-    void warning(const std::string & _message, const std::exception & _exception);
-    void error(const std::string & _message);
-    void error(const std::exception & _exception);
-    void error(const std::string & _message, const std::exception & _exception);
+    void write(LogLevel _level, const std::string & _message);
 
 private:
-    void write(LogLevel _level, std::function<void(std::fstream &)> _callback);
     void prepareFile();
     void incrementFileVersion(const boost::filesystem::path & _path);
 
@@ -66,8 +58,39 @@ private:
 }; // class Logger
 
 
+class LogWriter : private boost::noncopyable
+{
+public:
+    LogWriter(Logger & _logger, LogLevel _level) :
+        mr_logger(_logger),
+        m_level(_level)
+    {
+    }
+
+    ~LogWriter()
+    {
+        mr_logger.write(m_level, m_stream.str());
+    }
+
+    std::ostream & stream()
+    {
+        return m_stream;
+    }
+
+private:
+    Logger & mr_logger;
+    LogLevel m_level;
+    std::stringstream m_stream;
+}; // class LogWriter
+
 } // namespace MailUnit
 
+template<typename Type>
+inline MailUnit::LogWriter && operator << (MailUnit::LogWriter && _writer, const Type & _value)
+{
+    _writer.stream() << _value;
+    return std::move(_writer);
+}
 
 std::ostream & operator << (std::ostream & _stream, MailUnit::LogLevel _level);
 

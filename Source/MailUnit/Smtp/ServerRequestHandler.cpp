@@ -60,13 +60,13 @@ ServerRequestHandler::ServerRequestHandler(std::shared_ptr<Storage::Repository> 
 
 void ServerRequestHandler::handleConnection(boost::asio::ip::tcp::socket _socket)
 {
-    logger->info("New connection accepted by the SMTP server");
+    LOG_INFO << "New connection accepted by the SMTP server";
     std::make_shared<Session>(std::move(_socket), m_repository_ptr)->start();
 }
 
 bool ServerRequestHandler::handleError(const boost::system::error_code & _err_code)
 {
-    logger->error(std::string("The SMTP server has stopped due an error: ") + _err_code.message());
+    LOG_ERROR << "The SMTP server has stopped due an error: " << _err_code.message();
     return false;
 }
 
@@ -107,13 +107,14 @@ void Session::saveEmail()
 {
     try
     {
-        logger->info("Message received"); // TODO: more details
+        LOG_INFO << "Message received"; // TODO: more details
         m_repository_ptr->storeEmail(*m_raw_email_ptr);
     }
     catch(const Storage::StorageException & error)
     {
-        logger->error("An error occurred during an attempt to "
-            "save an e-mail into the database", error);
+        LOG_ERROR <<
+            "An error occurred during an attempt to save an e-mail into the database: " <<
+            error.what();
     }
 }
 

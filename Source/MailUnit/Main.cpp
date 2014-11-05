@@ -177,7 +177,7 @@ void printUsage(const po::options_description & _options_description, std::ostre
 void start(const std::shared_ptr<Config> _config)
 {
     deferred_logger_pointer.construct(_config->log_filepath, _config->log_level, _config->log_max_size);
-    logger->info("Application started");
+    LOG_INFO << "Application started";
 
     asio::io_service service;
 

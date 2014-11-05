@@ -30,4 +30,8 @@ extern Logger * const logger;
 
 } // namespace MailUnit
 
+#define LOG_INFO  ::MailUnit::LogWriter(*::MailUnit::logger, ::MailUnit::LogLevel::info)
+#define LOG_WARN  ::MailUnit::LogWriter(*::MailUnit::logger, ::MailUnit::LogLevel::warning)
+#define LOG_ERROR ::MailUnit::LogWriter(*::MailUnit::logger, ::MailUnit::LogLevel::error)
+
 #endif // __MU_DEF_H__
