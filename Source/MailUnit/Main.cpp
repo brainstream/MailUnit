@@ -123,6 +123,7 @@ OptionsPtr loadConfig(int _argc, const char ** _argv, const fs::path & _app_dir)
 
     PathString log_file;
     PathString data_dir;
+    const boost::uintmax_t defult_max_filesize = Logger::defult_max_filesize;
     cmd_line_only_description.add_options()
         (LOPT_HELP "," SOPT_HELP, "Print this help");
     common_description.add_options()
@@ -132,8 +133,8 @@ OptionsPtr loadConfig(int _argc, const char ** _argv, const fs::path & _app_dir)
             "MQP server port number")
         (LOPT_STORAGE_DIR "," SOPT_STORAGE_DIR, po::value(&data_dir)->required(),
             "Data storage directory")
-        (LOPT_LOGSIZE, po::value(&config->thread_count)->default_value(1),
-            "Maximum size of each log file")
+        (LOPT_LOGSIZE, po::value(&config->log_max_size)->default_value(defult_max_filesize),
+            "Maximum size of each log file in bytes")
         (LOPT_LOGFILE, po::value(&log_file), "Log filename")
         (LOPT_STDLOG, "Use stdlog")
         (LOPT_LOGLEVEL,
@@ -180,7 +181,13 @@ void printUsage(const po::options_description & _options_description, std::ostre
 
 void start(const std::shared_ptr<Config> _config)
 {
-    deferred_logger_pointer.construct(_config->log_filepath, _config->log_level, _config->log_max_size);
+    Logger::Options logger_options;
+    logger_options.filepath = _config->log_filepath;
+    logger_options.max_filesize = _config->log_max_size;
+    logger_options.min_level = _config->log_level;
+    logger_options.stdlog = _config->use_stdlog;
+    deferred_logger_pointer.construct(logger_options);
+
     LOG_INFO << "Application started";
 
     asio::io_service service;

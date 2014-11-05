@@ -39,22 +39,38 @@ MU_EXCEPTION(LoggerException)
 class Logger final : private boost::noncopyable
 {
 public:
-    Logger(const boost::filesystem::path & _filepath, LogLevel _min_level,
-        boost::uintmax_t _max_filesize = s_defult_max_filesize);
+    static const boost::uintmax_t min_filesize = 1024 * 1024;
+    static const boost::uintmax_t defult_max_filesize = 10 * 1024 * 1024;
+
+    struct Options
+    {
+        Options() :
+            min_level(LogLevel::info),
+            max_filesize(Logger::defult_max_filesize),
+            stdlog(false)
+        {
+        }
+
+        Options(const Options &) = default;
+
+        Options & operator = (const Options &) = default;
+
+        boost::filesystem::path filepath;
+        LogLevel min_level;
+        boost::uintmax_t max_filesize;
+        bool stdlog;
+    }; // struct Options
+
+public:
+    explicit Logger(const Options & _options);
     void write(LogLevel _level, const std::string & _message);
 
 private:
     void prepareFile();
     void incrementFileVersion(const boost::filesystem::path & _path);
 
-public:
-    static const boost::uintmax_t s_min_filesize = 1024 * 1024;
-    static const boost::uintmax_t s_defult_max_filesize = 10 * 1024 * 1024;
-
 private:
-    LogLevel m_min_level;
-    boost::filesystem::path m_filepath;
-    boost::uintmax_t m_max_file_size;
+    Options m_options;
 }; // class Logger
 
 extern Logger * const logger;

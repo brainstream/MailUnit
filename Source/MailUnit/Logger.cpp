@@ -16,9 +16,10 @@
  ***********************************************************************************************/
 
 #include <mutex>
+#include <iostream>
 #include <fstream>
-#include <algorithm>
 #include <sstream>
+#include <algorithm>
 #include <boost/date_time.hpp>
 #include <MailUnit/Logger.h>
 
@@ -27,6 +28,13 @@ using namespace MailUnit;
 namespace {
 
 std::mutex log_mutex;
+
+inline void writeStream(std::ostream & _stream, const boost::posix_time::ptime & _time,
+    LogLevel _level, const std::string & _message)
+{
+    _stream << boost::posix_time::to_simple_string(_time) <<
+        " [" << _level << "]: " << _message << std::endl;
+}
 
 } // namespace
 
@@ -48,41 +56,46 @@ std::ostream & operator << (std::ostream & _stream, LogLevel _level)
     return _stream;
 }
 
-Logger::Logger(const boost::filesystem::path & _filepath, LogLevel _min_level,
-        boost::uintmax_t _max_filesize /*= s_defult_max_filesize*/) :
-    m_min_level(_min_level),
-    m_filepath(_filepath),
-    m_max_file_size(_max_filesize < s_min_filesize ? s_min_filesize : _max_filesize)
+Logger::Logger(const Options & _options) :
+    m_options(_options)
 {
+    if(m_options.max_filesize < min_filesize)
+        m_options.max_filesize = min_filesize;
 }
 
 void Logger::write(LogLevel _level, const std::string & _message)
 {
-    if(m_filepath.empty() || _level < m_min_level)
+    if(_level < m_options.min_level || (!m_options.stdlog && m_options.filepath.empty()))
     {
         return;
     }
-    try
+    boost::posix_time::ptime time = boost::posix_time::microsec_clock::local_time();
+    if(m_options.stdlog)
     {
-        boost::posix_time::ptime time = boost::posix_time::microsec_clock::local_time();
-        log_mutex.lock();
-        prepareFile();
-        std::fstream stream(m_filepath.string(), std::fstream::out | std::ios_base::app);
-        stream << boost::posix_time::to_simple_string(time) <<
-            " [" << _level << "]: " << _message << std::endl;
+        writeStream(std::clog, time, _level, _message);
     }
-    catch(...)
+    if(!m_options.filepath.empty())
     {
+        try
+        {
+            log_mutex.lock();
+            prepareFile();
+            std::fstream stream(m_options.filepath.string(), std::fstream::out | std::ios_base::app);
+            writeStream(stream, time, _level, _message);
+        }
+        catch(...)
+        {
+            log_mutex.unlock();
+            return;
+        }
         log_mutex.unlock();
-        return;
     }
-    log_mutex.unlock();
 }
 
 void Logger::prepareFile()
 {
     boost::system::error_code error;
-    boost::filesystem::path parent_dir = m_filepath.parent_path();
+    boost::filesystem::path parent_dir = m_options.filepath.parent_path();
     if(!boost::filesystem::exists(parent_dir))
     {
         boost::filesystem::create_directories(parent_dir, error);
@@ -91,20 +104,20 @@ void Logger::prepareFile()
             throw LoggerException(error.message());
         }
     }
-    if(!boost::filesystem::exists(m_filepath))
+    if(!boost::filesystem::exists(m_options.filepath))
     {
         return;
     }
-    boost::uintmax_t size = boost::filesystem::file_size(m_filepath, error);
+    boost::uintmax_t size = boost::filesystem::file_size(m_options.filepath, error);
     if(error)
     {
         throw LoggerException(error.message());
     }
-    if(size < m_max_file_size)
+    if(size < m_options.max_filesize)
     {
         return;
     }
-    incrementFileVersion(m_filepath);
+    incrementFileVersion(m_options.filepath);
 }
 
 void Logger::incrementFileVersion(const boost::filesystem::path & _path)
