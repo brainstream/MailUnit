@@ -57,19 +57,20 @@ private:
     boost::uintmax_t m_max_file_size;
 }; // class Logger
 
+extern Logger * const logger;
 
 class LogWriter : private boost::noncopyable
 {
 public:
-    LogWriter(Logger & _logger, LogLevel _level) :
-        mr_logger(_logger),
+    explicit LogWriter(LogLevel _level) :
         m_level(_level)
     {
     }
 
     ~LogWriter()
     {
-        mr_logger.write(m_level, m_stream.str());
+        if(nullptr != logger)
+            logger->write(m_level, m_stream.str());
     }
 
     std::ostream & stream()
@@ -78,7 +79,6 @@ public:
     }
 
 private:
-    Logger & mr_logger;
     LogLevel m_level;
     std::stringstream m_stream;
 }; // class LogWriter
@@ -94,5 +94,8 @@ inline MailUnit::LogWriter && operator << (MailUnit::LogWriter && _writer, const
 
 std::ostream & operator << (std::ostream & _stream, MailUnit::LogLevel _level);
 
+#define LOG_INFO  ::MailUnit::LogWriter(::MailUnit::LogLevel::info)
+#define LOG_WARN  ::MailUnit::LogWriter(::MailUnit::LogLevel::warning)
+#define LOG_ERROR ::MailUnit::LogWriter(::MailUnit::LogLevel::error)
 
 #endif // __MU_LOGGER_H__

@@ -15,6 +15,10 @@
  *                                                                                             *
  ***********************************************************************************************/
 
+#if !defined __cplusplus || __cplusplus < 201300L
+#   error This project requires a C++14 compatible compiler!
+#endif // __cplusplus && __cplusplus >= 201300L
+
 #include <cstdlib>
 #include <boost/asio.hpp>
 #include <boost/variant.hpp>
@@ -22,7 +26,7 @@
 #include <boost/program_options.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
-#include <MailUnit/Def.h>
+#include <MailUnit/Logger.h>
 #include <MailUnit/DeferredPointer.h>
 #include <MailUnit/OS/FileSystem.h>
 #include <MailUnit/Server/TcpServer.h>

@@ -19,7 +19,7 @@
 #include <sstream>
 #include <functional>
 #include <boost/noncopyable.hpp>
-#include <MailUnit/Def.h>
+#include <MailUnit/Logger.h>
 #include <MailUnit/IO/AsyncLambdaWriter.h>
 #include <MailUnit/IO/AsyncFileWriter.h>
 #include <MailUnit/IO/AsyncSequenceOperation.h>

@@ -17,7 +17,7 @@
 
 #include <boost/noncopyable.hpp>
 #include <boost/scoped_ptr.hpp>
-#include <MailUnit/Def.h>
+#include <MailUnit/Logger.h>
 #include <MailUnit/Smtp/ServerRequestHandler.h>
 #include <MailUnit/Smtp/ProtocolDef.h>
 #include <MailUnit/Smtp/StateMachine/StateMachine.h>

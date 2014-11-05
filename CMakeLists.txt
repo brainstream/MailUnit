@@ -111,7 +111,6 @@ set(SRC_LIB
 )
 
 set(SRC_SERVER_LIB
-    Source/MailUnit/Def.h
     Source/MailUnit/StringEx.h
     Source/MailUnit/DeferredPointer.h
     Source/MailUnit/OS/FileSystem.h
