@@ -35,10 +35,10 @@
 namespace MailUnit {
 namespace OS {
 
-static const uint16_t nf_open_read   = 0x01;
-static const uint16_t nf_open_write  = 0x02;
-static const uint16_t nf_open_create = 0x04;
-static const uint16_t nf_open_append = 0x08;
+static const uint16_t file_open_read   = 0x01;
+static const uint16_t file_open_write  = 0x02;
+static const uint16_t file_open_create = 0x04;
+static const uint16_t file_open_append = 0x08;
 
 typedef boost::filesystem::path::string_type PathString;
 
@@ -67,6 +67,13 @@ inline PathString utf8ToPathString(const std::string & _mb_string)
     return _mb_string;
 #endif
 }
+
+boost::filesystem::path systemConfigDirectory();
+
+boost::filesystem::path userConfigDirectory();
+
+boost::filesystem::path toAbsolutePath(const boost::filesystem::path & _path,
+    const boost::filesystem::path & _app_path);
 
 class File
 {
@@ -199,7 +206,7 @@ private:
     static std::pair<MU_NATIVE_FILE, boost::filesystem::path> init()
     {
         boost::filesystem::path path = tempFilepath();;
-        MU_NATIVE_FILE file = openNativeFile(path, nf_open_create | nf_open_read | nf_open_write);
+        MU_NATIVE_FILE file = openNativeFile(path, file_open_create | file_open_read | file_open_write);
         return std::make_pair(file, path);
     }
 

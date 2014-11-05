@@ -58,18 +58,18 @@ MU_NATIVE_FILE File::openNativeFile(const fs::path & _filepath, uint16_t _nf_fla
 #else
     int flags = 0;
     int mode = 0;
-    if(_nf_flags & nf_open_read && _nf_flags & nf_open_write)
+    if(_nf_flags & file_open_read && _nf_flags & file_open_write)
         flags = O_RDWR;
-    else if(_nf_flags & nf_open_write)
+    else if(_nf_flags & file_open_write)
         flags = O_WRONLY;
     else
         flags = O_RDONLY;
-    if(_nf_flags & nf_open_write)
+    if(_nf_flags & file_open_write)
     {
         mode = S_IWUSR | S_IRUSR;
-        if(_nf_flags & nf_open_create)
+        if(_nf_flags & file_open_create)
             flags |= O_CREAT;
-        if(_nf_flags & nf_open_append)
+        if(_nf_flags & file_open_append)
             flags |= O_APPEND;
         else
             flags |= O_TRUNC;
@@ -89,3 +89,51 @@ void MailUnit::OS::closeNativeFile(MU_NATIVE_FILE _native_file)
 #endif
 }
 
+boost::filesystem::path MailUnit::OS::systemConfigDirectory()
+{
+#ifdef _WIN32
+    return _wgetenv("ALLUSERSPROFILE");
+#elif __APPLE__
+#   error Mac OS not supported yet
+#else
+    return "/etc";
+#endif
+}
+
+boost::filesystem::path MailUnit::OS::userConfigDirectory()
+{
+#ifdef _WIN32
+    return _wgetenv("APPDATA");
+#elif __APPLE__
+#   error Mac OS not supported yet
+#else
+    return fs::path(getenv("HOME")) / ".config";
+#endif
+}
+
+boost::filesystem::path MailUnit::OS::toAbsolutePath(const boost::filesystem::path & _path,
+    const boost::filesystem::path & _app_path)
+{
+    if(_path.empty())
+    {
+        return _app_path;
+    }
+    else if(_path.c_str()[0] == '~')
+    {
+
+#ifdef _WIN32
+        fs::path home = fs::path(_wgetenv("HOMEDRIVE")) / _wgetenv("HOMEPATH");
+#else
+        fs::path home = getenv("HOME");
+#endif
+        return home / &_path.c_str()[1];
+    }
+    else if(_path.is_relative())
+    {
+        return fs::absolute(_path, _app_path);
+    }
+    else
+    {
+        return _path;
+    }
+}

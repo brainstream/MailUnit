@@ -20,6 +20,8 @@
 #include <boost/variant.hpp>
 #include <boost/preprocessor/stringize.hpp>
 #include <boost/program_options.hpp>
+#include <boost/filesystem.hpp>
+#include <boost/filesystem/fstream.hpp>
 #include <MailUnit/Def.h>
 #include <MailUnit/DeferredPointer.h>
 #include <MailUnit/OS/FileSystem.h>
@@ -33,6 +35,8 @@
 #define SOPT_SMTP_PORT    "s"
 #define LOPT_MQP_PORT     "mqp-port"
 #define SOPT_MQP_PORT     "m"
+#define SOPT_STORAGE_DIR  "d"
+#define LOPT_STORAGE_DIR  "storage-dir"
 #define LOPT_LOGSIZE      "log-size"
 #define LOPT_LOGFILE      "log-file"
 #define LOPT_STDLOG       "log-std"
@@ -83,6 +87,7 @@ struct Config
     bool use_stdlog;
     boost::uintmax_t log_max_size;
     fs::path log_filepath;
+    fs::path data_dirpath;
     uint16_t smtp_port;
     uint16_t mqp_port;
     uint16_t thread_count;
@@ -97,18 +102,32 @@ struct LoadConfigError
     std::shared_ptr<po::options_description> options_description;
 }; // struct LoadConfigError
 
+fs::path configFile(const fs::path & _dir)
+{
+    if(_dir.empty())
+        return fs::path();
+    fs::path file = _dir / BOOST_STRINGIZE(_MU_BINARY_NAME) ".conf";
+    return fs::exists(file) ? file : fs::path();
+}
+
 OptionsPtr loadConfig(int _argc, const char ** _argv, const fs::path & _app_dir)
 {
     std::shared_ptr<Config> config(new Config);
-    std::shared_ptr<po::options_description> cmd_line_description(new po::options_description("Options"));
+    std::shared_ptr<po::options_description> full_description(new po::options_description);
+    po::options_description cmd_line_only_description("Command line only options");
+    po::options_description common_description("Options");
 
     PathString log_file;
-    cmd_line_description->add_options()
-        (LOPT_HELP "," SOPT_HELP, "Print this help")
+    PathString data_dir;
+    cmd_line_only_description.add_options()
+        (LOPT_HELP "," SOPT_HELP, "Print this help");
+    common_description.add_options()
         (LOPT_SMTP_PORT "," SOPT_SMTP_PORT, po::value(&config->smtp_port)->required(),
             "SMTP server port number")
         (LOPT_MQP_PORT "," SOPT_MQP_PORT, po::value(&config->mqp_port)->required(),
             "MQP server port number")
+        (LOPT_STORAGE_DIR "," SOPT_STORAGE_DIR, po::value(&data_dir)->required(),
+            "Data storage directory")
         (LOPT_LOGSIZE, po::value(&config->thread_count)->default_value(1),
             "Maximum size of each log file")
         (LOPT_LOGFILE, po::value(&log_file), "Log filename")
@@ -116,11 +135,22 @@ OptionsPtr loadConfig(int _argc, const char ** _argv, const fs::path & _app_dir)
         (LOPT_LOGLEVEL,
             po::value(&config->log_level)->default_value(LogLevel::error, LOG_LEVEL_ERROR),
             "Log level. Valid values: " LOG_LEVEL_INFO ", " LOG_LEVEL_WARNING ", " LOG_LEVEL_ERROR);
+    full_description->add(common_description).add(cmd_line_only_description);
+
     po::variables_map var_map;
-    po::store(po::parse_command_line(_argc, _argv, *cmd_line_description), var_map);
+    po::store(po::parse_command_line(_argc, _argv, *full_description), var_map);
+    for(const fs::path & path : { _app_dir, userConfigDirectory(), systemConfigDirectory() })
+    {
+        fs::path config_file = configFile(path);
+        if(!config_file.empty())
+        {
+            fs::fstream stream(config_file, std::ios_base::in);
+            po::store(po::parse_config_file(stream, common_description), var_map);
+        }
+    }
     if(var_map.count(LOPT_HELP) > 0)
     {
-        return cmd_line_description;
+        return full_description;
     }
     try
     {
@@ -128,22 +158,20 @@ OptionsPtr loadConfig(int _argc, const char ** _argv, const fs::path & _app_dir)
     }
     catch(std::exception & error)
     {
-        throw LoadConfigError { error.what(), cmd_line_description };
+        throw LoadConfigError { error.what(), full_description };
     }
     config->use_stdlog = var_map.count(LOPT_STDLOG) > 0;
     if(!log_file.empty())
-    {
-        config->log_filepath = log_file;
-        if(config->log_filepath.is_relative())
-            config->log_filepath = _app_dir / config->log_filepath;
-    }
+        config->log_filepath = toAbsolutePath(log_file, _app_dir);
+    if(!data_dir.empty())
+        config->data_dirpath = toAbsolutePath(data_dir, _app_dir);
     return config;
 }
 
 void printUsage(const po::options_description & _options_description, std::ostream & _stream)
 {
     _stream << "Usage: " BOOST_PP_STRINGIZE(_MU_BINARY_NAME) << " [options]" <<
-        std::endl << std::endl << _options_description << std::endl;
+        std::endl << _options_description << std::endl;
 }
 
 void start(const std::shared_ptr<Config> _config)
@@ -153,14 +181,7 @@ void start(const std::shared_ptr<Config> _config)
 
     asio::io_service service;
 
-    // TODO: config
-    std::shared_ptr<Repository> repo = std::make_shared<Repository>(
-            #ifdef _WIN32
-                L"D:\\temp\\mailunit\\"
-            #else
-                "/home/brainstream/temp/mailunit/"
-            #endif
-                );
+    std::shared_ptr<Repository> repo = std::make_shared<Repository>(_config->data_dirpath);
     // TODO: interface from config
     asio::ip::tcp::endpoint smtp_server_endpoint(asio::ip::tcp::v4(), _config->smtp_port);
     startTcpServer(service, smtp_server_endpoint, std::make_shared<Smtp::ServerRequestHandler>(repo));
@@ -191,7 +212,7 @@ int main(int _argc, const char ** _argv)
 {
     try
     {
-        OptionsPtr opts = loadConfig(_argc, _argv, fs::current_path());
+        OptionsPtr opts = loadConfig(_argc, _argv, fs::initial_path());
         Runner runner;
         boost::apply_visitor(runner, opts);
         return EXIT_SUCCESS;
