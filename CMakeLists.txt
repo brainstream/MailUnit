@@ -15,6 +15,17 @@
 #                                                                                             #
 ###############################################################################################
 
+###############################################################################################
+#
+# Allowed flags:
+#
+# ENABLE_TESTS=ON
+#    Enables unit tests. The Boost.Test library is required.
+# ENABLE_GUI=ON
+#    Enables graphic user interface. The Qt 4 or newer is required.
+#
+###############################################################################################
+
 cmake_minimum_required(VERSION 2.8)
 
 project(MailUnit)
@@ -24,6 +35,11 @@ set(TARGET_SERVER     mailunit-server)
 set(TARGET_LIB        mailunit-lib)
 set(TARGET_TESTS      mailunit-tests)
 set(TARGET_SQLITE     sqlite)
+set(TARGET_GUI        mailunitui)
+
+set(CMAKE_BINARY_DIR       ${CMAKE_CURRENT_LIST_DIR}/Binary)
+set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR})
+set(LIBRARY_OUTPUT_PATH    ${CMAKE_BINARY_DIR})
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     message(STATUS "Application will be built in the Debug configuration")
@@ -74,6 +90,23 @@ add_definitions(-DBOOST_FILESYSTEM_NO_DEPRECATED)
 # End the Boost libraries initialization
 ####
 
+####
+# Begin Qt libraries initialization
+####
+if(ENABLE_GUI)
+    find_package(Qt4 REQUIRED)
+    set(GUI_LIBS
+        Qt4::QtCore
+        Qt4::QtGui
+    )
+    set(GUI_INCLUDE_DIRS
+        ${QT_INCLUDE_DIR}
+    )
+endif(ENABLE_GUI)
+####
+# End Qt libraries initialization
+####
+
 if(WIN32)
     # Windows sockets
     set(WINSOCKET_LIBS ws2_32 mswsock)
@@ -83,7 +116,6 @@ else(WIN32)
 endif(WIN32)
 
 
-
 #######################################################
 #                                                     #
 #                     SOURCES                         #
@@ -91,72 +123,82 @@ endif(WIN32)
 #######################################################
 
 set(SRC_LIB
-    Include/LibMailUnit/MailUnit.h
-    Include/LibMailUnit/Def.h
-    Include/LibMailUnit/Memory.h
-    Source/LibMailUnit/InternalMemory.h
-    Source/LibMailUnit/Memory.cpp
-    Include/LibMailUnit/Mail/Headers.h
-    Source/LibMailUnit/Mail/Headers.cpp
-    Include/LibMailUnit/Mail/MessageId.h
-    Source/LibMailUnit/Mail/MessageId.cpp
-    Include/LibMailUnit/Mail/DateTime.h
-    Source/LibMailUnit/Mail/DateTime.cpp
-    Include/LibMailUnit/Mail/Address.h
-    Source/LibMailUnit/Mail/Address.cpp
-    Source/LibMailUnit/Mail/Mailbox.h
-    Source/LibMailUnit/Mail/Mailbox.cpp
-    Source/LibMailUnit/Mail/MailboxGroup.h
-    Source/LibMailUnit/Mail/MailboxGroup.cpp
+    LibMailUnit/MailUnit.h
+    LibMailUnit/Def.h
+    LibMailUnit/Memory.h
+    LibMailUnit/InternalMemory.h
+    LibMailUnit/Memory.cpp
+    LibMailUnit/Mail/Headers.h
+    LibMailUnit/Mail/Headers.cpp
+    LibMailUnit/Mail/MessageId.h
+    LibMailUnit/Mail/MessageId.cpp
+    LibMailUnit/Mail/DateTime.h
+    LibMailUnit/Mail/DateTime.cpp
+    LibMailUnit/Mail/Address.h
+    LibMailUnit/Mail/Address.cpp
+    LibMailUnit/Mail/Mailbox.h
+    LibMailUnit/Mail/Mailbox.cpp
+    LibMailUnit/Mail/MailboxGroup.h
+    LibMailUnit/Mail/MailboxGroup.cpp
 )
 
 set(SRC_SERVER_LIB
-    Source/MailUnit/StringEx.h
-    Source/MailUnit/DeferredPointer.h
-    Source/MailUnit/OS/FileSystem.h
-    Source/MailUnit/OS/FileSystem.cpp
-    Source/MailUnit/Logger.h
-    Source/MailUnit/Logger.cpp
-    Source/MailUnit/Exception.h
-    Source/MailUnit/IO/IODef.h
-    Source/MailUnit/IO/AsyncSequenceOperation.h
-    Source/MailUnit/IO/AsyncOperation.h
-    Source/MailUnit/IO/AsyncFileWriter.h
-    Source/MailUnit/IO/AsyncLambdaWriter.h
-    Source/MailUnit/Server/RequestHandler.h
-    Source/MailUnit/Server/TcpServer.h
-    Source/MailUnit/Server/TcpServer.cpp
-    Source/MailUnit/Smtp/ProtocolDef.h
-    Source/MailUnit/Smtp/ResponseCode.h
-    Source/MailUnit/Smtp/ResponseCode.cpp
-    Source/MailUnit/Smtp/ServerRequestHandler.h
-    Source/MailUnit/Smtp/ServerRequestHandler.cpp
-    Source/MailUnit/Smtp/StateMachine/StateMachine.h
-    Source/MailUnit/Smtp/StateMachine/StateBase.h
-    Source/MailUnit/Smtp/StateMachine/SingleLineCmdState.h
-    Source/MailUnit/Smtp/StateMachine/SingleLineCmdState.cpp
-    Source/MailUnit/Smtp/StateMachine/StartState.h
-    Source/MailUnit/Smtp/StateMachine/EhloState.h
-    Source/MailUnit/Smtp/StateMachine/MailFromState.h
-    Source/MailUnit/Smtp/StateMachine/MailFromState.cpp
-    Source/MailUnit/Smtp/StateMachine/RcptToState.h
-    Source/MailUnit/Smtp/StateMachine/RcptToState.cpp
-    Source/MailUnit/Smtp/StateMachine/DataState.h
-    Source/MailUnit/Smtp/StateMachine/DataState.cpp
-    Source/MailUnit/Smtp/StateMachine/QuitState.h
-    Source/MailUnit/Storage/StorageException.h
-    Source/MailUnit/Storage/Edsl.h
-    Source/MailUnit/Storage/Edsl.cpp
-    Source/MailUnit/Storage/Repository.h
-    Source/MailUnit/Storage/Repository.cpp
-    Source/MailUnit/Storage/Email.h
-    Source/MailUnit/Storage/Email.cpp
-    Source/MailUnit/Mqp/ServerRequestHandler.h
-    Source/MailUnit/Mqp/ServerRequestHandler.cpp
+    MailUnit/StringEx.h
+    MailUnit/DeferredPointer.h
+    MailUnit/OS/FileSystem.h
+    MailUnit/OS/FileSystem.cpp
+    MailUnit/Logger.h
+    MailUnit/Logger.cpp
+    MailUnit/Exception.h
+    MailUnit/IO/IODef.h
+    MailUnit/IO/AsyncSequenceOperation.h
+    MailUnit/IO/AsyncOperation.h
+    MailUnit/IO/AsyncFileWriter.h
+    MailUnit/IO/AsyncLambdaWriter.h
+    MailUnit/Server/RequestHandler.h
+    MailUnit/Server/TcpServer.h
+    MailUnit/Server/TcpServer.cpp
+    MailUnit/Smtp/ProtocolDef.h
+    MailUnit/Smtp/ResponseCode.h
+    MailUnit/Smtp/ResponseCode.cpp
+    MailUnit/Smtp/ServerRequestHandler.h
+    MailUnit/Smtp/ServerRequestHandler.cpp
+    MailUnit/Smtp/StateMachine/StateMachine.h
+    MailUnit/Smtp/StateMachine/StateBase.h
+    MailUnit/Smtp/StateMachine/SingleLineCmdState.h
+    MailUnit/Smtp/StateMachine/SingleLineCmdState.cpp
+    MailUnit/Smtp/StateMachine/StartState.h
+    MailUnit/Smtp/StateMachine/EhloState.h
+    MailUnit/Smtp/StateMachine/MailFromState.h
+    MailUnit/Smtp/StateMachine/MailFromState.cpp
+    MailUnit/Smtp/StateMachine/RcptToState.h
+    MailUnit/Smtp/StateMachine/RcptToState.cpp
+    MailUnit/Smtp/StateMachine/DataState.h
+    MailUnit/Smtp/StateMachine/DataState.cpp
+    MailUnit/Smtp/StateMachine/QuitState.h
+    MailUnit/Storage/StorageException.h
+    MailUnit/Storage/Edsl.h
+    MailUnit/Storage/Edsl.cpp
+    MailUnit/Storage/Repository.h
+    MailUnit/Storage/Repository.cpp
+    MailUnit/Storage/Email.h
+    MailUnit/Storage/Email.cpp
+    MailUnit/Mqp/ServerRequestHandler.h
+    MailUnit/Mqp/ServerRequestHandler.cpp
 )
 
 set(SRC_SERVER
-    Source/MailUnit/Main.cpp
+    MailUnit/Main.cpp
+)
+
+set(SRC_GUI
+    Gui/Main.cpp
+)
+
+set(SQLITE_SRC
+    SQLite/sqlite3.c
+    SQLite/sqlite3ext.h
+    SQLite/sqlite3.h
 )
 
 set(SRC_TESTS
@@ -169,12 +211,6 @@ set(SRC_TESTS
     Tests/MailUnit/DeferredPointer.cpp
     Tests/MailUnit/Edsl.cpp
     Tests/MailUnit/File.cpp
-)
-
-set(SRC_SQLITE
-    ThirdParty/SQLite/sqlite3.c
-    ThirdParty/SQLite/sqlite3ext.h
-    ThirdParty/SQLite/sqlite3.h
 )
 
 set(OTHER_FILES
@@ -197,18 +233,16 @@ set(OTHER_FILES
 #######################################################
 
 set(COMMON_INCLUDE_DIRS
-    ${CMAKE_CURRENT_LIST_DIR}/Source
-    ${CMAKE_CURRENT_LIST_DIR}/Include
-    ${CMAKE_CURRENT_LIST_DIR}/ThirdParty
+    ${CMAKE_CURRENT_LIST_DIR}
     ${Boost_INCLUDE_DIRS}
 )
 
 #
 # sqlite
 #
-add_library(${TARGET_SQLITE} STATIC ${SRC_SQLITE})
+add_library(${TARGET_SQLITE} STATIC ${SQLITE_SRC})
 target_include_directories(${TARGET_SQLITE} PRIVATE
-    ${CMAKE_CURRENT_LIST_DIR}/ThirdParty
+    ${CMAKE_CURRENT_LIST_DIR}/SQLite
 )
 target_compile_definitions(${TARGET_SQLITE} PRIVATE
     -DSQLITE_THREADSAFE=1
@@ -273,6 +307,30 @@ target_link_libraries(${TARGET_SERVER}
     ${TARGET_SERVER_LIB}
     ${WINSOCKET_LIBS}
 )
+
+
+#
+# mailunitui
+#
+if(ENABLE_GUI)
+    add_executable(${TARGET_GUI} ${SRC_GUI})
+    add_dependencies(${TARGET_GUI}
+        ${TARGET_LIB}
+        ${TARGET_SQLITE}
+    )
+    target_include_directories(${TARGET_GUI} PRIVATE
+        ${COMMON_INCLUDE_DIRS}
+        ${GUI_INCLUDE_DIRS}
+    )
+    target_compile_definitions(${TARGET_GUI} PRIVATE
+        -D_MU_GUI
+    )
+    target_link_libraries(${TARGET_GUI}
+        ${TARGET_SQLITE}
+        ${TARGET_LIB}
+        ${GUI_LIBS}
+    )
+endif(ENABLE_GUI)
 
 #
 # mailunit-tests
