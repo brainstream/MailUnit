@@ -313,8 +313,9 @@ std::unique_ptr<RawEmail> Repository::createRawEmail()
     return std::make_unique<RawEmail>(makeNewFileName(generateUniqueFilename(), true));
 }
 
-uint32_t Repository::storeEmail(const RawEmail & _raw_email)
+uint32_t Repository::storeEmail(RawEmail & _raw_email)
 {
+    _raw_email.flush();
     boost::uuids::uuid data_id = unique_id_generator.genUuid();
     fs::path data_filepath = makeNewFileName(unique_id_generator.uuidToPathString(data_id), false);
     boost::scoped_ptr<Email> email(new Email(_raw_email, data_filepath));

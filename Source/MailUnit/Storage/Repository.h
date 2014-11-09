@@ -38,7 +38,7 @@ public:
     Repository(const boost::filesystem::path & _storage_direcotiry);
     ~Repository();
     std::unique_ptr<RawEmail> createRawEmail();
-    uint32_t storeEmail(const RawEmail & _raw_email);
+    uint32_t storeEmail(RawEmail & _raw_email);
     void findEmails(const std::string & _edsl_query, std::vector<std::unique_ptr<Email> > & _result);
 
 private:

@@ -49,7 +49,15 @@ public:
 
     std::ostream & data()
     {
+        if(!m_data_out.is_open())
+            throw StorageException("Email storage file is not open");
         return m_data_out;
+    }
+
+    void flush()
+    {
+        if(m_data_out.is_open())
+            m_data_out.flush();
     }
 
     const boost::filesystem::path & dataFilePath() const
@@ -83,6 +91,7 @@ private:
     std::vector<std::string> m_from_addresses;
     std::vector<std::string> m_to_addresses;
 }; // class RawEmail
+
 
 class Email
 {

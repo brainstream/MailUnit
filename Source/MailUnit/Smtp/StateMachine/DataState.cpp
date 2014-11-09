@@ -48,6 +48,7 @@ void DataState::processHeader(const std::string & _input)
 void DataState::processData(const std::string & _input, Storage::RawEmail & _email)
 {
     m_read_state.data_accepting = 1;
+    // FIXME: a data must not be saved in the memory!
     m_data += _input;
     size_t end_pos = m_data.find(SMTP_DATA_END);
     if(std::string::npos == end_pos)
