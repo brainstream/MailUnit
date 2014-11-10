@@ -15,14 +15,44 @@
  *                                                                                             *
  ***********************************************************************************************/
 
-#include <QtGui/QApplication>
-#include <QtGui/QMainWindow>
+#ifndef __MUGUI_MAINWINDOW_H__
+#define __MUGUI_MAINWINDOW_H__
 
-int main(int _argc, char ** _argv)
+#include <QtGui/QMainWindow>
+#include <QtGui/QLineEdit>
+#include <QtGui/QTextEdit>
+#include <QtGui/QPlainTextEdit>
+#include <MailUnitUI/MqpClient.h>
+
+namespace MailUnit {
+namespace Gui {
+
+class MainWindow : public QMainWindow
 {
-    QApplication app(_argc, _argv);
-    QMainWindow wnd;
-    wnd.show();
-    app.exec();
-    return 0;
-}
+    Q_OBJECT
+
+public:
+    MainWindow();
+    ~MainWindow() override;
+
+private slots:
+    void execute();
+    void aboutQt();
+    void onMessageReceived(const QString & _data);
+
+private:
+    void setupUI();
+    bool setupMqpClient();
+
+private:
+    MqpClient * mp_mqp_client;
+    QLineEdit * mp_edit_host;
+    QLineEdit * mp_edit_port;
+    QPlainTextEdit * mp_edit_query;
+    QTextEdit * mp_edit_result;
+}; // class MainWindow
+
+} // namespace Gui
+} // namespace MailUnit
+
+#endif // __MUGUI_MAINWINDOW_H__

@@ -37,10 +37,6 @@ set(TARGET_TESTS      mailunit-tests)
 set(TARGET_SQLITE     sqlite)
 set(TARGET_GUI        mailunitui)
 
-set(CMAKE_BINARY_DIR       ${CMAKE_CURRENT_LIST_DIR}/Binary)
-set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR})
-set(LIBRARY_OUTPUT_PATH    ${CMAKE_BINARY_DIR})
-
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     message(STATUS "Application will be built in the Debug configuration")
     set(CMAKE_VERBOSE_MAKEFILE ON)
@@ -95,9 +91,11 @@ add_definitions(-DBOOST_FILESYSTEM_NO_DEPRECATED)
 ####
 if(ENABLE_GUI)
     find_package(Qt4 REQUIRED)
+    include(${QT_USE_FILE})
     set(GUI_LIBS
         Qt4::QtCore
         Qt4::QtGui
+        Qt4::QtNetwork
     )
     set(GUI_INCLUDE_DIRS
         ${QT_INCLUDE_DIR}
@@ -191,8 +189,17 @@ set(SRC_SERVER
     MailUnit/Main.cpp
 )
 
+set(SRC_GUI_MOC
+    MailUnitUI/MainWindow.h
+    MailUnitUI/MqpClient.h
+)
+
 set(SRC_GUI
-    Gui/Main.cpp
+    ${SRC_GUI_MOC}
+    MailUnitUI/Main.cpp
+    MailUnitUI/MainWindow.cpp
+    MailUnitUI/MqpClient.cpp
+    MailUnitUI/Message.h
 )
 
 set(SQLITE_SRC
@@ -313,7 +320,11 @@ target_link_libraries(${TARGET_SERVER}
 # mailunitui
 #
 if(ENABLE_GUI)
-    add_executable(${TARGET_GUI} ${SRC_GUI})
+    QT4_WRAP_CPP(GUI_MOC ${SRC_GUI_MOC})
+    add_executable(${TARGET_GUI}
+        ${SRC_GUI}
+        ${GUI_MOC}
+    )
     add_dependencies(${TARGET_GUI}
         ${TARGET_LIB}
         ${TARGET_SQLITE}
