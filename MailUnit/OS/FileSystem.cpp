@@ -92,22 +92,22 @@ void MailUnit::OS::closeNativeFile(MU_NATIVE_FILE _native_file)
 boost::filesystem::path MailUnit::OS::systemConfigDirectory()
 {
 #ifdef _WIN32
-    return _wgetenv("ALLUSERSPROFILE");
+    return fs::path(_wgetenv("ALLUSERSPROFILE")) / BOOST_PP_STRINGIZE(_MU_CONFIG_DIRECTORY);
 #elif __APPLE__
 #   error Mac OS not supported yet
 #else
-    return "/etc";
+    return "/etc/" BOOST_PP_STRINGIZE(_MU_CONFIG_DIRECTORY);
 #endif
 }
 
 boost::filesystem::path MailUnit::OS::userConfigDirectory()
 {
 #ifdef _WIN32
-    return _wgetenv("APPDATA");
+    return fs::path(_wgetenv("APPDATA")) / BOOST_PP_STRINGIZE(_MU_CONFIG_DIRECTORY);
 #elif __APPLE__
 #   error Mac OS not supported yet
 #else
-    return fs::path(getenv("HOME")) / ".config";
+    return fs::path(getenv("HOME")) / ".config" / BOOST_PP_STRINGIZE(_MU_CONFIG_DIRECTORY);
 #endif
 }
 

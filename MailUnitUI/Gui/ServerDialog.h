@@ -15,34 +15,44 @@
  *                                                                                             *
  ***********************************************************************************************/
 
-#include <boost/preprocessor/stringize.hpp>
-#include <QtCore/QDir>
-#include <QtGui/QApplication>
-#include <QtGui/QDesktopServices>
-#include <MailUnit/OS/FileSystem.h>
-#include <MailUnitUI/Config.h>
-#include <MailUnitUI/Gui/MainWindow.h>
+#ifndef __MUGUI_GUI_SERVERDIALOG_H__
+#define __MUGUI_GUI_SERVERDIALOG_H__
 
-using namespace MailUnit::Gui;
+#include <QtGui/QDialog>
+#include <ui_ServerDialog.h>
 
-Config * loadConfig()
+namespace MailUnit {
+namespace Gui {
+
+class ServerDialog : public QDialog, private Ui::ServerDialog
 {
-    QDir config_dir(MailUnit::OS::userConfigDirectory().string().c_str());
-    config_dir.cd(BOOST_PP_STRINGIZE(_MU_CONFIG_DIRECTORY));
-    return new Config(config_dir.filePath(BOOST_PP_STRINGIZE(_MU_GUI_BINARY_NAME) ".xml"));
-}
+    Q_OBJECT
 
-int main(int _argc, char ** _argv)
-{
-    QApplication app(_argc, _argv);
-    Config * config = loadConfig();
-    MainWindow wnd(*config);
-    wnd.setWindowTitle("Mail Unit GUI");
-    wnd.move(config->windowPosition());
-    wnd.resize(config->windowSize());
-    wnd.show();
-    app.exec();
-    config->save();
-    delete config;
-    return 0;
-}
+public:
+    explicit ServerDialog(QWidget * _parent = nullptr) :
+        QDialog(_parent)
+    {
+        setupUi(this);
+    }
+
+    const QString name() const
+    {
+        return mp_edit_name->text();
+    }
+
+    const QString host() const
+    {
+        return mp_edit_host->text();
+    }
+
+    quint16 port() const
+    {
+        return static_cast<quint16>(mp_spinbox_port->value());
+    }
+
+}; // class ServerDialog
+
+} // namespace Gui
+} // namespace MailUnit
+
+#endif // __MUGUI_GUI_SERVERDIALOG_H__

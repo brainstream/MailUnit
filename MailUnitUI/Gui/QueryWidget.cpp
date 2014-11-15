@@ -15,34 +15,27 @@
  *                                                                                             *
  ***********************************************************************************************/
 
-#include <boost/preprocessor/stringize.hpp>
-#include <QtCore/QDir>
-#include <QtGui/QApplication>
-#include <QtGui/QDesktopServices>
-#include <MailUnit/OS/FileSystem.h>
-#include <MailUnitUI/Config.h>
-#include <MailUnitUI/Gui/MainWindow.h>
+#include <MailUnitUI/Gui/QueryWidget.h>
 
 using namespace MailUnit::Gui;
 
-Config * loadConfig()
+QueryWidget::QueryWidget(const ServerConfig & _server, QWidget * _parent /*= nullptr*/) :
+    QWidget(_parent),
+    m_server(_server),
+    mp_mqp_client(nullptr)
 {
-    QDir config_dir(MailUnit::OS::userConfigDirectory().string().c_str());
-    config_dir.cd(BOOST_PP_STRINGIZE(_MU_CONFIG_DIRECTORY));
-    return new Config(config_dir.filePath(BOOST_PP_STRINGIZE(_MU_GUI_BINARY_NAME) ".xml"));
+    setupUi(this);
+    mp_mqp_client = new MqpClient(_server, this);
+    connect(mp_mqp_client, SIGNAL(messageReceived(QString)), this, SLOT(onMessageReceived(QString)));
 }
 
-int main(int _argc, char ** _argv)
+void QueryWidget::execute()
 {
-    QApplication app(_argc, _argv);
-    Config * config = loadConfig();
-    MainWindow wnd(*config);
-    wnd.setWindowTitle("Mail Unit GUI");
-    wnd.move(config->windowPosition());
-    wnd.resize(config->windowSize());
-    wnd.show();
-    app.exec();
-    config->save();
-    delete config;
-    return 0;
+    mp_edit_result->clear();
+    mp_mqp_client->query(mp_edit_query->toPlainText());
+}
+
+void QueryWidget::onMessageReceived(const QString & _data)
+{
+    mp_edit_result->appendPlainText(_data);
 }

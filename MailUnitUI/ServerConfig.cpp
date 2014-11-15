@@ -15,34 +15,40 @@
  *                                                                                             *
  ***********************************************************************************************/
 
-#include <boost/preprocessor/stringize.hpp>
-#include <QtCore/QDir>
-#include <QtGui/QApplication>
-#include <QtGui/QDesktopServices>
-#include <MailUnit/OS/FileSystem.h>
-#include <MailUnitUI/Config.h>
-#include <MailUnitUI/Gui/MainWindow.h>
+#include <MailUnitUI/ServerConfig.h>
 
 using namespace MailUnit::Gui;
 
-Config * loadConfig()
+ServerConfigList::~ServerConfigList()
 {
-    QDir config_dir(MailUnit::OS::userConfigDirectory().string().c_str());
-    config_dir.cd(BOOST_PP_STRINGIZE(_MU_CONFIG_DIRECTORY));
-    return new Config(config_dir.filePath(BOOST_PP_STRINGIZE(_MU_GUI_BINARY_NAME) ".xml"));
+    for(ServerConfig * server : m_servers)
+        delete server;
 }
 
-int main(int _argc, char ** _argv)
+void ServerConfigList::add(const ServerConfig & _server)
 {
-    QApplication app(_argc, _argv);
-    Config * config = loadConfig();
-    MainWindow wnd(*config);
-    wnd.setWindowTitle("Mail Unit GUI");
-    wnd.move(config->windowPosition());
-    wnd.resize(config->windowSize());
-    wnd.show();
-    app.exec();
-    config->save();
-    delete config;
-    return 0;
+    ServerConfig * server = new ServerConfig(_server);
+    m_servers.append(server);
+    emit added(*server);
+}
+
+bool ServerConfigList::remove(int _index)
+{
+    if(_index < 0 || _index >= m_servers.size())
+        return false;
+    ServerConfig * server = m_servers.at(_index);
+    m_servers.remove(_index);
+    emit removed(*server);
+    delete server;
+    return true;
+}
+
+bool ServerConfigList::update(int _index, const ServerConfig & _server)
+{
+    if(_index < 0 || _index >= m_servers.size())
+        return false;
+    ServerConfig * server = m_servers.at(_index);
+    *server = _server;
+    emit updated(*server);
+    return true;
 }

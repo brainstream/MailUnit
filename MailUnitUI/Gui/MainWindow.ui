@@ -1,0 +1,258 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="enabled">
+   <bool>true</bool>
+  </property>
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>993</width>
+    <height>619</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <property name="windowIcon">
+   <iconset resource="../Resources/Resources.qrc">
+    <normaloff>:/img/mu-logo-100.png</normaloff>:/img/mu-logo-100.png</iconset>
+  </property>
+  <property name="animated">
+   <bool>false</bool>
+  </property>
+  <widget class="QWidget" name="mp_central_widget">
+   <layout class="QHBoxLayout" name="horizontalLayout_2">
+    <item>
+     <layout class="QHBoxLayout" name="mp_central_widget_layout">
+      <item>
+       <widget class="QListView" name="mp_list_servers">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QTabWidget" name="mp_tabs">
+        <property name="tabShape">
+         <enum>QTabWidget::Rounded</enum>
+        </property>
+        <property name="currentIndex">
+         <number>-1</number>
+        </property>
+        <property name="tabsClosable">
+         <bool>true</bool>
+        </property>
+        <property name="movable">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="mp_menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>993</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="mp_menu_help">
+    <property name="title">
+     <string>&amp;Help</string>
+    </property>
+    <addaction name="mp_action_about"/>
+    <addaction name="mp_action_about_qt"/>
+   </widget>
+   <widget class="QMenu" name="mp_menu_server">
+    <property name="title">
+     <string>&amp;Server</string>
+    </property>
+    <addaction name="mp_action_new_server"/>
+   </widget>
+   <addaction name="mp_menu_server"/>
+   <addaction name="mp_menu_help"/>
+  </widget>
+  <widget class="QStatusBar" name="mp_statusbar"/>
+  <widget class="QToolBar" name="mp_toolbar">
+   <property name="windowTitle">
+    <string>toolBar</string>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="mp_action_new_server"/>
+   <addaction name="mp_action_exec_query"/>
+  </widget>
+  <action name="mp_action_about_qt">
+   <property name="text">
+    <string>About &amp;Qt...</string>
+   </property>
+  </action>
+  <action name="mp_action_new_server">
+   <property name="text">
+    <string>&amp;New server...</string>
+   </property>
+   <property name="toolTip">
+    <string>New server</string>
+   </property>
+  </action>
+  <action name="mp_action_about">
+   <property name="text">
+    <string>&amp;About...</string>
+   </property>
+  </action>
+  <action name="mp_action_exec_query">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Execute query</string>
+   </property>
+   <property name="toolTip">
+    <string>Execute query</string>
+   </property>
+   <property name="shortcut">
+    <string>F5</string>
+   </property>
+  </action>
+ </widget>
+ <resources>
+  <include location="../Resources/Resources.qrc"/>
+ </resources>
+ <connections>
+  <connection>
+   <sender>mp_action_about_qt</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>aboutQt()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>496</x>
+     <y>309</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>mp_action_new_server</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>addServer()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>496</x>
+     <y>309</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>mp_action_about</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>about()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>496</x>
+     <y>309</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>mp_list_servers</sender>
+   <signal>activated(QModelIndex)</signal>
+   <receiver>MainWindow</receiver>
+   <slot>serverSelected(QModelIndex)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>137</x>
+     <y>308</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>496</x>
+     <y>309</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>mp_tabs</sender>
+   <signal>currentChanged(int)</signal>
+   <receiver>MainWindow</receiver>
+   <slot>currentTabChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>627</x>
+     <y>308</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>496</x>
+     <y>309</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>mp_tabs</sender>
+   <signal>tabCloseRequested(int)</signal>
+   <receiver>MainWindow</receiver>
+   <slot>closeTab(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>627</x>
+     <y>308</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>496</x>
+     <y>309</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>mp_action_exec_query</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>execQuery()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>496</x>
+     <y>309</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>aboutQt()</slot>
+  <slot>addServer()</slot>
+  <slot>about()</slot>
+  <slot>serverSelected(QModelIndex)</slot>
+  <slot>currentTabChanged(int)</slot>
+  <slot>closeTab(int)</slot>
+  <slot>execQuery()</slot>
+ </slots>
+</ui>

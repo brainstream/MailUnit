@@ -81,7 +81,6 @@ find_package(Boost REQUIRED COMPONENTS
     iostreams
     ${BOOST_TEST}
 )
-add_definitions(-DBOOST_FILESYSTEM_NO_DEPRECATED)
 ####
 # End the Boost libraries initialization
 ####
@@ -96,6 +95,7 @@ if(ENABLE_GUI)
         Qt4::QtCore
         Qt4::QtGui
         Qt4::QtNetwork
+        Qt4::QtXml
     )
     set(GUI_INCLUDE_DIRS
         ${QT_INCLUDE_DIR}
@@ -112,6 +112,13 @@ if(WIN32)
 else(WIN32)
     set(LIBPREFIX lib)
 endif(WIN32)
+
+add_definitions(
+    -DBOOST_FILESYSTEM_NO_DEPRECATED
+    -D_MU_SERVER_BINARY_NAME=${BINARY_NAME}
+    -D_MU_GUI_BINARY_NAME=${TARGET_GUI}
+    -D_MU_CONFIG_DIRECTORY=${BINARY_NAME}
+)
 
 
 #######################################################
@@ -190,16 +197,41 @@ set(SRC_SERVER
 )
 
 set(SRC_GUI_MOC
-    MailUnitUI/MainWindow.h
+    MailUnitUI/ServerConfig.h
     MailUnitUI/MqpClient.h
+    MailUnitUI/Gui/MainWindow.h
+    MailUnitUI/Gui/ServerDialog.h
+    MailUnitUI/Gui/AboutDialog.h
+    MailUnitUI/Gui/QueryWidget.h
+)
+
+set(SRC_GUI_UI
+    MailUnitUI/Gui/MainWindow.ui
+    MailUnitUI/Gui/ServerDialog.ui
+    MailUnitUI/Gui/AboutDialog.ui
+    MailUnitUI/Gui/QueryWidget.ui
+)
+
+set(SRC_GUI_RSC
+    MailUnitUI/Resources/Resources.qrc
+)
+
+set(SRC_GUI_BIN
+    MailUnitUI/Resources/mu-logo-100.png
 )
 
 set(SRC_GUI
     ${SRC_GUI_MOC}
+    ${SRC_GUI_UI}
+    MailUnit/OS/FileSystem.cpp
     MailUnitUI/Main.cpp
-    MailUnitUI/MainWindow.cpp
-    MailUnitUI/MqpClient.cpp
     MailUnitUI/Message.h
+    MailUnitUI/Config.h
+    MailUnitUI/Config.cpp
+    MailUnitUI/ServerConfig.cpp
+    MailUnitUI/MqpClient.cpp
+    MailUnitUI/Gui/MainWindow.cpp
+    MailUnitUI/Gui/QueryWidget.cpp
 )
 
 set(SQLITE_SRC
@@ -304,7 +336,6 @@ target_include_directories(${TARGET_SERVER} PRIVATE
 )
 target_compile_definitions(${TARGET_SERVER} PRIVATE
     -D_MU_SERVER
-    -D_MU_BINARY_NAME=${BINARY_NAME}
 )
 target_link_libraries(${TARGET_SERVER}
     ${CMAKE_DL_LIBS}
@@ -321,9 +352,14 @@ target_link_libraries(${TARGET_SERVER}
 #
 if(ENABLE_GUI)
     QT4_WRAP_CPP(GUI_MOC ${SRC_GUI_MOC})
+    QT4_WRAP_UI(GUI_UI ${SRC_GUI_UI})
+    QT4_ADD_RESOURCES(GUI_RSC ${SRC_GUI_RSC})
     add_executable(${TARGET_GUI}
         ${SRC_GUI}
         ${GUI_MOC}
+        ${GUI_UI}
+        ${GUI_RSC}
+        ${SRC_GUI_BIN}
     )
     add_dependencies(${TARGET_GUI}
         ${TARGET_LIB}
@@ -331,7 +367,7 @@ if(ENABLE_GUI)
     )
     target_include_directories(${TARGET_GUI} PRIVATE
         ${COMMON_INCLUDE_DIRS}
-        ${GUI_INCLUDE_DIRS}
+        ${CMAKE_BINARY_DIR}
     )
     target_compile_definitions(${TARGET_GUI} PRIVATE
         -D_MU_GUI
@@ -340,6 +376,7 @@ if(ENABLE_GUI)
         ${TARGET_SQLITE}
         ${TARGET_LIB}
         ${GUI_LIBS}
+        ${Boost_LIBRARIES}
     )
 endif(ENABLE_GUI)
 

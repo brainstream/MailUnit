@@ -15,44 +15,61 @@
  *                                                                                             *
  ***********************************************************************************************/
 
-#ifndef __MUGUI_MAINWINDOW_H__
-#define __MUGUI_MAINWINDOW_H__
+#ifndef __MUGUI_CONFIG_H__
+#define __MUGUI_CONFIG_H__
 
-#include <QtGui/QMainWindow>
-#include <QtGui/QLineEdit>
-#include <QtGui/QTextEdit>
-#include <QtGui/QPlainTextEdit>
-#include <MailUnitUI/MqpClient.h>
+#include <QtCore/QFile>
+#include <QtCore/QPoint>
+#include <QtCore/QSize>
+#include <MailUnitUI/ServerConfig.h>
 
 namespace MailUnit {
 namespace Gui {
 
-class MainWindow : public QMainWindow
+class Config final
 {
-    Q_OBJECT
-
 public:
-    MainWindow();
-    ~MainWindow() override;
+    explicit Config(const QString & _config_file_path);
 
-private slots:
-    void execute();
-    void aboutQt();
-    void onMessageReceived(const QString & _data);
+    ~Config();
+
+    void reload();
+
+    bool save();
+
+    ServerConfigList & servers()
+    {
+        return *mp_servers;
+    }
+
+    const QSize & windowSize() const
+    {
+        return m_wnd_size;
+    }
+
+    void setWindowSize(const QSize & _size)
+    {
+        m_wnd_size = _size;
+    }
+
+    const QPoint & windowPosition() const
+    {
+        return m_wnd_pos;
+    }
+
+    void setWindowPosition(const QPoint & _pos)
+    {
+        m_wnd_pos = _pos;
+    }
 
 private:
-    void setupUI();
-    bool setupMqpClient();
-
-private:
-    MqpClient * mp_mqp_client;
-    QLineEdit * mp_edit_host;
-    QLineEdit * mp_edit_port;
-    QPlainTextEdit * mp_edit_query;
-    QTextEdit * mp_edit_result;
-}; // class MainWindow
+    QString m_config_file_path;
+    ServerConfigList * mp_servers;
+    QPoint m_wnd_pos;
+    QSize m_wnd_size;
+}; // class Config
 
 } // namespace Gui
 } // namespace MailUnit
 
-#endif // __MUGUI_MAINWINDOW_H__
+#endif // __MUGUI_CONFIG_H__

@@ -110,7 +110,7 @@ fs::path configFile(const fs::path & _dir)
 {
     if(_dir.empty())
         return fs::path();
-    fs::path file = _dir / BOOST_STRINGIZE(_MU_BINARY_NAME) ".conf";
+    fs::path file = _dir / BOOST_STRINGIZE(_MU_CONFIG_DIRECTORY) ".conf";
     return fs::exists(file) ? file : fs::path();
 }
 

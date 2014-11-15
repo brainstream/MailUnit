@@ -15,34 +15,41 @@
  *                                                                                             *
  ***********************************************************************************************/
 
-#include <boost/preprocessor/stringize.hpp>
-#include <QtCore/QDir>
-#include <QtGui/QApplication>
-#include <QtGui/QDesktopServices>
-#include <MailUnit/OS/FileSystem.h>
-#include <MailUnitUI/Config.h>
-#include <MailUnitUI/Gui/MainWindow.h>
+#ifndef __MUGUI_GUI_QUERYWIDGET_H__
+#define __MUGUI_GUI_QUERYWIDGET_H__
 
-using namespace MailUnit::Gui;
+#include <QtGui/QWidget>
+#include <ui_QueryWidget.h>
+#include <MailUnitUI/ServerConfig.h>
+#include <MailUnitUI/MqpClient.h>
 
-Config * loadConfig()
+namespace MailUnit {
+namespace Gui {
+
+class QueryWidget : public QWidget, private Ui::QueryWidget
 {
-    QDir config_dir(MailUnit::OS::userConfigDirectory().string().c_str());
-    config_dir.cd(BOOST_PP_STRINGIZE(_MU_CONFIG_DIRECTORY));
-    return new Config(config_dir.filePath(BOOST_PP_STRINGIZE(_MU_GUI_BINARY_NAME) ".xml"));
-}
+    Q_OBJECT
 
-int main(int _argc, char ** _argv)
-{
-    QApplication app(_argc, _argv);
-    Config * config = loadConfig();
-    MainWindow wnd(*config);
-    wnd.setWindowTitle("Mail Unit GUI");
-    wnd.move(config->windowPosition());
-    wnd.resize(config->windowSize());
-    wnd.show();
-    app.exec();
-    config->save();
-    delete config;
-    return 0;
-}
+public:
+    explicit QueryWidget(const ServerConfig & _server, QWidget * _parent = nullptr);
+
+    const ServerConfig & server() const
+    {
+        return m_server;
+    }
+
+public slots:
+    void execute();
+
+private slots:
+    void onMessageReceived(const QString & _data);
+
+private:
+    ServerConfig m_server;
+    MqpClient * mp_mqp_client;
+};
+
+} // namespace Gui
+} // namespace MailUnit
+
+#endif // __MUGUI_GUI_QUERYWIDGET_H__

@@ -15,39 +15,44 @@
  *                                                                                             *
  ***********************************************************************************************/
 
-#ifndef _MUGUI_MQPCLIENT_H__
-#define _MUGUI_MQPCLIENT_H__
+#ifndef __MUGUI_SERVERCONFIG_H__
+#define __MUGUI_SERVERCONFIG_H__
 
-#include <QtNetwork/QTcpSocket>
-#include <MailUnitUI/ServerConfig.h>
+#include <QtCore/QString>
+#include <QtCore/QObject>
+#include <QtCore/QVector>
 
 namespace MailUnit {
 namespace Gui {
 
-class MqpClient : public QObject
+class ServerConfig
 {
-    Q_OBJECT
-
 public:
-    explicit MqpClient(const ServerConfig & _config, QObject * _parent = nullptr);
-    void query(const QString & _query);
-
-    bool busy() const
+    ServerConfig(const QString & _name, const QString & _host, quint16 _port) :
+        m_name(_name),
+        m_host(_host),
+        m_port(_port)
     {
-        return nullptr != mp_socket;
     }
 
-    const QString & hostname() const
+    const QString & name() const
     {
-        return m_hostname;
+        return m_name;
     }
 
-    bool trySetHostName(const QString & _hostname)
+    void setName(const QString & _name)
     {
-        if(busy())
-            return false;
-        m_hostname = _hostname;
-        return true;
+        m_name = _name;
+    }
+
+    const QString & host() const
+    {
+        return m_host;
+    }
+
+    void setHost(const QString & _host)
+    {
+        m_host = _host;
     }
 
     quint16 port() const
@@ -55,31 +60,62 @@ public:
         return m_port;
     }
 
-    bool trySetPort(quint16 _port)
+    void setPort(quint16 _port)
     {
-        if(busy())
-            return false;
         m_port = _port;
-        return true;
     }
 
-signals:
-    void messageReceived(const QString & _message);
+private:
+    QString m_name;
+    QString m_host;
+    quint16 m_port;
+}; // class ServerConfig
 
-private slots:
-    void onSocketConnected();
-    void onSocketDisconnected();
-    void onSocketReadyRead();
-    void onSocketError(QAbstractSocket::SocketError _error);
+
+class ServerConfigList : public QObject
+{
+    Q_OBJECT
+
+public:
+    ServerConfigList(QObject * _parent = nullptr) :
+        QObject(_parent)
+    {
+    }
+
+    ~ServerConfigList() override;
+
+    int size() const
+    {
+        return m_servers.size();
+    }
+
+    const ServerConfig & at(int _index) const
+    {
+        return *m_servers.at(_index);
+    }
+
+    const ServerConfig & operator [](int _index) const
+    {
+        return at(_index);
+    }
+
+    bool update(int _index, const ServerConfig & _server);
+
+public slots:
+    void add(const ServerConfig & _server);
+    bool remove(int _index);
+
+signals:
+    void added(const ServerConfig & _server);
+    void removed(const ServerConfig & _server);
+    void updated(const ServerConfig & _server);
 
 private:
-    QString m_hostname;
-    quint16 m_port;
-    QTcpSocket * mp_socket;
-    QString m_query;
-}; // class MqpClient
+    QVector<ServerConfig *> m_servers;
+}; // class ServerConfigList
 
 } // namespace Gui
 } // namespace MailUnit
 
-#endif // _MUGUI_MQPCLIENT_H__
+
+#endif // __MUGUI_SERVERCONFIG_H__

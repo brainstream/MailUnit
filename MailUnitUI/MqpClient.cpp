@@ -19,10 +19,10 @@
 
 using namespace MailUnit::Gui;
 
-MqpClient::MqpClient(const QString & _hostname, quint16 _port, QObject * _parent /*= nullptr*/) :
+MqpClient::MqpClient(const ServerConfig & _config, QObject * _parent /*= nullptr*/) :
     QObject(_parent),
-    m_hostname(_hostname),
-    m_port(_port),
+    m_hostname(_config.host()),
+    m_port(_config.port()),
     mp_socket(nullptr)
 {
 }
