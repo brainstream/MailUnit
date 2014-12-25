@@ -286,6 +286,9 @@ target_include_directories(${TARGET_SQLITE} PRIVATE
 target_compile_definitions(${TARGET_SQLITE} PRIVATE
     -DSQLITE_THREADSAFE=1
 )
+target_link_libraries(${TARGET_SQLITE}
+    ${CMAKE_DL_LIBS}
+)
 
 #
 # libmailunit
