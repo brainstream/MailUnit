@@ -1,1 +1,56 @@
-The MailUnit page
+<html>
+    <head>
+	<title>MailUnit</title>
+	<link rel="stylesheet" href="bootstrap.min.css" />
+	<link rel="stylesheet" href="main.css" />
+    </head>
+    <body>
+	<div id="content" class="container">
+	    <h1>MailUnit</h1>
+	    <div class="alert alert-danger" role="alert">
+		<strong>Warning</strong>: it is early unstable development version!	
+	    </div>
+
+	    <p>MailUnit allows to test SMTP clients and request sent messages using the mail query protocol (MQP).</p>
+
+	    <h3>Download</h3>
+	    <p>Now you can only download MailUnit's source code from the <a href="https://github.com/brainstream/MailUnit">github</a></p>
+	    <p><a href="https://github.com/brainstream/MailUnit/archive/master.zip" class="btn btn-primary">Download source code</a></p>
+	    <p>or clone the git repository using following command</p>
+	    <p><code>git clone https://github.com/brainstream/MailUnit.git</code></p>
+
+	    <h3>Build</h3>
+	    <p>MailUnit has following dependencies</p>
+	    <ul>
+		<li>Boost.Filesystem</li>
+		<li>Boost.Date_Time</li>
+		<li>Boost.Program_Options</li>
+		<li>Boost.Regex</li>
+		<li>Boost.Iostreams</li>
+	    </ul>
+	    <p>Also a C++11 supported compiler is required.</p>
+	    <p>MailUnit uses CMake building system. You should enter following command to build binary files to a suitable place.</p>
+	    <p>
+		<code>
+		    cd MailUnit<br>
+		    cmake .<br>
+		    make
+		</code>
+	    </p>
+	    <p>
+		It will create two files: the executeble file named <code>mailunit</code> and library with the same name.
+	    </p>
+
+	    <h3>Install</h3>
+	    <p>Currently there is no way to install MailUnit automatically. You should copy binary files manually to </p>
+
+	    <h3>SMTP server</h3>
+	    <p>Only the main SMTP commands are supported now: EHLO, MAIL FROM, RCPT TO and QUIT.</p>
+
+	    <h3>MQP server</h3>
+	    <p>
+		MQP (Mail Query Protocol) allows to query received by SMTP server message using simple query language.
+	    </p>
+	</div>
+    </body>
+</html>
