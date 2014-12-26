@@ -6,7 +6,17 @@
     </head>
     <body>
 	<div id="content" class="container">
-	    <h1>MailUnit</h1>
+	    <div class="row">
+		<div class="col-sm-12">
+		    <div id="logo">
+			<img src="logo.png">
+		    </div>
+		    <div id="project-name" class="">
+			<h1>MailUnit</h1>
+		    </div>
+		</div>
+	    </div>
+
 	    <div class="alert alert-danger" role="alert">
 		<strong>Warning</strong>: it is early unstable development version!	
 	    </div>
@@ -31,11 +41,9 @@
 	    <p>Also a C++11 supported compiler is required.</p>
 	    <p>MailUnit uses CMake building system. You should enter following command to build binary files to a suitable place.</p>
 	    <p>
-		<code>
-		    cd MailUnit<br>
-		    cmake .<br>
-		    make
-		</code>
+		<code>cd MailUnit</code><br>
+		<code>cmake .</code><br>
+		<code>make</code><br>
 	    </p>
 	    <p>
 		It will create two files: the executeble file named <code>mailunit</code> and library with the same name.
@@ -49,7 +57,7 @@
 
 	    <h3>MQP server</h3>
 	    <p>
-		MQP (Mail Query Protocol) allows to query received by SMTP server message using simple query language.
+		MQP (Mail Query Protocol) allows to query received by SMTP server messages using simple query language.
 	    </p>
 	</div>
     </body>
