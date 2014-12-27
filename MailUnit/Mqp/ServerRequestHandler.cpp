@@ -169,8 +169,9 @@ void Session::writeEmails(std::shared_ptr<std::vector<std::unique_ptr<Email>>> _
             email_operation.addStep(std::make_unique<AsyncFileWriter<TcpSocket>>(file));
         }
     );
-    emails_operation->run(m_socket, [](const boost::system::error_code &) {
+    emails_operation->run(m_socket, [self](const boost::system::error_code &) {
         // TODO: error
+        self->read();
         return true;
     });
 }
