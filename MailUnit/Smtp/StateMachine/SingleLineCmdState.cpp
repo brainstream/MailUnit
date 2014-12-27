@@ -22,13 +22,13 @@ using namespace MailUnit::Smtp;
 
 SingleLineCmdState::SingleLineCmdState(size_t args_pos) :
     m_args_pos(args_pos),
-    m_state(ProcessResult::incomplete)
+    m_state(ProcessResult::incompleted)
 {
 }
 
 SingleLineCmdState::ProcessResult SingleLineCmdState::internalProcessInput(const std::string & _input)
 {
-    if(ProcessResult::incomplete != m_state)
+    if(ProcessResult::incompleted != m_state)
     {
         return m_state;
     }
@@ -56,5 +56,5 @@ bool SingleLineCmdState::commandArgString(std::string & _result) const
 void SingleLineCmdState::reset()
 {
     m_data.clear();
-    m_state = ProcessResult::incomplete;
+    m_state = ProcessResult::incompleted;
 }

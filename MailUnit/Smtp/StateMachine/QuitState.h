@@ -31,22 +31,13 @@ public:
     {
     }
 
-    bool isInputProcessingCompleted() const override
+    StateStatus response(ResponseCode & _response) const override
     {
-        return true;
+        _response = ResponseCode::closing;
+        return StateStatus::terminated;
     }
 
-    bool isProtocolProcessingCompleted() const override
-    {
-        return true;
-    }
-
-    bool response(ResponseCode * _response) const override
-    {
-        *_response = ResponseCode::Closing;
-        return true;
-    }
-
+protected:
     void reset() override
     {
     }

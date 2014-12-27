@@ -25,8 +25,6 @@ using namespace MailUnit::Smtp;
 
 void DataState::processInput(const std::string & _input, Storage::RawEmail & _email)
 {
-    if(m_read_state.error || m_read_state.data_accepted)
-        return;
     if(m_read_state.header_accepted)
         processData(_input, _email);
     else
@@ -60,29 +58,28 @@ void DataState::processData(const std::string & _input, Storage::RawEmail & _ema
     _email.data() << m_data.substr(sizeof(COMMAND) - 1);
 }
 
-bool DataState::response(ResponseCode * _response) const
+StateStatus DataState::response(ResponseCode & _response) const
 {
     if(m_read_state.error)
     {
-        *_response = ResponseCode::InternalError;
-        return true;
+        _response = ResponseCode::internalError;
+        return StateStatus::completed;
     }
     if(m_read_state.data_accepted)
     {
-        *_response = ResponseCode::Ok;
-        return true;
+        _response = ResponseCode::ok;
+        return StateStatus::emailReady;
     }
     else if(m_read_state.data_accepting)
     {
-        return false;
+        return StateStatus::incompleted;
     }
     else if(m_read_state.header_accepted)
     {
-        *_response = ResponseCode::Intermediate;
-        return true;
+        _response = ResponseCode::intermediate;
+        return StateStatus::intermediate;
     }
-    *_response = ResponseCode::InternalError;
-    return true;
+    return StateStatus::incompleted;
 }
 
 void DataState::reset()

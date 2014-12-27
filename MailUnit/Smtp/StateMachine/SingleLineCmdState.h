@@ -31,7 +31,7 @@ protected:
     {
         error,
         success,
-        incomplete
+        incompleted
     }; // enum class ProcessResult
 
 protected:

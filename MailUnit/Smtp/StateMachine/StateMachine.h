@@ -80,7 +80,7 @@ public:
     typedef StateBase  BaseAllStates;
 
     struct transition_table : boost::mpl::vector<
-        // Start               Event          Next
+        //    Start          Event          Next
         _row< StartState,    EhloEvent,     EhloState     >,
         _row< EhloState,     MailFromEvent, MailFromState >,
         _row< MailFromState, MailFromEvent, MailFromState >,
@@ -88,7 +88,8 @@ public:
         _row< RcptToState,   RcptToEvent,   RcptToState   >,
         _row< RcptToState,   DataEvent,     DataState     >,
         _row< RcptToState,   QuitEvent,     QuitState     >,
-        _row< DataState,     QuitEvent,     QuitState     >
+        _row< DataState,     QuitEvent,     QuitState     >,
+        _row< DataState,     MailFromEvent, MailFromState >
     > { };
 }; // class StateMachineDef
 

@@ -95,12 +95,22 @@ void Session::performNextAction()
     int state_id = mp_state_machine->current_state()[0];
     StateBase * state = mp_state_machine->get_state_by_id(state_id);
     ResponseCode response;
-    if(state->isProtocolProcessingCompleted())
-        saveEmail();
-    if(state->response(&response))
-        write(translateResponseCode(response));
-    else
+    switch(state->response(response))
+    {
+    case StateStatus::incompleted:
         read();
+        break;
+    case StateStatus::terminated:
+        break;
+    case StateStatus::completed:
+    case StateStatus::intermediate:
+        write(translateResponseCode(response));
+        break;
+    case StateStatus::emailReady:
+        saveEmail();
+        write(translateResponseCode(response));
+        break;
+    }
 }
 
 void Session::saveEmail()
@@ -109,6 +119,8 @@ void Session::saveEmail()
     {
         LOG_INFO << "Message received"; // TODO: more details
         m_repository_ptr->storeEmail(*m_raw_email_ptr);
+        m_raw_email_ptr.reset();
+        m_raw_email_ptr = m_repository_ptr->createRawEmail();
     }
     catch(const Storage::StorageException & error)
     {
@@ -143,9 +155,13 @@ void Session::read()
 
 void Session::processInput(const std::string & _input)
 {
+#if 1
+    std::cout << "INPUT: \"" << _input << "\"\n";
+    std::cout.flush();
+#endif
     int state_id = mp_state_machine->current_state()[0];
     StateBase * state = mp_state_machine->get_state_by_id(state_id);
-    if(!state->isInputProcessingCompleted())
+    if(!state->isInputProcessCompleted())
     {
         state->processInput(_input, *m_raw_email_ptr);
         return;

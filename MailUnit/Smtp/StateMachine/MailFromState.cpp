@@ -29,22 +29,24 @@ MailFromState::MailFromState() :
 
 void MailFromState::processInput(const std::string & _input, Storage::RawEmail & _email)
 {
+    if(internalProcessInput(_input) != ProcessResult::success)
+        return;
     std::string from;
-    if(internalProcessInput(_input) == ProcessResult::success && commandArgString(from))
+    if(commandArgString(from))
         _email.addFromAddress(from);
 }
 
-bool MailFromState::response(ResponseCode * _response) const
+StateStatus MailFromState::response(ResponseCode & _response) const
 {
     switch(currentState())
     {
-    case ProcessResult::incomplete:
-        return false;
+    case ProcessResult::incompleted:
+        return StateStatus::incompleted;
     case ProcessResult::error:
-        *_response = ResponseCode::InvalidParameters;
-        return true;
+        _response = ResponseCode::invalidParameters;
+        return StateStatus::completed;
     default:
-        *_response = ResponseCode::Ok;
-        return true;
+        _response = ResponseCode::ok;
+        return StateStatus::completed;
     }
 }

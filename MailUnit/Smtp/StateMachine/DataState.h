@@ -45,18 +45,9 @@ private:
 
 public:
     void processInput(const std::string & _input, Storage::RawEmail & _email) override;
+    StateStatus response(ResponseCode & _response) const override;
 
-    bool isInputProcessingCompleted() const override
-    {
-        return m_read_state.data_accepted;
-    }
-
-    bool isProtocolProcessingCompleted() const override
-    {
-        return false;
-    }
-
-    bool response(ResponseCode * _response) const override;
+protected:
     void reset() override;
 
 private:

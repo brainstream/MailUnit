@@ -27,15 +27,34 @@
 namespace MailUnit {
 namespace Smtp {
 
+enum class StateStatus
+{
+    incompleted   = 0x1,
+    completed     = 0x2,
+    intermediate  = 0X4,
+    emailReady    = 0x8,
+    terminated    = 0x10
+}; // enum class StateStatus
+
 
 class StateBase : private boost::noncopyable
 {
 public:
     virtual ~StateBase() { }
     virtual void processInput(const std::string & _input, Storage::RawEmail & _email) = 0;
-    virtual bool isInputProcessingCompleted() const                                   = 0;
-    virtual bool isProtocolProcessingCompleted() const                                = 0;
-    virtual bool response(ResponseCode * _response) const                             = 0;
+    virtual StateStatus response(ResponseCode & _response) const = 0;
+    bool isInputProcessCompleted() const
+    {
+        ResponseCode resp;
+        switch(response(resp))
+        {
+        case StateStatus::intermediate:
+        case StateStatus::incompleted:
+            return false;
+        default:
+            return true;
+        }
+    }
 }; // class StateBase
 
 
