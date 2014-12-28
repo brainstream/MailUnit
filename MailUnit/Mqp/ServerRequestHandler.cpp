@@ -116,14 +116,17 @@ void Session::read()
 
 void Session::processQuery()
 {
+    boost::algorithm::trim(m_query);
     if(isQueryEndOfSessionRequest())
     {
+        m_query.clear();
         return;
     }
     try
     {
         std::vector<std::unique_ptr<Email>> * emails = new std::vector<std::unique_ptr<Email>>();
         m_repository_ptr->findEmails(std::move(m_query), *emails);
+        m_query.clear();
         writeEmails(std::shared_ptr<std::vector<std::unique_ptr<Email>>>(emails));
     }
     catch(const StorageException & error) // TODO: EdslException
