@@ -155,7 +155,7 @@ void Session::read()
 
 void Session::processInput(const std::string & _input)
 {
-#if 1
+#ifdef DBGLOG
     std::cout << "INPUT: \"" << _input << "\"\n";
     std::cout.flush();
 #endif

@@ -47,6 +47,7 @@ private:
     size_t findEndOfQuery(const char * _query_piece, size_t _length);
     void read();
     void processQuery();
+    bool isQueryEndOfSessionRequest();
     void writeEmails(std::shared_ptr<std::vector<std::unique_ptr<Email> > > _emails);
     void write(const std::string & _data, std::function<void()> _callback);
 
@@ -115,6 +116,10 @@ void Session::read()
 
 void Session::processQuery()
 {
+    if(isQueryEndOfSessionRequest())
+    {
+        return;
+    }
     try
     {
         std::vector<std::unique_ptr<Email>> * emails = new std::vector<std::unique_ptr<Email>>();
@@ -130,6 +135,11 @@ void Session::processQuery()
             self->read();
         });
     }
+}
+
+bool Session::isQueryEndOfSessionRequest()
+{
+    return boost::algorithm::iequals("quite", m_query) || boost::algorithm::iequals("q", m_query);
 }
 
 void Session::writeEmails(std::shared_ptr<std::vector<std::unique_ptr<Email>>> _emails)

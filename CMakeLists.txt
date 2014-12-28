@@ -56,6 +56,10 @@ else()
     message(FATAL_ERROR "Unsupported compiler")
 endif()
 
+if(DBGLOG)
+    add_definitions(-DDBGLOG)
+endif()
+
 
 find_package(Threads REQUIRED)
 
