@@ -118,11 +118,11 @@ BOOST_AUTO_TEST_CASE(parseTest)
     {
         try
         {
-            std::shared_ptr<ConditionSequence> expression = parse(test.query);
+            std::shared_ptr<Expression> expression = parse(test.query);
             BOOST_CHECK(test.valid);
             BOOST_CHECK(nullptr != expression);
             std::stringstream stream;
-            stream << *expression;
+            stream << *expression->conditions;
             BOOST_CHECK_EQUAL(test.expected_result, stream.str());
         }
         catch(const EdslException &)

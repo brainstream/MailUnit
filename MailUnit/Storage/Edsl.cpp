@@ -44,7 +44,24 @@ BOOST_FUSION_ADAPT_STRUCT(
     (std::vector<RightConditionSequence>, right)
 )
 
+BOOST_FUSION_ADAPT_STRUCT(
+    Expression,
+    (Operation, operation)
+    (boost::optional<ConditionSequence>, conditions)
+)
+
 namespace {
+
+class OperationSymbols : public qi::symbols<char, Operation>
+{
+public:
+    OperationSymbols()
+    {
+        add
+            ("get", Operation::get)
+            ("drop" , Operation::drop);
+    }
+}; // class OperationSymbols
 
 class ConditionBinaryOperatorSymbols : public qi::symbols<char, ConditionBinaryOperator>
 {
@@ -73,7 +90,7 @@ public:
 }; // class ConditionJoinOperatorSymbols
 
 class Grammar :
-    public qi::grammar<typename std::string::const_iterator, ConditionSequence(), qi::ascii::space_type>
+    public qi::grammar<typename std::string::const_iterator, Expression(), qi::ascii::space_type>
 {
 private:
     template<typename Type>
@@ -83,6 +100,7 @@ public:
     Grammar();
 
 private:
+    OperationSymbols m_operation;
     Rule<std::string()> m_identifier;
     Rule<ConditionValue()> m_condition_value;
     Rule<BinaryCondition()> m_binary_condition;
@@ -92,10 +110,11 @@ private:
     Rule<RightConditionSequence()> m_right_condition_sequence;
     ConditionJoinOperatorSymbols m_join_operator;
     Rule<ConditionSequence()> m_condition_sequence;
+    Rule<Expression()> m_expression;
 }; // class Grammar
 
 Grammar::Grammar() :
-    Grammar::base_type(m_condition_sequence)
+    Grammar::base_type(m_expression)
 {
     m_identifier                   %= qi::lexeme[qi::ascii::alpha > *qi::ascii::alnum];
     m_condition_value              %= qi::int_ | ("'" > qi::lexeme[*(~qi::ascii::char_('\''))] > "'");
@@ -104,6 +123,7 @@ Grammar::Grammar() :
     m_condition_sequence_operand   %= m_binary_condition | m_bracketed_condition_sequence;
     m_right_condition_sequence     %= qi::ascii::no_case[m_join_operator] > m_condition_sequence_operand;
     m_condition_sequence           %= m_condition_sequence_operand > *m_right_condition_sequence;
+    m_expression                   %= m_operation > -m_condition_sequence;
 }
 
 class GenericPriter : public boost::static_visitor<>
@@ -246,7 +266,7 @@ std::ostream & operator << (std::ostream & _stream, const ConditionSequence & _c
     return _stream;
 }
 
-std::unique_ptr<ConditionSequence> MailUnit::Storage::Edsl::parse(const std::string & _input)
+std::unique_ptr<Expression> MailUnit::Storage::Edsl::parse(const std::string & _input)
 {
     std::string query = boost::algorithm::trim_copy(_input);
     if(query.empty())
@@ -254,11 +274,11 @@ std::unique_ptr<ConditionSequence> MailUnit::Storage::Edsl::parse(const std::str
         throw EdslException("Parse error: EDSL query is empty");
     }
     Grammar grammar;
-    ConditionSequence * condition_sequence = new ConditionSequence();
-    std::unique_ptr<ConditionSequence> result(condition_sequence);
+    Expression * expression = new Expression();
+    std::unique_ptr<Expression> result(expression);
     try
     {
-        if(qi::phrase_parse(query.cbegin(), query.cend(), grammar, qi::ascii::space, *condition_sequence))
+        if(qi::phrase_parse(query.cbegin(), query.cend(), grammar, qi::ascii::space, *expression))
             return result;
     }
     catch(...)

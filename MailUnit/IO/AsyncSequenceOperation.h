@@ -106,26 +106,27 @@ class AsyncSequenceOperation :
 public:
     typedef typename Sequence::value_type ValueType;
     typedef std::function<void(AsyncSequenceItemOperation<ValueType, Socket> &)> ItemOperatiton;
+    typedef std::function<const Sequence & ()> SequenceHolder;
 
 private:
-    AsyncSequenceOperation(std::shared_ptr<Sequence> _sequence, const ItemOperatiton & _item_operation) :
-        m_sequence_ptr(_sequence),
+    AsyncSequenceOperation(SequenceHolder _sequence_holder, const ItemOperatiton & _item_operation) :
+        m_sequence_holder(_sequence_holder),
         m_item_operation(_item_operation),
-        m_current_item(m_sequence_ptr->cbegin())
+        m_current_item(_sequence_holder().cbegin())
     {
     }
 
 public:
     static std::shared_ptr<AsyncSequenceOperation<Sequence, Socket>> create(
-        std::shared_ptr<Sequence> _sequence, const ItemOperatiton & _item_operation)
+        SequenceHolder _sequence_holder, const ItemOperatiton & _item_operation)
     {
         return std::shared_ptr<AsyncSequenceOperation<Sequence, Socket>>(
-            new AsyncSequenceOperation<Sequence, Socket>(_sequence, _item_operation));
+            new AsyncSequenceOperation<Sequence, Socket>(_sequence_holder, _item_operation));
     }
 
     void run(Socket & _socket, AsioCallback _complete_callback)
     {
-        m_current_item = m_sequence_ptr->begin();
+        m_current_item = m_sequence_holder().cbegin();
         execute(_socket, _complete_callback);
     }
 
@@ -133,7 +134,7 @@ private:
     void execute(Socket & _socket, AsioCallback _complete_callback);
 
 private:
-    std::shared_ptr<Sequence> m_sequence_ptr;
+    SequenceHolder m_sequence_holder;
     ItemOperatiton m_item_operation;
     typename Sequence::const_iterator m_current_item;
     AsioCallback m_complete_callback;
@@ -142,13 +143,14 @@ private:
 template<typename Sequence, typename Socket>
 void AsyncSequenceOperation<Sequence, Socket>::execute(Socket & _socket, AsioCallback _complete_callback)
 {
-    if(m_sequence_ptr->end() == m_current_item)
+    const Sequence & sequence = m_sequence_holder();
+    if(sequence.end() == m_current_item)
     {
         callAsioCallback(_complete_callback);
         return;
     }
     auto operation = AsyncSequenceItemOperation<ValueType, Socket>::create(
-        *m_current_item, m_current_item - m_sequence_ptr->begin());
+        *m_current_item, m_current_item - sequence.begin());
     ++m_current_item;
     m_item_operation(*operation);
     auto self = this->shared_from_this();

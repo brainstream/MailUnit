@@ -23,14 +23,33 @@
 #include <ostream>
 #include <boost/noncopyable.hpp>
 #include <boost/filesystem/path.hpp>
+#include <boost/variant.hpp>
 #include <MailUnit/OS/FileSystem.h>
 #include <MailUnit/Storage/StorageException.h>
 #include <MailUnit/Storage/Email.h>
+#include <MailUnit/Storage/Edsl.h>
 
 struct sqlite3;
 
 namespace MailUnit {
 namespace Storage {
+
+struct QueryErrorResult
+{
+    std::string message;
+}; // struct QueryErrorResult
+
+struct QueryGetResult
+{
+    std::vector<std::unique_ptr<Email>> emails;
+}; // struct QueryGetResult
+
+struct QueryDropResult
+{
+    size_t count;
+}; // struct QueryDropResult
+
+typedef boost::variant<QueryErrorResult, QueryGetResult, QueryDropResult> QueryResult;
 
 class Repository final : private boost::noncopyable
 {
@@ -39,7 +58,7 @@ public:
     ~Repository();
     std::unique_ptr<RawEmail> createRawEmail();
     uint32_t storeEmail(RawEmail & _raw_email);
-    void findEmails(const std::string & _edsl_query, std::vector<std::unique_ptr<Email> > & _result);
+    std::shared_ptr<QueryResult> executeQuery(const std::string & _edsl_query);
 
 private:
     void initStorageDirectory();
@@ -47,12 +66,22 @@ private:
     void prepareDatabase();
     uint32_t insertMessage(const Email & _email, const std::string & _data_id);
     void insertExchange(const Email & _email, uint32_t _message_id);
-    void mapEdslToSqlWhere(const std::string & _edsl, std::ostream & _out);
+    void findEmails(const Edsl::Expression & _expression, std::vector<std::unique_ptr<Email> > & _result);
+    size_t dropEmails(const Edsl::Expression & _expression);
+    void mapEdslToSqlSelectWhere(const Edsl::Expression & _expression, std::ostream & _out);
+    template<typename ResultType>
+    inline std::shared_ptr<QueryResult> makeQueryResult();
 
 private:
     boost::filesystem::path m_storage_direcotiry;
     sqlite3 * mp_sqlite;
 }; // class Repository
+
+template<typename ResultType>
+std::shared_ptr<QueryResult> Repository::makeQueryResult()
+{
+    return std::shared_ptr<QueryResult>(new QueryResult(ResultType()));
+}
 
 } // namespace Storage
 } // namespace MailUnit

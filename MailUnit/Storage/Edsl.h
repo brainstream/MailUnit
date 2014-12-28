@@ -32,6 +32,12 @@ namespace Edsl {
 
 MU_EXCEPTION(EdslException)
 
+enum class Operation
+{
+    get,
+    drop
+}; // enum class Operation
+
 typedef std::string Identifier;
 
 typedef boost::variant<int, std::string> ConditionValue;
@@ -78,7 +84,13 @@ struct ConditionSequence
     std::vector<RightConditionSequence> right;
 }; // struct ConditionSequence
 
-std::unique_ptr<ConditionSequence> parse(const std::string & _input);
+struct Expression
+{
+    Operation operation;
+    boost::optional<ConditionSequence> conditions;
+}; // struct Expression
+
+std::unique_ptr<Expression> parse(const std::string & _input);
 
 } // namespace Dsel
 } // namespace Storage

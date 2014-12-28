@@ -36,8 +36,13 @@ typedef typename boost::asio::ip::tcp::socket TcpSocket;
 
 namespace {
 
+class QueryResultVisitor;
+
 class Session final : public std::enable_shared_from_this<Session>, private boost::noncopyable
 {
+    friend class QueryResultVisitor;
+    typedef typename AsyncSequenceOperation<std::vector<std::unique_ptr<Email>>, TcpSocket>::SequenceHolder EmailsHolder;
+
 public:
     inline explicit Session(TcpSocket _socket, std::shared_ptr<Repository> _repository);
     ~Session();
@@ -48,7 +53,7 @@ private:
     void read();
     void processQuery();
     bool isQueryEndOfSessionRequest();
-    void writeEmails(std::shared_ptr<std::vector<std::unique_ptr<Email> > > _emails);
+    void writeEmails(EmailsHolder _emails);
     void write(const std::string & _data, std::function<void()> _callback);
 
 private:
@@ -122,16 +127,42 @@ void Session::processQuery()
         m_query.clear();
         return;
     }
+    std::shared_ptr<Session> self(shared_from_this());
     try
     {
-        std::vector<std::unique_ptr<Email>> * emails = new std::vector<std::unique_ptr<Email>>();
-        m_repository_ptr->findEmails(std::move(m_query), *emails);
+        std::shared_ptr<QueryResult> query_result = m_repository_ptr->executeQuery(std::move(m_query));
         m_query.clear();
-        writeEmails(std::shared_ptr<std::vector<std::unique_ptr<Email>>>(emails));
+        QueryErrorResult * error = boost::get<QueryErrorResult>(query_result.get());
+        if(error)
+        {
+            std::stringstream message;
+            message << "ERROR: " << error->message << "\r\n";
+            write(message.str(), [self]() {
+                self->read();
+            });
+            return;
+        }
+        QueryGetResult * get = boost::get<QueryGetResult>(query_result.get());
+        if(get)
+        {
+            writeEmails([query_result, get]() -> const std::vector<std::unique_ptr<Email>> & {
+                return get->emails;
+            });
+            return;
+        }
+        QueryDropResult * drop = boost::get<QueryDropResult>(query_result.get());
+        if(drop)
+        {
+            std::stringstream message;
+            message << "DELETED: " << drop->count << "\r\n";
+            write(message.str(), [self]() {
+                self->read();
+            });
+            return;
+        }
     }
     catch(const StorageException & error) // TODO: EdslException
     {
-        std::shared_ptr<Session> self(shared_from_this());
         std::stringstream message;
         message << "ERROR: " << error.what() << "\r\n";
         write(message.str(), [self]() {
@@ -145,14 +176,14 @@ bool Session::isQueryEndOfSessionRequest()
     return boost::algorithm::iequals("quite", m_query) || boost::algorithm::iequals("q", m_query);
 }
 
-void Session::writeEmails(std::shared_ptr<std::vector<std::unique_ptr<Email>>> _emails)
+void Session::writeEmails(EmailsHolder _emails)
 {
     using EmailSequenceOperation = AsyncSequenceOperation<
         std::vector<std::unique_ptr<Email>>, TcpSocket>;
     using EmailOperation = AsyncSequenceItemOperation<std::unique_ptr<Email>, TcpSocket>;
 
     auto self = this->shared_from_this();
-    size_t total_count = _emails->size();
+    size_t total_count = _emails().size();
     std::shared_ptr<EmailSequenceOperation> emails_operation = EmailSequenceOperation::create(_emails,
         [self, total_count](EmailOperation & email_operation) {
             const std::unique_ptr<Email> & email = email_operation.item();

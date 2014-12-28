@@ -384,7 +384,47 @@ void Repository::insertExchange(const Email & _email, uint32_t _message_id)
     }
 }
 
-void Repository::findEmails(const std::string & _edsl_query, std::vector<std::unique_ptr<Email>> & _result)
+std::shared_ptr<QueryResult> Repository::executeQuery(const std::string & _edsl_query)
+{
+    std::string query = boost::algorithm::trim_copy(_edsl_query);
+    std::unique_ptr<Edsl::Expression> expression;
+    try
+    {
+        expression = Edsl::parse(query);
+    }
+    catch(Edsl::EdslException & _error)
+    {
+        auto result =  makeQueryResult<QueryErrorResult>();
+        boost::get<QueryErrorResult>(*result).message = _error.what();
+        return result;
+    }
+    try
+    {
+        if(expression->operation == Edsl::Operation::get)
+        {
+            auto result =  makeQueryResult<QueryGetResult>();
+            findEmails(*expression, boost::get<QueryGetResult>(*result).emails);
+            return result;
+        }
+        if(expression->operation == Edsl::Operation::drop)
+        {
+            auto result =  makeQueryResult<QueryDropResult>();
+            boost::get<QueryDropResult>(*result).count = dropEmails(*expression);
+            return result;
+        }
+    }
+    catch(...)
+    {
+        auto result =  makeQueryResult<QueryErrorResult>();
+        boost::get<QueryErrorResult>(*result).message = "Server error has occurred"; // TODO: more details!
+        return result;
+    }
+    auto result =  makeQueryResult<QueryErrorResult>();
+    boost::get<QueryErrorResult>(*result).message = "Unknown query operation";
+    return result;
+}
+
+void Repository::findEmails(const Edsl::Expression & _expression, std::vector<std::unique_ptr<Email>> & _result)
 {
     std::stringstream sql;
     sql << "SELECT " <<
@@ -397,7 +437,7 @@ void Repository::findEmails(const std::string & _edsl_query, std::vector<std::un
            " INNER JOIN " <<TableExchange::table_name << " ON " <<
            TableExchange::table_name << '.' << TableExchange::column_message << '=' <<
            TableMessage::table_name << '.' << TableMessage::column_id << std::endl;
-    mapEdslToSqlWhere(_edsl_query, sql);
+    mapEdslToSqlSelectWhere(_expression, sql);
     struct CallbackArgs
     {
         Repository * repository;
@@ -428,15 +468,71 @@ void Repository::findEmails(const std::string & _edsl_query, std::vector<std::un
     }
 }
 
-void Repository::mapEdslToSqlWhere(const std::string & _edsl, std::ostream & _out)
+size_t Repository::dropEmails(const Edsl::Expression & _expression)
 {
-    std::string query = boost::algorithm::trim_copy(_edsl);
-    if(query.empty())
+    boost::scoped_ptr<std::vector<std::unique_ptr<Email>>> emails(new std::vector<std::unique_ptr<Email>>());
+    findEmails(_expression, *emails);
+    if(emails->empty())
+        return 0;
+    std::string sql;
+    {
+        std::stringstream exchange_sql;
+        std::stringstream message_sql;
+        exchange_sql << "DELETE FROM " << TableExchange::table_name <<
+               " WHERE " << TableExchange::column_message << " IN (";
+        message_sql << "DELETE FROM " << TableMessage::table_name <<
+                " WHERE " << TableMessage::column_id << " IN (";
+        bool first_email = true;
+        for(const std::unique_ptr<Email> & email : *emails)
+        {
+            if(first_email)
+            {
+                first_email = false;
+            }
+            else
+            {
+                exchange_sql << ", ";
+                message_sql << ", ";
+            }
+            exchange_sql << email->id();
+            message_sql << email->id();
+        }
+        exchange_sql << ");";
+        message_sql << ")";
+        exchange_sql << message_sql.str();
+        sql = exchange_sql.str();
+    }
+
+#ifdef DBGLOG
+    std::cout << "DROP SQL: " << sql << std::endl;
+#endif
+
+    char * error = nullptr;
+    int sql_result =  sqlite3_exec(mp_sqlite, sql.c_str(),
+        [](void * , int, char ** , char **) {
+            return 0;
+        }, nullptr, &error);
+    if(SQLITE_OK != sql_result)
+    {
+        std::string er_string("Unable to delete e-mails from the database:\n");
+        er_string += error;
+        sqlite3_free(error);
+        throw StorageException(formatSqliteError(er_string, sql_result));
+    }
+    for(const std::unique_ptr<Email> & email : *emails)
+    {
+        OS::deleteFile(email->dataFilePath());
+    }
+    return emails->size();
+}
+
+void Repository::mapEdslToSqlSelectWhere(const Edsl::Expression & _expression, std::ostream & _out)
+{
+    if(!_expression.conditions.is_initialized())
     {
         return;
     }
-    std::unique_ptr<Edsl::ConditionSequence> conditions = Edsl::parse(query);
     _out << " WHERE ";
     EdsToSqlMapper mapper(_out);
-    mapper.mapToSqlWhereClause(*conditions);
+    mapper.mapToSqlWhereClause(*_expression.conditions);
 }
