@@ -1,4 +1,4 @@
-MailUnit allows to test SMTP clients and request sent messages using the mail query protocol (MQP).
+MailUnit allows to test SMTP clients and request sent messages using the message query protocol (MQP).
 
 *Warning*: it is early unstable development version!
 
