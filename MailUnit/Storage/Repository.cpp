@@ -444,7 +444,10 @@ void Repository::findEmails(const Edsl::Expression & _expression, std::vector<st
         std::vector<std::unique_ptr<Email>> * result;
     } callback_args = { this, &_result };
     char * error = nullptr;
-    int insert_result = sqlite3_exec(mp_sqlite, sql.str().c_str(),
+#ifdef DBGLOG
+    std::cout << "SELECT SQL: " << sql.str() << std::endl;
+#endif
+    int select_result = sqlite3_exec(mp_sqlite, sql.str().c_str(),
         [](void * pargs, int, char ** values, char **) {
             CallbackArgs * args = static_cast<CallbackArgs *>(pargs);
             uint32_t id = boost::lexical_cast<uint32_t>(values[0]);
@@ -459,12 +462,12 @@ void Repository::findEmails(const Edsl::Expression & _expression, std::vector<st
             email->addAddress(static_cast<Email::AddressType>(boost::lexical_cast<short>(values[3])), values[4]);
             return 0;
         }, &callback_args, &error);
-    if(SQLITE_OK != insert_result)
+    if(SQLITE_OK != select_result)
     {
         std::string er_string("Unable to select e-mail objects:\n");
         er_string += error;
         sqlite3_free(error);
-        throw StorageException(formatSqliteError(er_string, insert_result));
+        throw StorageException(formatSqliteError(er_string, select_result));
     }
 }
 

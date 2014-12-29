@@ -25,7 +25,17 @@
 #include <MailUnit/IO/AsyncSequenceOperation.h>
 #include <MailUnit/Mqp/ServerRequestHandler.h>
 
-#define MQP_ENDLINE "\r\n"
+#define MQP_ENDLINE   "\r\n"
+#define MQP_ITEM      "ITEM: "
+#define MQP_SIZE      "SIZE: "
+#define MQP_ID        "ID: "
+#define MQP_SUBJECT   "SUBJECT: "
+#define MQP_FROM      "FROM: "
+#define MQP_TO        "TO: "
+#define MQP_CC        "CC: "
+#define MQP_BCC       "BCC: "
+#define MQP_ERROR     "ERROR: "
+#define MQP_DELETED   "DELETED: "
 
 using namespace MailUnit::Mqp;
 using namespace MailUnit::Storage;
@@ -36,11 +46,8 @@ typedef typename boost::asio::ip::tcp::socket TcpSocket;
 
 namespace {
 
-class QueryResultVisitor;
-
 class Session final : public std::enable_shared_from_this<Session>, private boost::noncopyable
 {
-    friend class QueryResultVisitor;
     typedef typename AsyncSequenceOperation<std::vector<std::unique_ptr<Email>>, TcpSocket>::SequenceHolder EmailsHolder;
 
 public:
@@ -136,7 +143,7 @@ void Session::processQuery()
         if(error)
         {
             std::stringstream message;
-            message << "ERROR: " << error->message << "\r\n";
+            message << MQP_ERROR << error->message << MQP_ENDLINE;
             write(message.str(), [self]() {
                 self->read();
             });
@@ -154,7 +161,7 @@ void Session::processQuery()
         if(drop)
         {
             std::stringstream message;
-            message << "DELETED: " << drop->count << "\r\n";
+            message << MQP_DELETED << drop->count << MQP_ENDLINE;
             write(message.str(), [self]() {
                 self->read();
             });
@@ -164,7 +171,7 @@ void Session::processQuery()
     catch(const StorageException & error) // TODO: EdslException
     {
         std::stringstream message;
-        message << "ERROR: " << error.what() << "\r\n";
+        message << MQP_ERROR << error.what() << MQP_ENDLINE;
         write(message.str(), [self]() {
             self->read();
         });
@@ -184,6 +191,14 @@ void Session::writeEmails(EmailsHolder _emails)
 
     auto self = this->shared_from_this();
     size_t total_count = _emails().size();
+    if(0 == total_count)
+    {
+        std::string message = MQP_ITEM "0/0" MQP_ENDLINE MQP_SIZE "0" MQP_ENDLINE;
+        write(message, [self]() {
+            self->read();
+        });
+        return;
+    }
     std::shared_ptr<EmailSequenceOperation> emails_operation = EmailSequenceOperation::create(_emails,
         [self, total_count](EmailOperation & email_operation) {
             const std::unique_ptr<Email> & email = email_operation.item();
@@ -195,18 +210,18 @@ void Session::writeEmails(EmailsHolder _emails)
             email_operation.addStep(std::make_unique<AsyncLambdaWriter<TcpSocket>>(
                 [&email_operation, &email, total_count](std::ostream & stream) {
                     stream <<
-                        "ITEM: " << email_operation.itemIndex() + 1 << '/' << total_count << MQP_ENDLINE <<
-                        "SIZE: " << boost::filesystem::file_size(email->dataFilePath()) << MQP_ENDLINE <<
-                        "ID: " << email->id() << MQP_ENDLINE <<
-                        "SUBJECT: " << email->subject() << MQP_ENDLINE;
+                        MQP_ITEM << email_operation.itemIndex() + 1 << '/' << total_count << MQP_ENDLINE <<
+                        MQP_SIZE << boost::filesystem::file_size(email->dataFilePath()) << MQP_ENDLINE <<
+                        MQP_ID << email->id() << MQP_ENDLINE <<
+                        MQP_SUBJECT << email->subject() << MQP_ENDLINE;
                     for(const std::string & address : email->addresses(Email::AddressType::from))
-                        stream << "FROM: " << address << MQP_ENDLINE;
+                        stream << MQP_FROM << address << MQP_ENDLINE;
                     for(const std::string & address : email->addresses(Email::AddressType::to))
-                        stream << "TO: " << address << MQP_ENDLINE;
+                        stream << MQP_TO << address << MQP_ENDLINE;
                     for(const std::string & address : email->addresses(Email::AddressType::cc))
-                        stream << "CC: " << address << MQP_ENDLINE;
+                        stream << MQP_CC << address << MQP_ENDLINE;
                     for(const std::string & address : email->addresses(Email::AddressType::bcc))
-                        stream << "BCC: " << address << MQP_ENDLINE;
+                        stream << MQP_BCC << address << MQP_ENDLINE;
                     stream << MQP_ENDLINE;
                 }
             ));
