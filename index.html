@@ -1,74 +1,61 @@
 <html>
     <head>
-	<title>MailUnit</title>
-	<link rel="shortcut icon" href="favicon.ico" />
-	<link rel="icon" href="favicon.ico" />
-	<link rel="stylesheet" href="bootstrap.min.css" />
-	<link rel="stylesheet" href="main.css" />
+        <title>MailUnit</title>
+        <meta charset="utf-8"/>
+        <link rel="stylesheet" href="bootstrap.min.css" />
+        <link rel="stylesheet" href="main.css" />
     </head>
     <body>
-	<div id="content" class="container">
-	    <div class="row">
-		<div class="col-sm-12">
-		    <div id="logo">
-			<img src="logo.png">
-		    </div>
-		    <div id="project-name" class="">
-			<h1>MailUnit</h1>
-		    </div>
-		</div>
-	    </div>
+        <div id="content" class="container">
+            <div class="jumbotron" id="head">
+                <h1>MailUnit</h1>
+                <p>MailUnit is a SMTP server designed especially for unit testing.</p>
+                <a class="btn btn-primary" href="https://github.com/brainstream/MailUnit"><span class="gh-ico"></span>Learn more on GitHub</a>
+                <a class="btn btn-success" href="https://github.com/brainstream/MailUnit/archive/master.zip">Download source code</a>
+            </div>
 
-	    <div class="alert alert-danger" role="alert">
-		<strong>Warning</strong>: it is early unstable development version!	
-	    </div>
+            <div class="alert alert-danger" role="alert">
+                <strong>Warning</strong>: it is early unstable development version!	
+            </div>
+                            
+            <h3>SMTP server</h3>
+            <p>Only the main SMTP commands are supported now: EHLO, MAIL FROM, RCPT TO and QUIT.</p>
 
-	    <p>MailUnit allows to test SMTP clients and request sent messages using the message query protocol (MQP).</p>
+            <h3>MQP server</h3>
+            <p>
+                MQP (Message Query Protocol) allows to query received by SMTP server messages using simple query language. See the <a href="https://github.com/brainstream/MailUnit/wiki/Message-Query-Protocol">wiki page</a> for details.
+            </p>
 
-	    <h3>Download</h3>
-	    <p>Now you can only download MailUnit's source code from the <a href="https://github.com/brainstream/MailUnit">github</a></p>
-	    <p><a href="https://github.com/brainstream/MailUnit/archive/master.zip" class="btn btn-primary">Download source code</a></p>
-	    <p>or clone the git repository using following command</p>
-	    <p><code>git clone https://github.com/brainstream/MailUnit.git</code></p>
+            <h3>Building</h3>
+            <p>MailUnit has following dependencies</p>
+            <ul>
+                <li>Boost.Asio</li>
+                <li>Boost.Filesystem</li>
+                <li>Boost.Date_Time</li>
+                <li>Boost.Program_Options</li>
+                <li>Boost.Regex</li>
+                <li>Boost.Iostreams</li>
+            </ul>
+            <p>Also a C++11 supported compiler is required.</p>
+            <p>MailUnit uses CMake building system. You should enter following command to build binary files.</p>
+            <p>
+                <code>cd MailUnit</code><br>
+                <code>cmake .</code><br>
+                <code>make</code><br>
+            </p>
+            <p>
+                It will create two files: the executeble file named <code>mailunit</code> and library with the same name.
+            </p>
 
-	    <h3>Build</h3>
-	    <p>MailUnit has following dependencies</p>
-	    <ul>
-		<li>Boost.Asio</li>
-		<li>Boost.Filesystem</li>
-		<li>Boost.Date_Time</li>
-		<li>Boost.Program_Options</li>
-		<li>Boost.Regex</li>
-		<li>Boost.Iostreams</li>
-	    </ul>
-	    <p>Also a C++11 supported compiler is required.</p>
-	    <p>MailUnit uses CMake building system. You should enter following command to build binary files.</p>
-	    <p>
-		<code>cd MailUnit</code><br>
-		<code>cmake .</code><br>
-		<code>make</code><br>
-	    </p>
-	    <p>
-		It will create two files: the executeble file named <code>mailunit</code> and library with the same name.
-	    </p>
+            <h3>Installing</h3>
+            <p>Currently there is no way to install MailUnit automatically. You should copy binary files manually to a suitable place.</p>
+        </div>
 
-	    <h3>Install</h3>
-	    <p>Currently there is no way to install MailUnit automatically. You should copy binary files manually to a suitable place.</p>
-
-	    <h3>SMTP server</h3>
-	    <p>Only the main SMTP commands are supported now: EHLO, MAIL FROM, RCPT TO and QUIT.</p>
-
-	    <h3>MQP server</h3>
-	    <p>
-		MQP (Message Query Protocol) allows to query received by SMTP server messages using simple query language. See the <a href="https://github.com/brainstream/MailUnit/wiki/Message-Query-Protocol">wiki page</a> for details.
-	    </p>
-	</div>
-
-	<a href="https://github.com/brainstream/MailUnit">
-	    <img style="position: absolute; top: 0; right: 0; border: 0;"
-		 src="https://camo.githubusercontent.com/a6677b08c955af8400f44c6298f40e7d19cc5b2d/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f677261795f3664366436642e706e67"
-		 alt="Fork me on GitHub"
-		 data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_gray_6d6d6d.png">
-	</a>
+        <a href="https://github.com/brainstream/MailUnit">
+            <img style="position: absolute; top: 0; right: 0; border: 0;"
+                 src="https://camo.githubusercontent.com/a6677b08c955af8400f44c6298f40e7d19cc5b2d/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f677261795f3664366436642e706e67"
+                 alt="Fork me on GitHub"
+                 data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_gray_6d6d6d.png">
+        </a>
     </body>
 </html>
