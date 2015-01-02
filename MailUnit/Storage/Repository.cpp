@@ -156,32 +156,26 @@ void EdsToSqlMapper::operator ()(const Edsl::BinaryCondition & _bin_condition)
 void EdsToSqlMapper::addMailboxCause(Edsl::ConditionBinaryOperator _operator,
     Email::AddressType _address_type, const std::string & _address)
 {
-    if(_operator == Edsl::ConditionBinaryOperator::equal)
-    {
-        mr_sql << " (";
-    }
-    else if(_operator == Edsl::ConditionBinaryOperator::not_equal)
-    {
-        mr_sql << " ( NOT (";
-    }
-    else
-    {
-        std::stringstream message;
-        message << '"' << _operator << "\" is not supported operator for Mailbox causes";
-        throw StorageException(message.str());
-    }
-    mr_sql <<
+    mr_sql << '(' <<
         TableExchange::table_name << '.' << TableExchange::column_reason << " = " <<
         static_cast<uint16_t>(_address_type) << " AND " <<
-        TableExchange::table_name << '.' << TableExchange::column_mailbox << " = '" << _address;
-    if(_operator == Edsl::ConditionBinaryOperator::equal)
+        TableExchange::table_name << '.' << TableExchange::column_mailbox;
+    switch(_operator)
     {
-        mr_sql << "') ";
+    case Edsl::ConditionBinaryOperator::equal:
+        mr_sql << " = ";
+        break;
+    case Edsl::ConditionBinaryOperator::not_equal:
+        mr_sql << " <> ";
+        break;
+    default:
+        {
+            std::stringstream message;
+            message << '"' << _operator << "\" is not supported operator for Mailbox causes";
+            throw StorageException(message.str());
+        }
     }
-    else if(_operator == Edsl::ConditionBinaryOperator::not_equal)
-    {
-        mr_sql << "')) ";
-    }
+    mr_sql << '\'' << _address << "')";
 }
 
 thread_local static class
