@@ -20,6 +20,7 @@
 #endif // __cplusplus && __cplusplus >= 201300L
 
 #include <cstdlib>
+#include <thread>
 #include <boost/asio.hpp>
 #include <boost/variant.hpp>
 #include <boost/preprocessor/stringize.hpp>
@@ -41,6 +42,8 @@
 #define SOPT_MQP_PORT     "m"
 #define SOPT_STORAGE_DIR  "d"
 #define LOPT_STORAGE_DIR  "storage-dir"
+#define SOPT_THREAD_COUTN "t"
+#define LOPT_THREAD_COUTN "threads"
 #define LOPT_LOGSIZE      "log-size"
 #define LOPT_LOGFILE      "log-file"
 #define LOPT_STDLOG       "log-std"
@@ -49,6 +52,9 @@
 #define LOG_LEVEL_INFO    "info"
 #define LOG_LEVEL_WARNING "warning"
 #define LOG_LEVEL_ERROR   "error"
+
+#define MIN_THREAD_COUNT 1
+#define MAX_THREAD_COUNT 255
 
 using namespace MailUnit;
 using namespace MailUnit::Storage;
@@ -133,6 +139,8 @@ OptionsPtr loadConfig(int _argc, const char ** _argv, const fs::path & _app_dir)
             "MQP server port number")
         (LOPT_STORAGE_DIR "," SOPT_STORAGE_DIR, po::value(&data_dir)->required(),
             "Data storage directory")
+        (LOPT_THREAD_COUTN "," SOPT_THREAD_COUTN, po::value(&config->thread_count)->default_value(MIN_THREAD_COUNT),
+            "Working thread count (" BOOST_PP_STRINGIZE(MIN_THREAD_COUNT) " – "  BOOST_PP_STRINGIZE(MAX_THREAD_COUNT) ")" )
         (LOPT_LOGSIZE, po::value(&config->log_max_size)->default_value(defult_max_filesize),
             "Maximum size of each log file in bytes")
         (LOPT_LOGFILE, po::value(&log_file), "Log filename")
@@ -201,7 +209,21 @@ void start(const std::shared_ptr<Config> _config)
     asio::ip::tcp::endpoint storage_server_endpoint(asio::ip::tcp::v4(), _config->mqp_port);
     startTcpServer(service, storage_server_endpoint, std::make_shared<Mqp::ServerRequestHandler>(repo));
 
-    service.run();
+    uint16_t thread_count = _config->thread_count;
+    if(thread_count < MIN_THREAD_COUNT) thread_count = MIN_THREAD_COUNT;
+    else if(thread_count > MAX_THREAD_COUNT) thread_count = MAX_THREAD_COUNT;
+
+    std::thread threads[thread_count];
+    for(uint16_t i = 0; i < thread_count; ++i)
+    {
+        threads[i] = std::thread([&service]() {
+            service.run();
+        });
+    }
+    for(uint16_t i = 0; i < thread_count; ++i)
+    {
+        threads[i].join();
+    }
 }
 
 struct Runner : boost::static_visitor<>
