@@ -42,76 +42,81 @@ BOOST_AUTO_TEST_CASE(parseTest)
         },
         {
             false,
-            " \t\v\b\r\n",
+            "invalid text",
+        },
+        {
+            true,
+            "get \t\v\b\r\n",
+            "GET;"
         },
         {
             false,
-            "Number",
+            "get Number",
         },
         {
             false,
-            "Number =",
+            "get Number =",
         },
         {
             false,
-            "Number = X",
+            "get Number = X",
         },
         {
             false,
-            "(Number = 123"
+            "get (Number = 123;"
         },
         {
             false,
-            "Name = 'BrokenString"
+            "get Name = 'BrokenString;"
         },
         {
             true,
-            "Number = 123",
-            "(Number = 123)"
+            "get Number = 123",
+            "GET (Number = 123);"
         },
         {
             true,
-            "Name = 'SomeValue'",
-            "(Name = 'SomeValue')"
+            "gEt Name = 'SomeValue'",
+            "GET (Name = 'SomeValue');"
         },
         {
             true,
-            "Name = 'Some Value'",
-            "(Name = 'Some Value')"
+            "dRoP Name = 'Some Value'",
+            "DROP (Name = 'Some Value');"
         },
         {
             true,
-            "Number = 123 AND Name <> 'Some Value'",
-            "(Number = 123 AND Name <> 'Some Value')"
+            "drop Number = 123 AND Name <> 'Some Value'",
+            "DROP (Number = 123 AND Name <> 'Some Value');"
         },
         {
             true,
-            "Number = 123 or Name = 'Some Value'",
-            "(Number = 123 OR Name = 'Some Value')"
+            "get Number = 123 or Name = 'Some Value'",
+            "GET (Number = 123 OR Name = 'Some Value');"
         },
         {
             true,
-            "(Number = 123 and Name = 'Some Value') or Surname = 'Other'",
-            "((Number = 123 AND Name = 'Some Value') OR Surname = 'Other')"
+            "get (Number = 123 and Name = 'Some Value') or Surname = 'Other'",
+            "GET ((Number = 123 AND Name = 'Some Value') OR Surname = 'Other');"
         },
         {
             true,
-            "Surname = 'Other' or (Number > 123 and Name = 'Some Value')",
-            "(Surname = 'Other' OR (Number > 123 AND Name = 'Some Value'))"
+            "drop Surname = 'Other' or (Number > 123 and Name = 'Some Value')",
+            "DROP (Surname = 'Other' OR (Number > 123 AND Name = 'Some Value'));"
         },
         {
             true,
-            "(Age >= 12 and Surname = 'Other') or (Number < 123 and Name = 'Some Value')",
-            "((Age >= 12 AND Surname = 'Other') OR (Number < 123 AND Name = 'Some Value'))"
+            "get (Age >= 12 and Surname = 'Other') or (Number < 123 and Name = 'Some Value')",
+            "GET ((Age >= 12 AND Surname = 'Other') OR (Number < 123 AND Name = 'Some Value'));"
         },
         {
             false,
-            "(Age >= 12 and Surname = 'Other') or (Number < 123 and Name = ValueWithoutQuotes)"
+            "get (Age >= 12 and Surname = 'Other') or (Number < 123 and Name = ValueWithoutQuotes)"
         },
         {
             true,
-            "Subject = 'test' and (From = 'from@test' or To = 'to@test')",
-            "(Subject = 'test' AND (From = 'from@test' OR To = 'to@test'))"
+            "get Subject = 'test' and (From = 'from@test' or To = 'to@test')",
+            "GET (Subject = 'test' AND (From = 'from@test' OR To = 'to@test'));"
         }
     };
     for(auto test : tests)
@@ -122,7 +127,7 @@ BOOST_AUTO_TEST_CASE(parseTest)
             BOOST_CHECK(test.valid);
             BOOST_CHECK(nullptr != expression);
             std::stringstream stream;
-            stream << *expression->conditions;
+            stream << *expression;
             BOOST_CHECK_EQUAL(test.expected_result, stream.str());
         }
         catch(const EdslException &)

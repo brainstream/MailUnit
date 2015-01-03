@@ -123,7 +123,7 @@ Grammar::Grammar() :
     m_condition_sequence_operand   %= m_binary_condition | m_bracketed_condition_sequence;
     m_right_condition_sequence     %= qi::ascii::no_case[m_join_operator] > m_condition_sequence_operand;
     m_condition_sequence           %= m_condition_sequence_operand > *m_right_condition_sequence;
-    m_expression                   %= m_operation > -m_condition_sequence;
+    m_expression                   %= qi::ascii::no_case[m_operation] > -m_condition_sequence;
 }
 
 class GenericPriter : public boost::static_visitor<>
@@ -263,6 +263,33 @@ std::ostream & operator << (std::ostream & _stream, const ConditionSequence & _c
         boost::apply_visitor(printer, right.operand);
     }
     _stream << ')';
+    return _stream;
+}
+
+std::ostream & operator << (std::ostream & _stream, const Operation & _operation)
+{
+    switch(_operation)
+    {
+    case Operation::get:
+        _stream << "GET";
+        break;
+    case Operation::drop:
+        _stream << "DROP";
+        break;
+    default:
+        break;
+    }
+    return _stream;
+}
+
+std::ostream & operator << (std::ostream & _stream, const Expression & _expression)
+{
+    _stream << _expression.operation;
+    if(_expression.conditions.is_initialized())
+    {
+        _stream << ' ' << _expression.conditions.get();
+    }
+    _stream << ';';
     return _stream;
 }
 

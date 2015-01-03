@@ -102,5 +102,7 @@ std::ostream & operator << (std::ostream & _stream, MailUnit::Storage::Edsl::Con
 std::ostream & operator << (std::ostream & _stream, const MailUnit::Storage::Edsl::BinaryCondition & _condition);
 std::ostream & operator << (std::ostream & _stream, const MailUnit::Storage::Edsl::ConditionSequenceOperand & _operand);
 std::ostream & operator << (std::ostream & _stream, const MailUnit::Storage::Edsl::ConditionSequence & _condition);
+std::ostream & operator << (std::ostream & _stream, const MailUnit::Storage::Edsl::Operation & _operation);
+std::ostream & operator << (std::ostream & _stream, const MailUnit::Storage::Edsl::Expression & _expression);
 
 #endif // __MU_STORAGE_EDSL_H__
