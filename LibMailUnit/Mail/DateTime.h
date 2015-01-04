@@ -23,6 +23,7 @@
  * @htmlinclude RFC/DateSpec.html
 */
 
+#include <time.h>
 #include "../Def.h"
 
 /**
@@ -81,9 +82,29 @@ typedef struct
  * @param _raw_date_time
  *     String from a mail header.
  * @param _date_time
- *     Pointer to the object to hold a result of parsing. <i>Must not be a NULL.</i>
+ *     A pointer to a variable that will contain a result. <i>Must not be NULL.</i>
  * @return
  *     In success case returns @ref MBool::mtrue and @ref MBool::mfalse otherwise.
  *     The @a _date_time object will not be modified if parsing failed.
  */
 MUAPI MBool muDateTimeParse(const char * _raw_date_time, MDateTime * _date_time);
+
+/**
+ * @brief Convert @ref MDateTime value to the UNIX time format
+ * @param _date_time
+ *     Value to convert.
+ * @return
+ *     The UNIX time representation of @a _date_time.
+ * @sa muUnixTimeToDateTime
+ */
+MUAPI time_t muDateTimeToUnixTime(const MDateTime * _date_time);
+
+/**
+ * @brief Convert UNIX time value to @ref MDateTime
+ * @param _unix_time
+ *     Date and time in the UNIX time format.
+ * @param _date_time
+ *     A pointer to a variable that will contain a result. <i>Must not be NULL.</i>
+ * @sa muDateTimeToUnixTime
+ */
+MUAPI void muUnixTimeToDateTime(time_t _unix_time, MDateTime * _date_time);

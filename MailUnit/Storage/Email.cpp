@@ -36,11 +36,26 @@ void collectAddressesFromHeader(MU_MAIL_HEADERLIST _headers, const char * _heade
     muFree(header);
 }
 
+std::time_t getDateTimeFromHeaders(MU_MAIL_HEADERLIST _headers)
+{
+    MU_MAIL_HEADER date_time_header = muMailHeaderByName(_headers, MU_MAILHDR_DATE);
+    if(MU_INVALID_HANDLE == date_time_header || muMailHeaderValueCount(date_time_header) == 0)
+        return 0;
+    const char * date_time_string = muMailHeaderValue(date_time_header, 0);
+    if(nullptr == date_time_string)
+        return 0;
+    MDateTime date_time;
+    if(!muDateTimeParse(date_time_string, &date_time))
+        return 0;
+    return muDateTimeToUnixTime(&date_time);
+}
+
 } // namespace
 
 Email::Email(uint32_t _id, const boost::filesystem::path & _data_file_path, bool _parse_file) :
     m_id(_id),
-    m_data_file_path(_data_file_path)
+    m_data_file_path(_data_file_path),
+    m_sending_time(0)
 {
     if(!fs::is_regular_file(m_data_file_path) && !fs::is_symlink(m_data_file_path))
     {
@@ -73,6 +88,7 @@ void Email::parseHeaders(MU_NATIVE_FILE _file)
     MU_MAIL_HEADER subject_header = muMailHeaderByName(headers, MU_MAILHDR_SUBJECT);
     if(MU_INVALID_HANDLE != subject_header && muMailHeaderValueCount(subject_header) > 0)
         m_subject = muMailHeaderValue(subject_header, 0);
+    m_sending_time = getDateTimeFromHeaders(headers);
     collectAddressesFromHeader(headers, MU_MAILHDR_FROM, m_from_addresses);
     collectAddressesFromHeader(headers, MU_MAILHDR_TO, m_to_addresses);
     collectAddressesFromHeader(headers, MU_MAILHDR_CC, m_cc_addresses);

@@ -19,6 +19,7 @@
 #include <utility>
 #include <boost/regex.hpp>
 #include <boost/lexical_cast.hpp>
+#include <boost/date_time.hpp>
 #include <LibMailUnit/Mail/DateTime.h>
 
 namespace {
@@ -176,4 +177,93 @@ MBool muDateTimeParse(const char * _raw_date_time, MDateTime * _date_time)
     return mtrue;
 }
 
+time_t muDateTimeToUnixTime(const MDateTime * _date_time)
+{
+    boost::posix_time::ptime ptime(
+        boost::gregorian::date(_date_time->year, _date_time->month, _date_time->day),
+        boost::posix_time::time_duration(_date_time->hours - _date_time->timezone_offset_hours,
+        _date_time->minutes - _date_time->timezone_offset_minutes, _date_time->seconds));
+    boost::posix_time::ptime inception(boost::gregorian::date(1970, 1, 1));
+    boost::posix_time::time_duration duration = ptime - inception;
+    return  duration.total_seconds();
+}
 
+void muUnixTimeToDateTime(time_t _unix_time, MDateTime * _date_time)
+{
+    boost::posix_time::ptime ptime(boost::gregorian::date(1970, 1, 1));
+    ptime += boost::posix_time::seconds(_unix_time);
+    _date_time->year = ptime.date().year();
+    switch(ptime.date().month())
+    {
+    case boost::date_time::Jan:
+        _date_time->month = mmonth_jan;
+        break;
+    case boost::date_time::Feb:
+        _date_time->month = mmonth_feb;
+        break;
+    case boost::date_time::Mar:
+        _date_time->month = mmonth_mar;
+        break;
+    case boost::date_time::Apr:
+        _date_time->month = mmonth_apr;
+        break;
+    case boost::date_time::May:
+        _date_time->month = mmonth_may;
+        break;
+    case boost::date_time::Jun:
+        _date_time->month = mmonth_jun;
+        break;
+    case boost::date_time::Jul:
+        _date_time->month = mmonth_jul;
+        break;
+    case boost::date_time::Aug:
+        _date_time->month = mmonth_aug;
+        break;
+    case boost::date_time::Sep:
+        _date_time->month = mmonth_sep;
+        break;
+    case boost::date_time::Oct:
+        _date_time->month = mmonth_oct;
+        break;
+    case boost::date_time::Nov:
+        _date_time->month = mmonth_nov;
+        break;
+    case boost::date_time::Dec:
+        _date_time->month = mmonth_dec;
+        break;
+    default:
+        _date_time->month = mmonth_invalid;
+        break;
+    }
+    _date_time->day = ptime.date().day();
+    switch(ptime.date().day_of_week())
+    {
+    case boost::date_time::Monday:
+        _date_time->day_of_week = mdow_mon;
+        break;
+    case boost::date_time::Tuesday:
+        _date_time->day_of_week = mdow_tue;
+        break;
+    case boost::date_time::Wednesday:
+        _date_time->day_of_week = mdow_wed;
+        break;
+    case boost::date_time::Thursday:
+        _date_time->day_of_week = mdow_thu;
+        break;
+    case boost::date_time::Friday:
+        _date_time->day_of_week = mdow_fri;
+        break;
+    case boost::date_time::Saturday:
+        _date_time->day_of_week = mdow_sat;
+        break;
+    case boost::date_time::Sunday:
+        _date_time->day_of_week = mdow_sun;
+        break;
+    default:
+        _date_time->day_of_week = mdow_invalid;
+        break;
+    }
+    _date_time->hours = ptime.time_of_day().hours();
+    _date_time->minutes = ptime.time_of_day().minutes();
+    _date_time->seconds = ptime.time_of_day().seconds();
+}

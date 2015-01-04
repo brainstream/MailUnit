@@ -22,6 +22,7 @@
 #include <set>
 #include <string>
 #include <fstream>
+#include <ctime>
 #include <boost/optional.hpp>
 #include <boost/noncopyable.hpp>
 #include <boost/filesystem.hpp>
@@ -143,6 +144,16 @@ public:
         return m_data_file_path;
     }
 
+    std::time_t sendingTime() const
+    {
+        return m_sending_time;
+    }
+
+    void setSendingTime(std::time_t _date_time)
+    {
+        m_sending_time = _date_time;
+    }
+
 private:
     void parseHeaders(MU_NATIVE_FILE _file);
     void appendBcc(const RawEmail & _raw);
@@ -155,6 +166,7 @@ private:
     AddressSet m_cc_addresses;
     AddressSet m_bcc_addresses;
     std::string m_subject;
+    std::time_t m_sending_time;
 }; // class Email
 
 

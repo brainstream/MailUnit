@@ -37,10 +37,11 @@ static const MailUnit::OS::PathString tmp_file_ext = MU_PATHSTR(".tmp");
 static const MailUnit::OS::PathString db_filename = MU_PATHSTR("index.db");
 
 namespace TableMessage {
-static const std::string table_name     = "Message";
-static const std::string column_id      = "Id";
-static const std::string column_data_id = "DataId";
-static const std::string column_subject = "Subject";
+static const std::string table_name           = "Message";
+static const std::string column_id            = "Id";
+static const std::string column_data_id       = "DataId";
+static const std::string column_subject       = "Subject";
+static const std::string column_sending_time  = "SendingTime";
 } // namespace TableMessage
 
 namespace TableExchange {
@@ -150,6 +151,11 @@ void EdsToSqlMapper::operator ()(const Edsl::BinaryCondition & _bin_condition)
             throw StorageException(message.str());
         }
         mr_sql << boost::get<std::string>(_bin_condition.value) << "' ";
+    }
+    else if(boost::algorithm::iequals("TIME", _bin_condition.identifier))
+    {
+        mr_sql << TableMessage::table_name << '.' << TableMessage::column_sending_time <<
+            ' ' << _bin_condition.operator_ << ' ' << _bin_condition.value;
     }
 }
 
@@ -275,6 +281,7 @@ void Repository::prepareDatabase()
         "CREATE TABLE IF NOT EXISTS " << TableMessage::table_name << "(\n" <<
         TableMessage::column_id <<  " INTEGER PRIMARY KEY AUTOINCREMENT,\n" <<
         TableMessage::column_data_id << " VARCHAR(36),\n" <<
+        TableMessage::column_sending_time << " INTEGER,\n" <<
         TableMessage::column_subject << " TEXT\n);\n" <<
 
         "CREATE TABLE IF NOT EXISTS " << TableExchange::table_name << "(\n" <<
@@ -287,6 +294,8 @@ void Repository::prepareDatabase()
 
         "CREATE INDEX IF NOT EXISTS iMessageSubject ON " << TableMessage::table_name <<
         "(" << TableMessage::column_subject << ");\n" <<
+        "CREATE INDEX IF NOT EXISTS iMessageTime ON " << TableMessage::table_name <<
+        "(" << TableMessage::column_sending_time << ");\n" <<
         "CREATE INDEX IF NOT EXISTS iExchangeMailbox ON " << TableExchange::table_name <<
         "(" << TableExchange::column_mailbox << ");\n" <<
         "CREATE INDEX IF NOT EXISTS iExchangeMessage ON " << TableExchange::table_name <<
@@ -322,9 +331,10 @@ uint32_t Repository::insertMessage(const Email & _email, const std::string & _da
 {
     std::stringstream sql;
     sql << "INSERT INTO " << TableMessage::table_name << " (" <<
-        TableMessage::column_subject << ", " << TableMessage::column_data_id << ") VALUES ('" <<
-        prepareSqlValueString(_email.subject()) << "','" << _data_id <<
-        "');\nSELECT last_insert_rowid();";
+        TableMessage::column_subject << ", " << TableMessage::column_data_id << ", " <<
+        TableMessage::column_sending_time << ") VALUES ('" <<
+        prepareSqlValueString(_email.subject()) << "','" << _data_id << "', " << _email.sendingTime() <<
+        ");\nSELECT last_insert_rowid();";
     uint32_t message_id;
     char * error = nullptr;
     int insert_result = sqlite3_exec(mp_sqlite, sql.str().c_str(),
@@ -439,7 +449,7 @@ void Repository::findEmails(const Edsl::Expression & _expression, std::vector<st
     } callback_args = { this, &_result };
     char * error = nullptr;
 #ifdef DBGLOG
-    std::cout << "SELECT SQL: " << sql.str() << std::endl;
+    std::cout << "SELECT SQL: " << sql.str() << std::endl << std::flush;
 #endif
     int select_result = sqlite3_exec(mp_sqlite, sql.str().c_str(),
         [](void * pargs, int, char ** values, char **) {
