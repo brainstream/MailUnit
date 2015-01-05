@@ -34,11 +34,6 @@ struct sqlite3;
 namespace MailUnit {
 namespace Storage {
 
-struct QueryErrorResult
-{
-    std::string message;
-}; // struct QueryErrorResult
-
 struct QueryGetResult
 {
     std::vector<std::unique_ptr<Email>> emails;
@@ -49,7 +44,7 @@ struct QueryDropResult
     size_t count;
 }; // struct QueryDropResult
 
-typedef boost::variant<QueryErrorResult, QueryGetResult, QueryDropResult> QueryResult;
+typedef boost::variant<QueryGetResult, QueryDropResult> QueryResult;
 
 class Repository final : private boost::noncopyable
 {

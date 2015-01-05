@@ -194,6 +194,7 @@ set(SRC_SERVER_LIB
     MailUnit/Storage/Email.cpp
     MailUnit/Mqp/ServerRequestHandler.h
     MailUnit/Mqp/ServerRequestHandler.cpp
+    MailUnit/Mqp/Error.h
 )
 
 set(SRC_SERVER

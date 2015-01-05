@@ -391,41 +391,20 @@ void Repository::insertExchange(const Email & _email, uint32_t _message_id)
 std::shared_ptr<QueryResult> Repository::executeQuery(const std::string & _edsl_query)
 {
     std::string query = boost::algorithm::trim_copy(_edsl_query);
-    std::unique_ptr<Edsl::Expression> expression;
-    try
+    std::unique_ptr<Edsl::Expression> expression = Edsl::parse(query);
+    if(expression->operation == Edsl::Operation::get)
     {
-        expression = Edsl::parse(query);
-    }
-    catch(Edsl::EdslException & _error)
-    {
-        auto result =  makeQueryResult<QueryErrorResult>();
-        boost::get<QueryErrorResult>(*result).message = _error.what();
+        auto result =  makeQueryResult<QueryGetResult>();
+        findEmails(*expression, boost::get<QueryGetResult>(*result).emails);
         return result;
     }
-    try
+    if(expression->operation == Edsl::Operation::drop)
     {
-        if(expression->operation == Edsl::Operation::get)
-        {
-            auto result =  makeQueryResult<QueryGetResult>();
-            findEmails(*expression, boost::get<QueryGetResult>(*result).emails);
-            return result;
-        }
-        if(expression->operation == Edsl::Operation::drop)
-        {
-            auto result =  makeQueryResult<QueryDropResult>();
-            boost::get<QueryDropResult>(*result).count = dropEmails(*expression);
-            return result;
-        }
-    }
-    catch(...)
-    {
-        auto result =  makeQueryResult<QueryErrorResult>();
-        boost::get<QueryErrorResult>(*result).message = "Server error has occurred"; // TODO: more details!
+        auto result =  makeQueryResult<QueryDropResult>();
+        boost::get<QueryDropResult>(*result).count = dropEmails(*expression);
         return result;
     }
-    auto result =  makeQueryResult<QueryErrorResult>();
-    boost::get<QueryErrorResult>(*result).message = "Unknown query operation";
-    return result;
+    throw StorageException("Unknown query operation");
 }
 
 void Repository::findEmails(const Edsl::Expression & _expression, std::vector<std::unique_ptr<Email>> & _result)

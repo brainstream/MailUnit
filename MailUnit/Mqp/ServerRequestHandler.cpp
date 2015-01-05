@@ -24,6 +24,7 @@
 #include <MailUnit/IO/AsyncFileWriter.h>
 #include <MailUnit/IO/AsyncSequenceOperation.h>
 #include <MailUnit/Mqp/ServerRequestHandler.h>
+#include <MailUnit/Mqp/Error.h>
 
 #define MQP_ENDLINE   "\r\n"
 #define MQP_ITEM      "ITEM: "
@@ -59,8 +60,9 @@ private:
     size_t findEndOfQuery(const char * _query_piece, size_t _length);
     void read();
     void processQuery();
-    bool isQueryEndOfSessionRequest();
+    bool isQueryEndOfSessionRequest(const std::string & _query);
     void writeEmails(EmailsHolder _emails);
+    void writeError(ErrorCode _code, const std::exception * _exception);
     void write(const std::string & _data, std::function<void()> _callback);
 
 private:
@@ -128,27 +130,15 @@ void Session::read()
 
 void Session::processQuery()
 {
-    boost::algorithm::trim(m_query);
-    if(isQueryEndOfSessionRequest())
+    std::string query = boost::trim_copy(m_query);
+    m_query.clear();
+    if(isQueryEndOfSessionRequest(query))
     {
-        m_query.clear();
         return;
     }
-    std::shared_ptr<Session> self(shared_from_this());
     try
     {
-        std::shared_ptr<QueryResult> query_result = m_repository_ptr->executeQuery(std::move(m_query));
-        m_query.clear();
-        QueryErrorResult * error = boost::get<QueryErrorResult>(query_result.get());
-        if(error)
-        {
-            std::stringstream message;
-            message << MQP_ERROR << error->message << MQP_ENDLINE;
-            write(message.str(), [self]() {
-                self->read();
-            });
-            return;
-        }
+        std::shared_ptr<QueryResult> query_result = m_repository_ptr->executeQuery(query);
         QueryGetResult * get = boost::get<QueryGetResult>(query_result.get());
         if(get)
         {
@@ -160,6 +150,7 @@ void Session::processQuery()
         QueryDropResult * drop = boost::get<QueryDropResult>(query_result.get());
         if(drop)
         {
+            std::shared_ptr<Session> self(shared_from_this());
             std::stringstream message;
             message << MQP_DELETED << drop->count << MQP_ENDLINE;
             write(message.str(), [self]() {
@@ -168,19 +159,27 @@ void Session::processQuery()
             return;
         }
     }
-    catch(const StorageException & error) // TODO: EdslException
+    catch(const StorageException & error)
     {
-        std::stringstream message;
-        message << MQP_ERROR << error.what() << MQP_ENDLINE;
-        write(message.str(), [self]() {
-            self->read();
-        });
+        writeError(ErrorCode::StorageError, &error);
+    }
+    catch(const Edsl::EdslException & error)
+    {
+        writeError(ErrorCode::ParseError, &error);
+    }
+    catch(const std::exception & error)
+    {
+        writeError(ErrorCode::UnknowError, &error);
+    }
+    catch(...)
+    {
+        writeError(ErrorCode::UnknowError, nullptr);
     }
 }
 
-bool Session::isQueryEndOfSessionRequest()
+bool Session::isQueryEndOfSessionRequest(const std::string & _query)
 {
-    return boost::algorithm::iequals("quite", m_query) || boost::algorithm::iequals("q", m_query);
+    return boost::algorithm::iequals("quite", _query) || boost::algorithm::iequals("q", _query);
 }
 
 void Session::writeEmails(EmailsHolder _emails)
@@ -233,6 +232,20 @@ void Session::writeEmails(EmailsHolder _emails)
         self->read();
         return true;
     });
+}
+
+void Session::writeError(ErrorCode _code, const std::exception * _exception)
+{
+    std::shared_ptr<Session> self(shared_from_this());
+    std::stringstream message;
+    message << MQP_ERROR << _code << MQP_ENDLINE;
+    write(message.str(), [self]() {
+        self->read();
+    });
+    if(nullptr == _exception)
+        LOG_ERROR << "An unknonw error occurred during the MQP query processing";
+    else
+        LOG_ERROR << "An error occurred during the MQP query processing: " << _exception->what();
 }
 
 void Session::write(const std::string & _data, std::function<void()> _callback)
