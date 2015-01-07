@@ -18,7 +18,7 @@
 #ifndef __MU_SMTP_STATEMACHINE_EHLOSTATE_H__
 #define __MU_SMTP_STATEMACHINE_EHLOSTATE_H__
 
-#include <MailUnit/Smtp/StateMachine/StartState.h>
+#include <MailUnit/Smtp/StateMachine/StateBase.h>
 
 namespace MailUnit {
 namespace Smtp {
@@ -27,14 +27,9 @@ namespace Smtp {
 class EhloState : public State
 {
 public:
-    void processInput(const std::string &, Storage::RawEmail &) override
+    boost::optional<ResponseCode> processInput(const char *, Protocol &) override
     {
-    }
-
-    StateStatus response(ResponseCode & _response) const override
-    {
-        _response = ResponseCode::ok;
-        return StateStatus::completed;
+        return ResponseCode::ok;
     }
 
 protected:

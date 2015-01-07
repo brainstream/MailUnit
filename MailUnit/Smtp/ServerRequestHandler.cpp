@@ -19,21 +19,29 @@
 #include <boost/scoped_ptr.hpp>
 #include <MailUnit/Logger.h>
 #include <MailUnit/Smtp/ServerRequestHandler.h>
-#include <MailUnit/Smtp/ProtocolDef.h>
-#include <MailUnit/Smtp/StateMachine/StateMachine.h>
+#include <MailUnit/Smtp/Protocol.h>
 
 using namespace MailUnit;
 using namespace MailUnit::Smtp;
 using namespace MailUnit::Storage;
 
+typedef typename boost::asio::ip::tcp::socket TcpSocket;
+
 namespace {
 
-class Session final : public std::enable_shared_from_this<Session>, private boost::noncopyable
+class Session final :
+    public std::enable_shared_from_this<Session>,
+    public ProtocolTransport,
+    private boost::noncopyable
 {
 public:
-    inline Session(boost::asio::ip::tcp::socket _socket, std::shared_ptr<Repository> _repository);
-    ~Session();
+    inline Session(TcpSocket _socket, std::shared_ptr<Repository> _repository);
+    ~Session() override;
     inline void start();
+    void readRequest() override;
+    void writeRequest(const std::string & _data) override;
+    void switchToTlsRequest() override;
+    void exitRequest() override;
 
 private:
     void performNextAction();
@@ -44,11 +52,10 @@ private:
 
 private:
     static const size_t s_buffer_size = 1024;
-    boost::asio::ip::tcp::socket m_socket;
-    StateMachine * mp_state_machine;
+    TcpSocket m_socket;
     std::shared_ptr<Repository> m_repository_ptr;
-    std::unique_ptr<RawEmail> m_raw_email_ptr;
     char * mp_buffer;
+    Protocol * mp_protocol;
 }; // class Session
 
 } // namespace
@@ -58,7 +65,7 @@ ServerRequestHandler::ServerRequestHandler(std::shared_ptr<Storage::Repository> 
 {
 }
 
-void ServerRequestHandler::handleConnection(boost::asio::ip::tcp::socket _socket)
+void ServerRequestHandler::handleConnection(TcpSocket _socket)
 {
     LOG_INFO << "New connection accepted by the SMTP server";
     std::make_shared<Session>(std::move(_socket), m_repository_ptr)->start();
@@ -70,64 +77,42 @@ bool ServerRequestHandler::handleError(const boost::system::error_code & _err_co
     return false;
 }
 
-Session::Session(boost::asio::ip::tcp::socket _socket, std::shared_ptr<Repository> _repository) :
+Session::Session(TcpSocket _socket, std::shared_ptr<Repository> _repository) :
     m_socket(std::move(_socket)),
-    mp_state_machine(new StateMachine()),
     m_repository_ptr(_repository),
-    m_raw_email_ptr(m_repository_ptr->createRawEmail()),
     mp_buffer(new char[s_buffer_size])
 {
+    mp_protocol = new Protocol(*m_repository_ptr, *this);
 }
 
 Session::~Session()
 {
-    delete mp_state_machine;
     delete [] mp_buffer;
+    delete mp_protocol;
 }
 
 void Session::start()
 {
-    performNextAction();
+    mp_protocol->processInput(nullptr);
 }
 
-void Session::performNextAction()
+void Session::readRequest()
 {
-    int state_id = mp_state_machine->current_state()[0];
-    StateBase * state = mp_state_machine->get_state_by_id(state_id);
-    ResponseCode response;
-    switch(state->response(response))
-    {
-    case StateStatus::incompleted:
-        read();
-        break;
-    case StateStatus::terminated:
-        break;
-    case StateStatus::completed:
-    case StateStatus::intermediate:
-        write(translateResponseCode(response));
-        break;
-    case StateStatus::emailReady:
-        saveEmail();
-        write(translateResponseCode(response));
-        break;
-    }
+    read();
 }
 
-void Session::saveEmail()
+void Session::writeRequest(const std::string & _data)
 {
-    try
-    {
-        LOG_INFO << "Message received"; // TODO: more details
-        m_repository_ptr->storeEmail(*m_raw_email_ptr);
-        m_raw_email_ptr.reset();
-        m_raw_email_ptr = m_repository_ptr->createRawEmail();
-    }
-    catch(const Storage::StorageException & error)
-    {
-        LOG_ERROR <<
-            "An error occurred during an attempt to save an e-mail into the database: " <<
-            error.what();
-    }
+    write(_data);
+}
+
+void Session::switchToTlsRequest()
+{
+}
+
+void Session::exitRequest()
+{
+    // Just do nothing
 }
 
 void Session::write(const std::string & _message)
@@ -136,7 +121,7 @@ void Session::write(const std::string & _message)
     m_socket.async_send(boost::asio::buffer(_message),
         [this, self](const boost::system::error_code & ec, std::size_t length)
         {
-            read();
+            afterWritingAction();
         });
 }
 
@@ -148,47 +133,6 @@ void Session::read()
         {
             if(ec) return; // TODO: log
             mp_buffer[length] = '\0';
-            processInput(mp_buffer);
-            performNextAction();
+            mp_protocol->processInput(mp_buffer);
         });
-}
-
-void Session::processInput(const std::string & _input)
-{
-#ifdef DBGLOG
-    std::cout << "INPUT: \"" << _input << "\"\n";
-    std::cout.flush();
-#endif
-    int state_id = mp_state_machine->current_state()[0];
-    StateBase * state = mp_state_machine->get_state_by_id(state_id);
-    if(!state->isInputProcessCompleted())
-    {
-        state->processInput(_input, *m_raw_email_ptr);
-        return;
-    }
-    else if(_input.compare(0, SMTP_CMDLEN, SMTP_CMD_EHLO) == 0)
-    {
-        mp_state_machine->process_event(EhloEvent(_input, *m_raw_email_ptr));
-    }
-    else if(_input.compare(0, SMTP_CMDLEN, SMTP_CMD_MAIL) == 0)
-    {
-        mp_state_machine->process_event(MailFromEvent(_input, *m_raw_email_ptr));
-    }
-    else if(_input.compare(0, SMTP_CMDLEN, SMTP_CMD_RCPT) == 0)
-    {
-        mp_state_machine->process_event(RcptToEvent(_input, *m_raw_email_ptr));
-    }
-    else if(_input.compare(0, SMTP_CMDLEN, SMTP_CMD_DATA) == 0)
-    {
-        mp_state_machine->process_event(DataEvent(_input, *m_raw_email_ptr));
-    }
-    else if(_input.compare(0, SMTP_CMDLEN, SMTP_CMD_QUIT) == 0)
-    {
-        mp_state_machine->process_event(QuitEvent(_input, *m_raw_email_ptr));
-    }
-    else
-    {
-        // TODO: error!
-        return;
-    }
 }

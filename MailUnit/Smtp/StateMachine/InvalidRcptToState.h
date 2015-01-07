@@ -15,24 +15,29 @@
  *                                                                                             *
  ***********************************************************************************************/
 
-#ifndef __MU_SMTP_STATEMACHINE_RCPTTOSTATE_H__
-#define __MU_SMTP_STATEMACHINE_RCPTTOSTATE_H__
+#ifndef __MU_SMTP_STATEMACHINE_INVALIDRCPTTOSTATE_H__
+#define __MU_SMTP_STATEMACHINE_INVALIDRCPTTOSTATE_H__
 
-#include <MailUnit/Smtp/StateMachine/SingleLineCmdState.h>
+#include <MailUnit/Smtp/StateMachine/StateBase.h>
 
 namespace MailUnit {
 namespace Smtp {
 
-
-class RcptToState : public SingleLineCmdState
+class InvalidRcptToState : public State
 {
 public:
-    RcptToState();
-    boost::optional<ResponseCode> processInput(const char * _data, Protocol & _protocol) override;
-}; // class RcptToState
+    boost::optional<ResponseCode> processInput(const char *, Protocol &) override
+    {
+        throw StateException(ResponseCode::internalError, "Invalid server state");
+    }
 
+protected:
+    void reset() override
+    {
+    }
+}; // class InvalidRcptToState
 
 } // namespace Smtp
 } // namespace MailUnit
 
-#endif // __MU_SMTP_STATEMACHINE_RCPTTOSTATE_H__
+#endif // __MU_SMTP_STATEMACHINE_INVALIDRCPTTOSTATE_H__

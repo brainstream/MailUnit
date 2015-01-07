@@ -27,26 +27,21 @@ MailFromState::MailFromState() :
 {
 }
 
-void MailFromState::processInput(const std::string & _input, Storage::RawEmail & _email)
+boost::optional<ResponseCode> MailFromState::processInput(const char * _data, Protocol & _protocol)
 {
-    if(internalProcessInput(_input) != ProcessResult::success)
-        return;
-    std::string from;
-    if(commandArgString(from))
-        _email.addFromAddress(from);
-}
-
-StateStatus MailFromState::response(ResponseCode & _response) const
-{
-    switch(currentState())
+    if(!internalProcessInput(_data))
     {
-    case ProcessResult::incompleted:
-        return StateStatus::incompleted;
-    case ProcessResult::error:
-        _response = ResponseCode::invalidParameters;
-        return StateStatus::completed;
-    default:
-        _response = ResponseCode::ok;
-        return StateStatus::completed;
+        return nullptr;
+    }
+    std::string from = args();
+    if(from.empty())
+    {
+        reset();
+        throw StateException(ResponseCode::invalidParameters, "Address is required");
+    }
+    else
+    {
+        _protocol.email().addFromAddress(from);
+        return ResponseCode::ok;
     }
 }

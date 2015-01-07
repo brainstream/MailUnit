@@ -427,9 +427,6 @@ void Repository::findEmails(const Edsl::Expression & _expression, std::vector<st
         std::vector<std::unique_ptr<Email>> * result;
     } callback_args = { this, &_result };
     char * error = nullptr;
-#ifdef DBGLOG
-    std::cout << "SELECT SQL: " << sql.str() << std::endl << std::flush;
-#endif
     int select_result = sqlite3_exec(mp_sqlite, sql.str().c_str(),
         [](void * pargs, int, char ** values, char **) {
             CallbackArgs * args = static_cast<CallbackArgs *>(pargs);
@@ -488,11 +485,6 @@ size_t Repository::dropEmails(const Edsl::Expression & _expression)
         exchange_sql << message_sql.str();
         sql = exchange_sql.str();
     }
-
-#ifdef DBGLOG
-    std::cout << "DROP SQL: " << sql << std::endl;
-#endif
-
     char * error = nullptr;
     int sql_result =  sqlite3_exec(mp_sqlite, sql.c_str(),
         [](void * , int, char ** , char **) {

@@ -81,7 +81,7 @@ public:
         return m_to_addresses;
     }
 
-    void addToAddress(const std::string & _address)
+    void addToAddress(const std::string & _address) // TODO: parse and raise an error
     {
         m_to_addresses.push_back(_address);
     }

@@ -27,24 +27,31 @@ namespace Smtp {
 class SingleLineCmdState : public State
 {
 protected:
-    enum class ProcessResult
+    SingleLineCmdState(size_t args_pos) :
+        m_args_pos(args_pos),
+        m_completed(false)
     {
-        error,
-        success,
-        incompleted
-    }; // enum class ProcessResult
+    }
 
-protected:
-    SingleLineCmdState(size_t args_pos);
-    ProcessResult internalProcessInput(const std::string & _input);
-    bool commandArgString(std::string & _result) const;
-    ProcessResult currentState() const { return m_state; }
-    void reset() override;
+    bool internalProcessInput(const std::string & _input);
+
+    bool completed() const
+    {
+        return m_completed;
+    }
+
+    void reset() override
+    {
+        m_data.clear();
+        m_completed = false;
+    }
+
+    std::string args() const;
 
 private:
     const size_t m_args_pos;
     std::string m_data;
-    ProcessResult m_state;
+    bool m_completed;
 }; // class SingleLineCmdState
 
 

@@ -45,7 +45,7 @@ enum class ResponseCode
     badCommandsSequence            = 503,
     commandParameterNotImplemented = 504,
     mailboxUnavailable             = 550,
-    forvardPath                    = 551,
+    forwardPath                    = 551,
     mailActionAborted              = 552,
     mailboxNameNotAllowed          = 553,
     transactionFailed              = 554,

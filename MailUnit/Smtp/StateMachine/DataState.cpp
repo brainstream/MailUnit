@@ -23,67 +23,24 @@
 
 using namespace MailUnit::Smtp;
 
-void DataState::processInput(const std::string & _input, Storage::RawEmail & _email)
+boost::optional<ResponseCode> DataState::processInput(const char * _data, Protocol & _protocol)
 {
-    if(m_read_state.header_accepted)
-        processData(_input, _email);
-    else
-        processHeader(_input);
-}
-
-void DataState::processHeader(const std::string & _input)
-{
-    const size_t cmd_len = sizeof(COMMAND) - 1;
-    m_data += _input;
-    if(m_data.length() < cmd_len)
-        return;
-    if(m_data.compare(0, cmd_len, COMMAND) == 0)
-        m_read_state.header_accepted = 1;
-    else
-        m_read_state.error = 1;
-}
-
-void DataState::processData(const std::string & _input, Storage::RawEmail & _email)
-{
-    m_read_state.data_accepting = 1;
+    if(m_end_of_data)
+    {
+        return ResponseCode::ok;
+    }
     // FIXME: a data must not be saved in the memory!
-    m_data += _input;
+    m_data += _data;
     size_t end_pos = m_data.find(SMTP_DATA_END);
     if(std::string::npos == end_pos)
     {
-        return;
+        return nullptr;
     }
-    m_read_state.data_accepted = 1;
+    m_end_of_data = true;
     m_data.resize(end_pos + sizeof(SMTP_DATA_END));
-    _email.data() << m_data.substr(sizeof(COMMAND) - 1);
-}
-
-StateStatus DataState::response(ResponseCode & _response) const
-{
-    if(m_read_state.error)
-    {
-        _response = ResponseCode::internalError;
-        return StateStatus::completed;
-    }
-    if(m_read_state.data_accepted)
-    {
-        _response = ResponseCode::ok;
-        return StateStatus::emailReady;
-    }
-    else if(m_read_state.data_accepting)
-    {
-        return StateStatus::incompleted;
-    }
-    else if(m_read_state.header_accepted)
-    {
-        _response = ResponseCode::intermediate;
-        return StateStatus::intermediate;
-    }
-    return StateStatus::incompleted;
-}
-
-void DataState::reset()
-{
-    std::memset(&m_read_state, 0, sizeof(ReadState));
+    _protocol.email().data() << m_data;
     m_data.clear();
+    _protocol.endMessageData();
+    _protocol.storeEmail();
+    return ResponseCode::ok;
 }

@@ -21,56 +21,19 @@
 #include <boost/msm/front/state_machine_def.hpp>
 #include <boost/msm/back/state_machine.hpp>
 #include <boost/mpl/vector.hpp>
+#include <MailUnit/Smtp/StateMachine/Event.h>
 #include <MailUnit/Smtp/StateMachine/StartState.h>
 #include <MailUnit/Smtp/StateMachine/EhloState.h>
 #include <MailUnit/Smtp/StateMachine/MailFromState.h>
+#include <MailUnit/Smtp/StateMachine/InvalidMailFromState.h>
 #include <MailUnit/Smtp/StateMachine/RcptToState.h>
+#include <MailUnit/Smtp/StateMachine/InvalidRcptToState.h>
+#include <MailUnit/Smtp/StateMachine/DataHeaderState.h>
 #include <MailUnit/Smtp/StateMachine/DataState.h>
 #include <MailUnit/Smtp/StateMachine/QuitState.h>
 
 namespace MailUnit {
 namespace Smtp {
-
-class Event
-{
-public:
-    Event(const std::string & _data, Storage::RawEmail & _email) :
-        m_data(_data),
-        mr_email(_email)
-    {
-    }
-
-    const std::string & data() const
-    {
-        return m_data;
-    }
-
-    Storage::RawEmail & email() const
-    {
-        return mr_email;
-    }
-
-private:
-    std::string m_data;
-    Storage::RawEmail & mr_email;
-}; // class Event
-
-#define EVENT(name)                                                   \
-    class name : public Event                                         \
-    {                                                                 \
-    public:                                                           \
-        name(const std::string & _data, Storage::RawEmail & _email) : \
-            Event(_data, _email)                                      \
-        {                                                             \
-        }                                                             \
-    };
-
-EVENT(EhloEvent)
-EVENT(MailFromEvent)
-EVENT(RcptToEvent)
-EVENT(DataEvent)
-EVENT(QuitEvent)
-
 
 class StateMachineDef :
     public boost::msm::front::state_machine_def<StateMachineDef>
@@ -80,22 +43,28 @@ public:
     typedef StateBase  BaseAllStates;
 
     struct transition_table : boost::mpl::vector<
-        //    Start          Event          Next
-        _row< StartState,    EhloEvent,     EhloState     >,
-        _row< EhloState,     MailFromEvent, MailFromState >,
-        _row< MailFromState, MailFromEvent, MailFromState >,
-        _row< MailFromState, RcptToEvent,   RcptToState   >,
-        _row< RcptToState,   RcptToEvent,   RcptToState   >,
-        _row< RcptToState,   DataEvent,     DataState     >,
-        _row< RcptToState,   QuitEvent,     QuitState     >,
-        _row< DataState,     QuitEvent,     QuitState     >,
-        _row< DataState,     MailFromEvent, MailFromState >
+        //    Start                   Event               Next
+        _row< StartState,             EhloEvent,          EhloState            >,
+        _row< StartState,             QuitEvent,          QuitState            >,
+        _row< EhloState,              MailFromEvent,      MailFromState        >,
+        _row< EhloState,              QuitEvent,          QuitState            >,
+        _row< MailFromState,          ErrorEvent,         InvalidMailFromState >,
+        _row< InvalidMailFromState,   MailFromEvent,      MailFromState        >,
+        _row< MailFromState,          MailFromEvent,      MailFromState        >,
+        _row< MailFromState,          RcptToEvent,        RcptToState          >,
+        _row< MailFromState,          QuitEvent,          QuitState            >,
+        _row< RcptToState,            RcptToEvent,        RcptToState          >,
+        _row< RcptToState,            DataHeaderEvent,    DataHeaderState      >,
+        _row< RcptToState,            QuitEvent,          QuitState            >,
+        _row< RcptToState,            ErrorEvent,         InvalidRcptToState   >,
+        _row< InvalidRcptToState,     RcptToEvent,        RcptToState          >,
+        _row< DataHeaderState,        DataEvent,          DataState            >,
+        _row< DataState,              QuitEvent,          QuitState            >,
+        _row< DataState,              MailFromEvent,      MailFromState        >
     > { };
 }; // class StateMachineDef
 
-
 typedef boost::msm::back::state_machine<StateMachineDef> StateMachine;
-
 
 } // namespace Smtp
 } // namespace MailUnit

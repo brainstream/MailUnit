@@ -20,41 +20,38 @@
 
 #include <string>
 #include <boost/noncopyable.hpp>
+#include <boost/optional.hpp>
 #include <boost/msm/front/states.hpp>
+#include <MailUnit/Exception.h>
 #include <MailUnit/Smtp/ResponseCode.h>
-#include <MailUnit/Storage/Email.h>
+#include <MailUnit/Smtp/Protocol.h>
 
 namespace MailUnit {
 namespace Smtp {
 
-enum class StateStatus
+class StateException : public Excpetion
 {
-    incompleted   = 0x1,
-    completed     = 0x2,
-    intermediate  = 0X4,
-    emailReady    = 0x8,
-    terminated    = 0x10
-}; // enum class StateStatus
+public:
+    StateException(ResponseCode _response_code, const std::string & _message) :
+        Excpetion(_message),
+        m_response_code(_response_code)
+    {
+    }
 
+    ResponseCode responseCode() const
+    {
+        return m_response_code;
+    }
+
+private:
+    ResponseCode m_response_code;
+}; // class StateException
 
 class StateBase : private boost::noncopyable
 {
 public:
     virtual ~StateBase() { }
-    virtual void processInput(const std::string & _input, Storage::RawEmail & _email) = 0;
-    virtual StateStatus response(ResponseCode & _response) const = 0;
-    bool isInputProcessCompleted() const
-    {
-        ResponseCode resp;
-        switch(response(resp))
-        {
-        case StateStatus::intermediate:
-        case StateStatus::incompleted:
-            return false;
-        default:
-            return true;
-        }
-    }
+    virtual boost::optional<ResponseCode> processInput(const char * _data, Protocol & _protocol) = 0;
 }; // class StateBase
 
 
@@ -62,13 +59,12 @@ class State : public boost::msm::front::state<StateBase>
 {
 public:
     template <typename EventT, typename FsmT>
-    void on_entry(const EventT & _event, FsmT &)
+    void on_entry(const EventT &, FsmT &)
     {
-        processInput(_event.data(), _event.email());
     }
 
     template <typename EventT, typename FsmT>
-    void on_exit(const EventT & _event, FsmT &)
+    void on_exit(const EventT &, FsmT &)
     {
         reset();
     }

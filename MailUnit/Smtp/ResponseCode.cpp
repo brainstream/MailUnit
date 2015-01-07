@@ -25,17 +25,19 @@ std::string MailUnit::Smtp::translateResponseCode(ResponseCode _code)
     switch(_code)
     {
     case ResponseCode::ready:
-        return "220 [127.0.0.1] Stub Mail Transfer Service Ready" SMTP_NEWLINE;
+        return "220 MailUnit Ready" SMTP_NEWLINE;
     case ResponseCode::closing:
-        return "221 [127.0.0.1] Stub Mail Transfer Service Closing" SMTP_NEWLINE;
+        return "221 MailUnit Closing" SMTP_NEWLINE;
     case ResponseCode::ok:
         return "250 OK" SMTP_NEWLINE;
     case ResponseCode::intermediate:
         return "354 Intermediate" SMTP_NEWLINE;
     case ResponseCode::badCommandsSequence:
-        return "503  Bad sequence of commands" SMTP_NEWLINE;
+        return "503 Bad sequence of commands" SMTP_NEWLINE;
     case ResponseCode::invalidParameters:
         return "455 Server unable to accommodate parameters" SMTP_NEWLINE;
+    case ResponseCode::unrecognizedCommand:
+        return "500 Unrecognized command" SMTP_NEWLINE;
     default:
         return "451 Internal server error" SMTP_NEWLINE;
     }

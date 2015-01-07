@@ -27,26 +27,21 @@ RcptToState::RcptToState() :
 {
 }
 
-void RcptToState::processInput(const std::string & _input, Storage::RawEmail & _email)
+boost::optional<ResponseCode> RcptToState::processInput(const char * _data, Protocol & _protocol)
 {
-    if(internalProcessInput(_input) != ProcessResult::success)
-        return;
-    std::string to;
-    if(commandArgString(to))
-        _email.addToAddress(to);
-}
-
-StateStatus RcptToState::response(ResponseCode & _response) const
-{
-    switch(currentState())
+    if(!internalProcessInput(_data))
     {
-    case ProcessResult::incompleted:
-        return StateStatus::incompleted;
-    case ProcessResult::error:
-        _response = ResponseCode::invalidParameters;
-        return StateStatus::completed;
-    default:
-        _response = ResponseCode::ok;
-        return StateStatus::completed;
+        return nullptr;
+    }
+    std::string to = args();
+    if(to.empty())
+    {
+        reset();
+        throw StateException(ResponseCode::invalidParameters, "Address is required");
+    }
+    else
+    {
+        _protocol.email().addToAddress(to);
+        return ResponseCode::ok;
     }
 }

@@ -27,14 +27,9 @@ namespace Smtp {
 class StartState : public State
 {
 public:
-    void processInput(const std::string &, Storage::RawEmail &) override
+    boost::optional<ResponseCode> processInput(const char *, Protocol &) override
     {
-    }
-
-    StateStatus response(ResponseCode & _response) const override
-    {
-        _response = ResponseCode::ready;
-        return StateStatus::completed;
+        return ResponseCode::ready;
     }
 
 protected:

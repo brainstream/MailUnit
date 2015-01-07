@@ -27,14 +27,10 @@ namespace Smtp {
 class QuitState : public State
 {
 public:
-    void processInput(const std::string &, Storage::RawEmail &) override
+    boost::optional<ResponseCode> processInput(const char *, Protocol & _protocol) override
     {
-    }
-
-    StateStatus response(ResponseCode & _response) const override
-    {
-        _response = ResponseCode::closing;
-        return StateStatus::terminated;
+        _protocol.terminate();
+        return ResponseCode::closing;
     }
 
 protected:

@@ -15,24 +15,30 @@
  *                                                                                             *
  ***********************************************************************************************/
 
-#ifndef __MU_SMTP_STATEMACHINE_RCPTTOSTATE_H__
-#define __MU_SMTP_STATEMACHINE_RCPTTOSTATE_H__
+#ifndef __MU_SMTP_STATEMACHINE_DATAHEADER_H__
+#define __MU_SMTP_STATEMACHINE_DATAHEADER_H__
 
-#include <MailUnit/Smtp/StateMachine/SingleLineCmdState.h>
+#include <MailUnit/Smtp/StateMachine/StateBase.h>
 
 namespace MailUnit {
 namespace Smtp {
 
-
-class RcptToState : public SingleLineCmdState
+class DataHeaderState : public State
 {
 public:
-    RcptToState();
-    boost::optional<ResponseCode> processInput(const char * _data, Protocol & _protocol) override;
-}; // class RcptToState
+    boost::optional<ResponseCode> processInput(const char *, Protocol & _protocol) override
+    {
+        _protocol.beginMessageData();
+        return ResponseCode::intermediate;
+    }
 
+protected:
+    void reset() override
+    {
+    }
+}; // class DataHeaderState
 
 } // namespace Smtp
 } // namespace MailUnit
 
-#endif // __MU_SMTP_STATEMACHINE_RCPTTOSTATE_H__
+#endif // __MU_SMTP_STATEMACHINE_DATAHEADER_H__

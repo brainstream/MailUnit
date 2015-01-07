@@ -56,11 +56,6 @@ else()
     message(FATAL_ERROR "Unsupported compiler")
 endif()
 
-if(DBGLOG)
-    add_definitions(-DDBGLOG)
-endif()
-
-
 find_package(Threads REQUIRED)
 
 ####
@@ -168,11 +163,14 @@ set(SRC_SERVER_LIB
     MailUnit/Server/TcpServer.h
     MailUnit/Server/TcpServer.cpp
     MailUnit/Smtp/ProtocolDef.h
+    MailUnit/Smtp/Protocol.h
+    MailUnit/Smtp/Protocol.cpp
     MailUnit/Smtp/ResponseCode.h
     MailUnit/Smtp/ResponseCode.cpp
     MailUnit/Smtp/ServerRequestHandler.h
     MailUnit/Smtp/ServerRequestHandler.cpp
     MailUnit/Smtp/StateMachine/StateMachine.h
+    MailUnit/Smtp/StateMachine/Event.h
     MailUnit/Smtp/StateMachine/StateBase.h
     MailUnit/Smtp/StateMachine/SingleLineCmdState.h
     MailUnit/Smtp/StateMachine/SingleLineCmdState.cpp
@@ -180,8 +178,11 @@ set(SRC_SERVER_LIB
     MailUnit/Smtp/StateMachine/EhloState.h
     MailUnit/Smtp/StateMachine/MailFromState.h
     MailUnit/Smtp/StateMachine/MailFromState.cpp
+    MailUnit/Smtp/StateMachine/InvalidMailFromState.h
     MailUnit/Smtp/StateMachine/RcptToState.h
     MailUnit/Smtp/StateMachine/RcptToState.cpp
+    MailUnit/Smtp/StateMachine/InvalidRcptToState.h
+    MailUnit/Smtp/StateMachine/DataHeaderState.h
     MailUnit/Smtp/StateMachine/DataState.h
     MailUnit/Smtp/StateMachine/DataState.cpp
     MailUnit/Smtp/StateMachine/QuitState.h

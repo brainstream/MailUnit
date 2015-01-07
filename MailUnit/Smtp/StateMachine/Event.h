@@ -15,24 +15,28 @@
  *                                                                                             *
  ***********************************************************************************************/
 
-#ifndef __MU_SMTP_STATEMACHINE_RCPTTOSTATE_H__
-#define __MU_SMTP_STATEMACHINE_RCPTTOSTATE_H__
+#ifndef __MU_SMTP_STATEMACHINE_EVENT_H__
+#define __MU_SMTP_STATEMACHINE_EVENT_H__
 
-#include <MailUnit/Smtp/StateMachine/SingleLineCmdState.h>
+#include <MailUnit/Smtp/Protocol.h>
 
 namespace MailUnit {
 namespace Smtp {
 
-
-class RcptToState : public SingleLineCmdState
+template<unsigned int index>
+class Event
 {
-public:
-    RcptToState();
-    boost::optional<ResponseCode> processInput(const char * _data, Protocol & _protocol) override;
-}; // class RcptToState
+}; // class Event
 
+typedef Event<0> ErrorEvent;
+typedef Event<1> EhloEvent;
+typedef Event<2> MailFromEvent;
+typedef Event<3> RcptToEvent;
+typedef Event<4> DataHeaderEvent;
+typedef Event<5> DataEvent;
+typedef Event<6> QuitEvent;
 
 } // namespace Smtp
 } // namespace MailUnit
 
-#endif // __MU_SMTP_STATEMACHINE_RCPTTOSTATE_H__
+#endif // __MU_SMTP_STATEMACHINE_EVENT_H__

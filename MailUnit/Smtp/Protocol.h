@@ -15,24 +15,72 @@
  *                                                                                             *
  ***********************************************************************************************/
 
-#ifndef __MU_SMTP_STATEMACHINE_RCPTTOSTATE_H__
-#define __MU_SMTP_STATEMACHINE_RCPTTOSTATE_H__
+#ifndef __MU_SMTP_PROTOCOL_H__
+#define __MU_SMTP_PROTOCOL_H__
 
-#include <MailUnit/Smtp/StateMachine/SingleLineCmdState.h>
+#include <string>
+#include <functional>
+#include <boost/noncopyable.hpp>
+#include <MailUnit/Storage/Repository.h>
+#include <MailUnit/Smtp/ProtocolDef.h>
 
 namespace MailUnit {
 namespace Smtp {
 
-
-class RcptToState : public SingleLineCmdState
+class ProtocolTransport
 {
 public:
-    RcptToState();
-    boost::optional<ResponseCode> processInput(const char * _data, Protocol & _protocol) override;
-}; // class RcptToState
+    typedef std::function<void()> Action;
 
+public:
+    virtual ~ProtocolTransport() { }
+    virtual void readRequest() = 0;
+    virtual void writeRequest(const std::string & _data) = 0;
+    virtual void switchToTlsRequest() = 0;
+    virtual void exitRequest() = 0;
+
+    void setAfterWriting(Action _action)
+    {
+        m_next_action = _action;
+    }
+
+protected:
+    void afterWritingAction()
+    {
+        if(nullptr != m_next_action)
+        {
+            Action action = nullptr;
+            std::swap(action, m_next_action);
+            action();
+        }
+    }
+
+private:
+    Action m_next_action;
+}; // class ProtocolTransport
+
+class Protocol final : private boost::noncopyable
+{
+    struct Data;
+public:
+    Protocol(Storage::Repository & _repository, ProtocolTransport & _transport);
+    ~Protocol();
+    void processInput(const char * _data);
+    Storage::RawEmail & email();
+    void beginMessageData();
+    void endMessageData();
+    void storeEmail();
+    void terminate();
+
+private:
+    void nextState(const char * _data);
+    void continueState(const char * _data);
+
+private:
+    Data * mp_data;
+}; // class Protocol
 
 } // namespace Smtp
 } // namespace MailUnit
 
-#endif // __MU_SMTP_STATEMACHINE_RCPTTOSTATE_H__
+#endif // __MU_SMTP_PROTOCOL_H__

@@ -15,23 +15,15 @@
  *                                                                                             *
  ***********************************************************************************************/
 
+#include <boost/algorithm/string.hpp>
 #include <MailUnit/Smtp/StateMachine/SingleLineCmdState.h>
 #include <MailUnit/Smtp/ProtocolDef.h>
 
 using namespace MailUnit::Smtp;
 
-SingleLineCmdState::SingleLineCmdState(size_t args_pos) :
-    m_args_pos(args_pos),
-    m_state(ProcessResult::incompleted)
+bool SingleLineCmdState::internalProcessInput(const std::string & _input)
 {
-}
-
-SingleLineCmdState::ProcessResult SingleLineCmdState::internalProcessInput(const std::string & _input)
-{
-    if(ProcessResult::incompleted != m_state)
-    {
-        return m_state;
-    }
+    if(m_completed) return true;
     size_t end_pos = _input.find(SMTP_NEWLINE);
     if(std::string::npos == end_pos)
     {
@@ -40,21 +32,14 @@ SingleLineCmdState::ProcessResult SingleLineCmdState::internalProcessInput(const
     else
     {
         m_data += _input.substr(0, end_pos);
-        m_state = m_data.length() < m_args_pos + 1 ? ProcessResult::error : ProcessResult::success;
+        m_completed = true;
     }
-    return m_state;
+    return m_completed;
 }
 
-bool SingleLineCmdState::commandArgString(std::string & _result) const
+std::string SingleLineCmdState::args() const
 {
-    if(ProcessResult::success != m_state)
-        return false;
-    _result = m_data.substr(m_args_pos);
-    return true;
-}
-
-void SingleLineCmdState::reset()
-{
-    m_data.clear();
-    m_state = ProcessResult::incompleted;
+    std::string args = m_data.substr(m_args_pos);
+    boost::trim(args);
+    return args;
 }

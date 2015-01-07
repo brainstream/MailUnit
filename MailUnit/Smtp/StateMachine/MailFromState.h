@@ -28,8 +28,7 @@ class MailFromState : public SingleLineCmdState
 {
 public:
     MailFromState();
-    void processInput(const std::string & _input, Storage::RawEmail & _email) override;
-    StateStatus response(ResponseCode & _response) const override;
+    boost::optional<ResponseCode> processInput(const char * _data, Protocol & _protocol) override;
 }; // class MailFromState
 
 
