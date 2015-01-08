@@ -15,29 +15,42 @@
  *                                                                                             *
  ***********************************************************************************************/
 
-#ifndef __MU_SMTP_SERVERREQUESTHANDLER_H__
-#define __MU_SMTP_SERVERREQUESTHANDLER_H__
+#include <boost/algorithm/string.hpp>
+#include <MailUnit/Server/TlsContext.h>
 
-#include <memory>
-#include <boost/asio.hpp>
-#include <MailUnit/Server/RequestHandler.h>
-#include <MailUnit/Storage/Repository.h>
+using namespace MailUnit::Server;
+namespace fs = boost::filesystem;
+namespace asio = boost::asio;
 
-namespace MailUnit {
-namespace Smtp {
+namespace {
 
-class ServerRequestHandler : public MailUnit::Server::RequestHandler<boost::asio::ip::tcp::socket>
+asio::ssl::context::file_format fileFormat(const fs::path & _path)
 {
-public:
-    ServerRequestHandler(std::shared_ptr<MailUnit::Storage::Repository> _repository);
-    std::shared_ptr<Server::Session> createSession(boost::asio::ip::tcp::socket _socket) override;
-    bool handleError(const boost::system::error_code & _err_code) override;
+     std::string ext = _path.extension().string();
+     if(boost::iequals("asn1", ext))
+         return asio::ssl::context::asn1;
+     else
+         return asio::ssl::context::pem;
+}
 
-private:
-    std::shared_ptr<MailUnit::Storage::Repository> m_repository_ptr;
-}; // class ServerRequestHandler
+} // namespace
 
-} // namespace Smtp
-} // namespace MailUnit
-
-#endif // __MU_SMTP_SERVERREQUESTHANDLER_H__
+TlsContext::TlsContext(const TlsConfig & _config) :
+    context(tlsv12_server)
+{
+    set_options(
+        asio::ssl::context::default_workarounds |
+        asio::ssl::context::no_tlsv1 |
+        asio::ssl::context::no_sslv2 |
+        asio::ssl::context::no_sslv3);
+    if(!_config.certPath.empty())
+        use_certificate_chain_file(_config.certPath.string());
+    if(!_config.keyPath.empty())
+        use_private_key_file(_config.keyPath.string(), fileFormat(_config.keyPath));
+    if(!_config.dhPath.empty())
+        use_tmp_dh_file(_config.dhPath.string());
+    std::string pass = _config.password;
+    set_password_callback([pass](size_t, context_base::password_purpose) {
+       return pass;
+    });
+}

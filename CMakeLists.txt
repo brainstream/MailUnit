@@ -22,7 +22,7 @@
 # ENABLE_TESTS=ON
 #    Enables unit tests. The Boost.Test library is required.
 # ENABLE_GUI=ON
-#    Enables graphic user interface. The Qt 4 or newer is required.
+#    Enables graphic user interface. The Qt 4 or later is required.
 #
 ###############################################################################################
 
@@ -57,6 +57,7 @@ else()
 endif()
 
 find_package(Threads REQUIRED)
+find_package(OpenSSL REQUIRED)
 
 ####
 # Begin the Boost libraries initialization
@@ -155,13 +156,21 @@ set(SRC_SERVER_LIB
     MailUnit/Logger.cpp
     MailUnit/Exception.h
     MailUnit/IO/IODef.h
+    MailUnit/IO/AsyncWriter.h
     MailUnit/IO/AsyncSequenceOperation.h
     MailUnit/IO/AsyncOperation.h
     MailUnit/IO/AsyncFileWriter.h
+    MailUnit/IO/AsyncFileWriter.cpp
     MailUnit/IO/AsyncLambdaWriter.h
+    MailUnit/IO/AsyncLambdaWriter.cpp
     MailUnit/Server/RequestHandler.h
-    MailUnit/Server/TcpServer.h
-    MailUnit/Server/TcpServer.cpp
+    MailUnit/Server/Session.h
+    MailUnit/Server/TlsContext.h
+    MailUnit/Server/TlsContext.cpp
+    MailUnit/Server/Tcp/TcpServer.h
+    MailUnit/Server/Tcp/TcpServer.cpp
+    MailUnit/Server/Tcp/TcpSession.h
+    MailUnit/Server/Tcp/TcpSession.cpp
     MailUnit/Smtp/ProtocolDef.h
     MailUnit/Smtp/Protocol.h
     MailUnit/Smtp/Protocol.cpp
@@ -322,10 +331,12 @@ target_link_libraries(${TARGET_LIB}
 add_library(${TARGET_SERVER_LIB} STATIC ${SRC_SERVER_LIB})
 target_include_directories(${TARGET_SERVER_LIB} PRIVATE
     ${COMMON_INCLUDE_DIRS}
+    ${OPENSSL_INCLUDE_DIR}
 )
 target_link_libraries(${TARGET_SERVER_LIB}
     ${TARGET_SQLITE}
     ${TARGET_LIB}
+    ${OPENSSL_LIBRARIES}
 )
 
 #

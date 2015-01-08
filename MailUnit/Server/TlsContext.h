@@ -15,29 +15,31 @@
  *                                                                                             *
  ***********************************************************************************************/
 
-#ifndef __MU_SMTP_SERVERREQUESTHANDLER_H__
-#define __MU_SMTP_SERVERREQUESTHANDLER_H__
+#ifndef __MU_SERVER_TLSCONTEXT_H__
+#define __MU_SERVER_TLSCONTEXT_H__
 
-#include <memory>
-#include <boost/asio.hpp>
-#include <MailUnit/Server/RequestHandler.h>
-#include <MailUnit/Storage/Repository.h>
+#include <string>
+#include <boost/asio/ssl.hpp>
+#include <boost/filesystem/path.hpp>
 
 namespace MailUnit {
-namespace Smtp {
+namespace Server {
 
-class ServerRequestHandler : public MailUnit::Server::RequestHandler<boost::asio::ip::tcp::socket>
+struct TlsConfig
+{
+    boost::filesystem::path certPath;
+    boost::filesystem::path keyPath;
+    boost::filesystem::path dhPath;
+    std::string password;
+}; // struct TlsConfig
+
+class TlsContext : public boost::asio::ssl::context
 {
 public:
-    ServerRequestHandler(std::shared_ptr<MailUnit::Storage::Repository> _repository);
-    std::shared_ptr<Server::Session> createSession(boost::asio::ip::tcp::socket _socket) override;
-    bool handleError(const boost::system::error_code & _err_code) override;
+    explicit TlsContext(const TlsConfig & _config);
+}; // class TlsContext
 
-private:
-    std::shared_ptr<MailUnit::Storage::Repository> m_repository_ptr;
-}; // class ServerRequestHandler
-
-} // namespace Smtp
+} // namespace Server
 } // namespace MailUnit
 
-#endif // __MU_SMTP_SERVERREQUESTHANDLER_H__
+#endif // __MU_SERVER_TLSCONTEXT_H__

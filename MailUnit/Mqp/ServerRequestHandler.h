@@ -34,7 +34,7 @@ public:
     {
     }
 
-    void handleConnection(boost::asio::ip::tcp::socket _socket) override;
+    std::shared_ptr<Server::Session> createSession(boost::asio::ip::tcp::socket _socket) override;
     bool handleError(const boost::system::error_code & _err_code) override;
 
 private:

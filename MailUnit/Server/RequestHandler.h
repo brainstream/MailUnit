@@ -18,18 +18,25 @@
 #ifndef __MU_SERVER_REQUESTHANDLER_H__
 #define __MU_SERVER_REQUESTHANDLER_H__
 
-#include <LibMailUnit/Def.h>
+#include <memory>
+#include <boost/noncopyable.hpp>
 #include <boost/system/error_code.hpp>
+#include <LibMailUnit/Def.h>
+#include <MailUnit/Server/Session.h>
 
 namespace MailUnit {
 namespace Server {
 
 template<typename Socket>
-class RequestHandler
+class RequestHandler : private boost::noncopyable
 {
 public:
-    virtual ~RequestHandler() { }
-    virtual void handleConnection(Socket _socket) = 0;
+    virtual ~RequestHandler()
+    {
+    }
+
+    virtual std::shared_ptr<Session> createSession(Socket _socket) = 0;
+
     virtual bool handleError(const boost::system::error_code & _err_code)
     {
         MU_UNUSED(_err_code);

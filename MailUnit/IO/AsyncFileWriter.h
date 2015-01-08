@@ -25,28 +25,9 @@
 namespace MailUnit {
 namespace IO {
 
-template<typename Socket>
-void writeFileAsync(Socket & _socket, std::shared_ptr<std::ifstream> _stream, AsioCallback _callback)
-{
-    static const size_t chank_size = 1024;
-    char chank[chank_size];
-    size_t symbol_count = _stream->read(chank, chank_size).gcount();
-    if(symbol_count == 0)
-    {
-        _callback(boost::system::error_code());
-        return;
-    }
-    boost::asio::async_write(_socket, boost::asio::buffer(chank, symbol_count),
-        [&_socket, _stream, _callback](const boost::system::error_code & error_code, std::size_t) {
-            if(error_code && !callAsioCallback(_callback, error_code))
-                return;
-            writeFileAsync(_socket, _stream, _callback);
-        }
-    );
-}
+void writeFileAsync(AsyncWriter & _writer, std::shared_ptr<std::ifstream> _stream, AsioCallback _callback);
 
-template<typename Socket>
-class AsyncFileWriter : public AsyncOperation<Socket>
+class AsyncFileWriter : public AsyncOperation
 {
 public:
     explicit AsyncFileWriter(std::shared_ptr<std::ifstream> _stream) :
@@ -54,9 +35,9 @@ public:
     {
     }
 
-    void run(Socket & _socket, AsioCallback _callback) override
+    void run(AsyncWriter & _writer, AsioCallback _callback) override
     {
-        writeFileAsync(_socket, m_stream, _callback);
+        writeFileAsync(_writer, m_stream, _callback);
     }
 
 private:

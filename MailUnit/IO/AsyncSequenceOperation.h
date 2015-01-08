@@ -25,9 +25,9 @@
 namespace MailUnit {
 namespace IO {
 
-template<typename Item, typename Socket>
+template<typename Item>
 class AsyncSequenceItemOperation :
-    public std::enable_shared_from_this<AsyncSequenceItemOperation<Item, Socket>>
+    public std::enable_shared_from_this<AsyncSequenceItemOperation<Item>>
 {
 private:
     AsyncSequenceItemOperation(const Item & _item, size_t _index) :
@@ -38,10 +38,10 @@ private:
     }
 
 public:
-    static std::shared_ptr<AsyncSequenceItemOperation<Item, Socket>> create(const Item & _item, size_t _index)
+    static std::shared_ptr<AsyncSequenceItemOperation<Item>> create(const Item & _item, size_t _index)
     {
-        return std::shared_ptr<AsyncSequenceItemOperation<Item, Socket>>(
-            new AsyncSequenceItemOperation<Item, Socket>(_item, _index));
+        return std::shared_ptr<AsyncSequenceItemOperation<Item>>(
+            new AsyncSequenceItemOperation<Item>(_item, _index));
     }
 
     const Item & item() const
@@ -54,7 +54,7 @@ public:
         return m_item_index;
     }
 
-    void addStep(std::unique_ptr<AsyncOperation<Socket>> && _operation)
+    void addStep(std::unique_ptr<AsyncOperation> && _operation)
     {
         m_operations.push_back(std::move(_operation));
     }
@@ -64,24 +64,24 @@ public:
         return m_operations.empty();
     }
 
-    void run(Socket & _socket, AsioCallback _callbak)
+    void run(AsyncWriter & _writer, AsioCallback _callbak)
     {
         m_current_operation = m_operations.begin();
-        execute(_socket, _callbak);
+        execute(_writer, _callbak);
     }
 
 private:
-    void execute(Socket & _socket, AsioCallback _callbak);
+    void execute(AsyncWriter & _writer, AsioCallback _callbak);
 
 private:
     const Item & mr_item;
     const size_t m_item_index;
-    std::list<std::unique_ptr<AsyncOperation<Socket>>> m_operations;
-    typename std::list<std::unique_ptr<AsyncOperation<Socket>>>::iterator m_current_operation;
+    std::list<std::unique_ptr<AsyncOperation>> m_operations;
+    typename std::list<std::unique_ptr<AsyncOperation>>::iterator m_current_operation;
 }; // class AsyncSequenceItemOperation
 
-template<typename Item, typename Socket>
-void AsyncSequenceItemOperation<Item, Socket>::execute(Socket & _socket, AsioCallback _callbak)
+template<typename Item>
+void AsyncSequenceItemOperation<Item>::execute(AsyncWriter & _writer, AsioCallback _callbak)
 {
     if(m_operations.end() == m_current_operation)
     {
@@ -89,23 +89,23 @@ void AsyncSequenceItemOperation<Item, Socket>::execute(Socket & _socket, AsioCal
         return;
     }
     auto self = this->shared_from_this();
-    AsyncOperation<Socket> * operation = m_current_operation->get();
+    AsyncOperation * operation = m_current_operation->get();
     ++m_current_operation;
-    operation->run(_socket, [self, &_socket, _callbak](const boost::system::error_code & error_code) {
+    operation->run(_writer, [self, &_writer, _callbak](const boost::system::error_code & error_code) {
         if(error_code && !callAsioCallback(_callbak, error_code))
             return false;
-        self->execute(_socket, _callbak);
+        self->execute(_writer, _callbak);
         return true;
     });
 }
 
-template<typename Sequence, typename Socket>
+template<typename Sequence>
 class AsyncSequenceOperation :
-    public std::enable_shared_from_this<AsyncSequenceOperation<Sequence, Socket>>
+    public std::enable_shared_from_this<AsyncSequenceOperation<Sequence>>
 {
 public:
     typedef typename Sequence::value_type ValueType;
-    typedef std::function<void(AsyncSequenceItemOperation<ValueType, Socket> &)> ItemOperatiton;
+    typedef std::function<void(AsyncSequenceItemOperation<ValueType> &)> ItemOperatiton;
     typedef std::function<const Sequence & ()> SequenceHolder;
 
 private:
@@ -117,21 +117,21 @@ private:
     }
 
 public:
-    static std::shared_ptr<AsyncSequenceOperation<Sequence, Socket>> create(
+    static std::shared_ptr<AsyncSequenceOperation<Sequence>> create(
         SequenceHolder _sequence_holder, const ItemOperatiton & _item_operation)
     {
-        return std::shared_ptr<AsyncSequenceOperation<Sequence, Socket>>(
-            new AsyncSequenceOperation<Sequence, Socket>(_sequence_holder, _item_operation));
+        return std::shared_ptr<AsyncSequenceOperation<Sequence>>(
+            new AsyncSequenceOperation<Sequence>(_sequence_holder, _item_operation));
     }
 
-    void run(Socket & _socket, AsioCallback _complete_callback)
+    void run(AsyncWriter & _writer, AsioCallback _complete_callback)
     {
         m_current_item = m_sequence_holder().cbegin();
-        execute(_socket, _complete_callback);
+        execute(_writer, _complete_callback);
     }
 
 private:
-    void execute(Socket & _socket, AsioCallback _complete_callback);
+    void execute(AsyncWriter & _writer, AsioCallback _complete_callback);
 
 private:
     SequenceHolder m_sequence_holder;
@@ -140,8 +140,8 @@ private:
     AsioCallback m_complete_callback;
 }; // class AsyncSequenceOperation
 
-template<typename Sequence, typename Socket>
-void AsyncSequenceOperation<Sequence, Socket>::execute(Socket & _socket, AsioCallback _complete_callback)
+template<typename Sequence>
+void AsyncSequenceOperation<Sequence>::execute(AsyncWriter & _writer, AsioCallback _complete_callback)
 {
     const Sequence & sequence = m_sequence_holder();
     if(sequence.end() == m_current_item)
@@ -149,16 +149,16 @@ void AsyncSequenceOperation<Sequence, Socket>::execute(Socket & _socket, AsioCal
         callAsioCallback(_complete_callback);
         return;
     }
-    auto operation = AsyncSequenceItemOperation<ValueType, Socket>::create(
+    auto operation = AsyncSequenceItemOperation<ValueType>::create(
         *m_current_item, m_current_item - sequence.begin());
     ++m_current_item;
     m_item_operation(*operation);
     auto self = this->shared_from_this();
-    operation->run(_socket,
-        [self, &_socket, _complete_callback](const boost::system::error_code & error_code) {
+    operation->run(_writer,
+        [self, &_writer, _complete_callback](const boost::system::error_code & error_code) {
             if(error_code && !callAsioCallback(_complete_callback, error_code))
                 return false;
-            self->execute(_socket, _complete_callback);
+            self->execute(_writer, _complete_callback);
             return true;
         }
     );

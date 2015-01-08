@@ -15,29 +15,63 @@
  *                                                                                             *
  ***********************************************************************************************/
 
-#ifndef __MU_SMTP_SERVERREQUESTHANDLER_H__
-#define __MU_SMTP_SERVERREQUESTHANDLER_H__
+#include <MailUnit/Server/Tcp/TcpServer.h>
 
-#include <memory>
-#include <boost/asio.hpp>
-#include <MailUnit/Server/RequestHandler.h>
-#include <MailUnit/Storage/Repository.h>
+using namespace MailUnit::Server;
+namespace asio = boost::asio;
 
-namespace MailUnit {
-namespace Smtp {
+namespace {
 
-class ServerRequestHandler : public MailUnit::Server::RequestHandler<boost::asio::ip::tcp::socket>
+class TcpServer : public std::enable_shared_from_this<TcpServer>
 {
 public:
-    ServerRequestHandler(std::shared_ptr<MailUnit::Storage::Repository> _repository);
-    std::shared_ptr<Server::Session> createSession(boost::asio::ip::tcp::socket _socket) override;
-    bool handleError(const boost::system::error_code & _err_code) override;
+    inline TcpServer(asio::io_service & _io_service,
+        const asio::ip::tcp::endpoint & _endpoint,
+        std::shared_ptr<TcpRequestHandler> _handler);
+    void accept();
 
 private:
-    std::shared_ptr<MailUnit::Storage::Repository> m_repository_ptr;
-}; // class ServerRequestHandler
+    asio::ip::tcp::socket m_socket;
+    asio::ip::tcp::acceptor m_acceptor;
+    std::shared_ptr<TcpRequestHandler> m_handler_ptr;
+}; // class TcpServer
 
-} // namespace Smtp
-} // namespace MailUnit
+} // namespace
 
-#endif // __MU_SMTP_SERVERREQUESTHANDLER_H__
+TcpServer::TcpServer(asio::io_service & _io_service,
+        const asio::ip::tcp::endpoint & _endpoint,
+        std::shared_ptr<TcpRequestHandler> _handler) :
+    m_socket(_io_service),
+    m_acceptor(_io_service, _endpoint),
+    m_handler_ptr(_handler)
+{
+}
+
+void TcpServer::accept()
+{
+    if(nullptr == m_handler_ptr)
+    {
+        return;
+    }
+    auto self = shared_from_this();
+    m_acceptor.async_accept(m_socket, [self](boost::system::error_code err_code)
+    {
+        if(err_code)
+        {
+            if(!self->m_handler_ptr->handleError(err_code))
+                return;
+        }
+        else
+        {
+            self->m_handler_ptr->createSession(std::move(self->m_socket))->start();
+        }
+        self->accept();
+    });
+}
+
+void MailUnit::Server::startTcpServer(asio::io_service & _io_service,
+    const asio::ip::tcp::endpoint & _endpoint,
+    std::shared_ptr<TcpRequestHandler> _handler)
+{
+    std::make_shared<TcpServer>(_io_service, _endpoint, _handler)->accept();
+}

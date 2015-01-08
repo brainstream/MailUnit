@@ -28,6 +28,7 @@ namespace MailUnit {
 
 enum class LogLevel
 {
+    debug,
     info,
     warning,
     error
@@ -110,6 +111,7 @@ inline MailUnit::LogWriter && operator << (MailUnit::LogWriter && _writer, const
 
 std::ostream & operator << (std::ostream & _stream, MailUnit::LogLevel _level);
 
+#define LOG_DEBUG ::MailUnit::LogWriter(::MailUnit::LogLevel::debug)
 #define LOG_INFO  ::MailUnit::LogWriter(::MailUnit::LogLevel::info)
 #define LOG_WARN  ::MailUnit::LogWriter(::MailUnit::LogLevel::warning)
 #define LOG_ERROR ::MailUnit::LogWriter(::MailUnit::LogLevel::error)

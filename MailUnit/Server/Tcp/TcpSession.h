@@ -15,29 +15,50 @@
  *                                                                                             *
  ***********************************************************************************************/
 
-#ifndef __MU_SMTP_SERVERREQUESTHANDLER_H__
-#define __MU_SMTP_SERVERREQUESTHANDLER_H__
+#ifndef __MU_SERVER_TCP_TCPSESSION_H__
+#define __MU_SERVER_TCP_TCPSESSION_H__
 
-#include <memory>
 #include <boost/asio.hpp>
-#include <MailUnit/Server/RequestHandler.h>
-#include <MailUnit/Storage/Repository.h>
+#include <boost/asio/ssl.hpp>
+#include <MailUnit/Server/Session.h>
+#include <MailUnit/Server/TlsContext.h>
 
 namespace MailUnit {
-namespace Smtp {
+namespace Server {
 
-class ServerRequestHandler : public MailUnit::Server::RequestHandler<boost::asio::ip::tcp::socket>
+typedef boost::asio::ip::tcp::socket TcpSocket;
+
+class TcpSession : public Session
 {
+private:
+    typedef boost::asio::ssl::stream<TcpSocket &> TlsSocket;
+
 public:
-    ServerRequestHandler(std::shared_ptr<MailUnit::Storage::Repository> _repository);
-    std::shared_ptr<Server::Session> createSession(boost::asio::ip::tcp::socket _socket) override;
-    bool handleError(const boost::system::error_code & _err_code) override;
+    typedef std::function<void(const boost::system::error_code &, size_t)> ReadCallback;
+    typedef std::function<void(const boost::system::error_code &)> HandshakeCallback;
+
+    typedef boost::asio::mutable_buffers_1 OutBuffer;
+
+public:
+    explicit TcpSession(boost::asio::io_service & _io_service);
+    explicit TcpSession(TcpSocket _socket);
+    virtual ~TcpSession();
+    void writeAsync(const InBuffer & _buffer, WriteCallback _callback) override;
+    void readAsync(const OutBuffer & _buffer, ReadCallback _callback);
+    void switchToTlsAsync(TlsContext & _context, HandshakeCallback _callback);
+
+protected:
+    TcpSocket & tcpSocket()
+    {
+        return m_tcp_socket;
+    }
 
 private:
-    std::shared_ptr<MailUnit::Storage::Repository> m_repository_ptr;
-}; // class ServerRequestHandler
+    TcpSocket m_tcp_socket;
+    TlsSocket * mp_tls_socket;
+}; // class TcpSession
 
-} // namespace Smtp
+} // namespace Server
 } // namespace MailUnit
 
-#endif // __MU_SMTP_SERVERREQUESTHANDLER_H__
+#endif // __MU_SERVER_TCP_TCPSESSION_H__

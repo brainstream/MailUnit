@@ -15,23 +15,30 @@
  *                                                                                             *
  ***********************************************************************************************/
 
-#ifndef __MU_SERVER_TCPSERVER_H__
-#define __MU_SERVER_TCPSERVER_H__
+#ifndef __MU_IO_ASYNCWRITER_H__
+#define __MU_IO_ASYNCWRITER_H__
 
-#include <memory>
+#include <functional>
 #include <boost/asio.hpp>
-#include <MailUnit/Server/RequestHandler.h>
 
 namespace MailUnit {
-namespace Server {
+namespace IO {
 
-typedef RequestHandler<boost::asio::ip::tcp::socket> TcpRequestHandler;
+class AsyncWriter
+{
+public:
+    typedef boost::asio::const_buffers_1 InBuffer;
+    typedef std::function<void(const boost::system::error_code &, size_t)> WriteCallback;
 
-void startTcpServer(boost::asio::io_service & _io_service,
-    const boost::asio::ip::tcp::endpoint & _endpoint,
-    std::shared_ptr<TcpRequestHandler> _handler);
+public:
+    virtual ~AsyncWriter()
+    {
+    }
 
-} // namespace Server
+    virtual void writeAsync(const InBuffer & _buffer, WriteCallback _callback) = 0;
+}; // class AsyncWriter
+
+} // namespace IO
 } // namespace MailUnit
 
-#endif // __MU_SERVER_TCPSERVER_H__
+#endif // __MU_IO_ASYNCWRITER_H__

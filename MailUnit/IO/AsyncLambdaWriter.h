@@ -25,8 +25,7 @@
 namespace MailUnit {
 namespace IO {
 
-template<typename Socket>
-class AsyncLambdaWriter : public AsyncOperation<Socket>
+class AsyncLambdaWriter : public AsyncOperation
 {
 public:
     typedef std::function<void(std::ostream & _data_stream)> Lambda;
@@ -37,24 +36,11 @@ public:
     {
     }
 
-    void run(Socket & _socket, AsioCallback _callback) override;
+    void run(AsyncWriter &_writer, AsioCallback _callback) override;
 
 private:
     Lambda m_lambda;
 }; // class AsyncLambdaWriter
-
-template<typename Socket>
-void AsyncLambdaWriter<Socket>::run(Socket & _socket, AsioCallback _callback)
-{
-    boost::asio::streambuf streambuf;
-    std::ostream stream(&streambuf);
-    m_lambda(stream);
-    boost::asio::async_write(_socket, streambuf,
-        [_callback](const boost::system::error_code & error_code, std::size_t) {
-            callAsioCallback(_callback, error_code);
-        }
-    );
-}
 
 } // namespace IO
 } // namespace MailUnit

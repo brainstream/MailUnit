@@ -17,46 +17,39 @@
 
 #include <boost/noncopyable.hpp>
 #include <boost/scoped_ptr.hpp>
+#include <boost/asio/ssl.hpp>
 #include <MailUnit/Logger.h>
-#include <MailUnit/Smtp/ServerRequestHandler.h>
+#include <MailUnit/Server/Tcp/TcpSession.h>
 #include <MailUnit/Smtp/Protocol.h>
+#include <MailUnit/Smtp/ServerRequestHandler.h>
 
 using namespace MailUnit;
+using namespace MailUnit::Server;
 using namespace MailUnit::Smtp;
 using namespace MailUnit::Storage;
 
-typedef typename boost::asio::ip::tcp::socket TcpSocket;
-
 namespace {
 
-class Session final :
-    public std::enable_shared_from_this<Session>,
-    public ProtocolTransport,
-    private boost::noncopyable
+class SmtpSession final :
+    public std::enable_shared_from_this<SmtpSession>,
+    public TcpSession,
+    public ProtocolTransport
 {
 public:
-    inline Session(TcpSocket _socket, std::shared_ptr<Repository> _repository);
-    ~Session() override;
-    inline void start();
+    inline SmtpSession(TcpSocket _socket, std::shared_ptr<Repository> _repository);
+    ~SmtpSession() override;
+    void start() override;
     void readRequest() override;
     void writeRequest(const std::string & _data) override;
     void switchToTlsRequest() override;
     void exitRequest() override;
 
 private:
-    void performNextAction();
-    void write(const std::string & _message);
-    void read();
-    void processInput(const std::string & _input);
-    void saveEmail();
-
-private:
     static const size_t s_buffer_size = 1024;
-    TcpSocket m_socket;
     std::shared_ptr<Repository> m_repository_ptr;
     char * mp_buffer;
     Protocol * mp_protocol;
-}; // class Session
+}; // class SmtpSession
 
 } // namespace
 
@@ -65,10 +58,9 @@ ServerRequestHandler::ServerRequestHandler(std::shared_ptr<Storage::Repository> 
 {
 }
 
-void ServerRequestHandler::handleConnection(TcpSocket _socket)
+std::shared_ptr<Session> ServerRequestHandler::createSession(boost::asio::ip::tcp::socket _socket)
 {
-    LOG_INFO << "New connection accepted by the SMTP server";
-    std::make_shared<Session>(std::move(_socket), m_repository_ptr)->start();
+    return std::make_shared<SmtpSession>(std::move(_socket), m_repository_ptr);
 }
 
 bool ServerRequestHandler::handleError(const boost::system::error_code & _err_code)
@@ -77,62 +69,55 @@ bool ServerRequestHandler::handleError(const boost::system::error_code & _err_co
     return false;
 }
 
-Session::Session(TcpSocket _socket, std::shared_ptr<Repository> _repository) :
-    m_socket(std::move(_socket)),
+SmtpSession::SmtpSession(TcpSocket _socket, std::shared_ptr<Repository> _repository) :
+    TcpSession(std::move(_socket)),
     m_repository_ptr(_repository),
     mp_buffer(new char[s_buffer_size])
 {
+    LOG_DEBUG << "New SMTP session has started";
     mp_protocol = new Protocol(*m_repository_ptr, *this);
 }
 
-Session::~Session()
+SmtpSession::~SmtpSession()
 {
+    LOG_DEBUG << "SMTP session has closed";
     delete [] mp_buffer;
     delete mp_protocol;
 }
 
-void Session::start()
+void SmtpSession::start()
 {
     mp_protocol->processInput(nullptr);
 }
 
-void Session::readRequest()
-{
-    read();
-}
-
-void Session::writeRequest(const std::string & _data)
-{
-    write(_data);
-}
-
-void Session::switchToTlsRequest()
-{
-}
-
-void Session::exitRequest()
-{
-    // Just do nothing
-}
-
-void Session::write(const std::string & _message)
+void SmtpSession::readRequest()
 {
     auto self(shared_from_this());
-    m_socket.async_send(boost::asio::buffer(_message),
-        [this, self](const boost::system::error_code & ec, std::size_t length)
-        {
-            afterWritingAction();
-        });
-}
-
-void Session::read()
-{
-    auto self(shared_from_this());
-    m_socket.async_receive(boost::asio::buffer(mp_buffer, s_buffer_size - 1),
-        [this, self](const boost::system::error_code & ec, std::size_t length)
+    readAsync(boost::asio::buffer(mp_buffer, s_buffer_size - 1),
+        [self](const boost::system::error_code & ec, std::size_t length)
         {
             if(ec) return; // TODO: log
-            mp_buffer[length] = '\0';
-            mp_protocol->processInput(mp_buffer);
+            self->mp_buffer[length] = '\0';
+            self->mp_protocol->processInput(self->mp_buffer);
         });
+}
+
+void SmtpSession::writeRequest(const std::string & _data)
+{
+    auto self(shared_from_this());
+    writeAsync(boost::asio::buffer(_data),
+        [self](const boost::system::error_code &, std::size_t)
+        {
+            // TODO: handle error
+            self->afterWritingAction();
+        });
+}
+
+void SmtpSession::switchToTlsRequest()
+{
+}
+
+void SmtpSession::exitRequest()
+{
+    // Just do nothing
 }

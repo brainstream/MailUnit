@@ -19,11 +19,11 @@
 #define __MU_IO_ASYNCOPERATION_H__
 
 #include <MailUnit/IO/IODef.h>
+#include <MailUnit/IO/AsyncWriter.h>
 
 namespace MailUnit {
 namespace IO {
 
-template<typename Socket>
 class AsyncOperation
 {
 public:
@@ -31,7 +31,7 @@ public:
     {
     }
 
-    virtual void run(Socket & _socket, AsioCallback _callback) = 0;
+    virtual void run(AsyncWriter & _writer, AsioCallback _callback) = 0;
 }; // class AsyncOperation
 
 } // namespace IO

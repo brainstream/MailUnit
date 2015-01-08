@@ -15,29 +15,23 @@
  *                                                                                             *
  ***********************************************************************************************/
 
-#ifndef __MU_SMTP_SERVERREQUESTHANDLER_H__
-#define __MU_SMTP_SERVERREQUESTHANDLER_H__
+#ifndef __MU_SERVER_TCP_TCPSERVER_H__
+#define __MU_SERVER_TCP_TCPSERVER_H__
 
 #include <memory>
 #include <boost/asio.hpp>
 #include <MailUnit/Server/RequestHandler.h>
-#include <MailUnit/Storage/Repository.h>
 
 namespace MailUnit {
-namespace Smtp {
+namespace Server {
 
-class ServerRequestHandler : public MailUnit::Server::RequestHandler<boost::asio::ip::tcp::socket>
-{
-public:
-    ServerRequestHandler(std::shared_ptr<MailUnit::Storage::Repository> _repository);
-    std::shared_ptr<Server::Session> createSession(boost::asio::ip::tcp::socket _socket) override;
-    bool handleError(const boost::system::error_code & _err_code) override;
+typedef RequestHandler<boost::asio::ip::tcp::socket> TcpRequestHandler;
 
-private:
-    std::shared_ptr<MailUnit::Storage::Repository> m_repository_ptr;
-}; // class ServerRequestHandler
+void startTcpServer(boost::asio::io_service & _io_service,
+    const boost::asio::ip::tcp::endpoint & _endpoint,
+    std::shared_ptr<TcpRequestHandler> _handler);
 
-} // namespace Smtp
+} // namespace Server
 } // namespace MailUnit
 
-#endif // __MU_SMTP_SERVERREQUESTHANDLER_H__
+#endif // __MU_SERVER_TCP_TCPSERVER_H__

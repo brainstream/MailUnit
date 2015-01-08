@@ -52,6 +52,9 @@ std::ostream & operator << (std::ostream & _stream, LogLevel _level)
     case LogLevel::error:
         _stream << "ERROR";
         break;
+    case LogLevel::debug:
+        _stream << "DEBUG";
+        break;
     }
     return _stream;
 }

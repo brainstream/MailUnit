@@ -30,7 +30,7 @@
 #include <MailUnit/Logger.h>
 #include <MailUnit/DeferredPointer.h>
 #include <MailUnit/OS/FileSystem.h>
-#include <MailUnit/Server/TcpServer.h>
+#include <MailUnit/Server/Tcp/TcpServer.h>
 #include <MailUnit/Smtp/ServerRequestHandler.h>
 #include <MailUnit/Mqp/ServerRequestHandler.h>
 
@@ -49,6 +49,7 @@
 #define LOPT_STDLOG       "log-std"
 #define LOPT_LOGLEVEL     "log-level"
 
+#define LOG_LEVEL_DEBUG   "debug"
 #define LOG_LEVEL_INFO    "info"
 #define LOG_LEVEL_WARNING "warning"
 #define LOG_LEVEL_ERROR   "error"
@@ -83,6 +84,8 @@ void validate(boost::any & _out_value, const std::vector<std::string> & _in_valu
         _out_value = boost::any(LogLevel::warning);
     else if(boost::iequals(input, LOG_LEVEL_INFO))
         _out_value = boost::any(LogLevel::info);
+    else if(boost::iequals(input, LOG_LEVEL_DEBUG))
+        _out_value = boost::any(LogLevel::debug);
     else
         throw po::validation_error(po::validation_error::invalid_option_value);
 }
@@ -147,7 +150,8 @@ OptionsPtr loadConfig(int _argc, const char ** _argv, const fs::path & _app_dir)
         (LOPT_STDLOG, "Use stdlog")
         (LOPT_LOGLEVEL,
             po::value(&config->log_level)->default_value(LogLevel::error, LOG_LEVEL_ERROR),
-            "Log level. Valid values: " LOG_LEVEL_INFO ", " LOG_LEVEL_WARNING ", " LOG_LEVEL_ERROR);
+            "Log level. \nValid values: "
+            LOG_LEVEL_DEBUG ", " LOG_LEVEL_INFO ", " LOG_LEVEL_WARNING ", " LOG_LEVEL_ERROR);
     full_description->add(common_description).add(cmd_line_only_description);
 
     po::variables_map var_map;

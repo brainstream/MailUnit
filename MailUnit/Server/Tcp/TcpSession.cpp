@@ -15,29 +15,52 @@
  *                                                                                             *
  ***********************************************************************************************/
 
-#ifndef __MU_SMTP_SERVERREQUESTHANDLER_H__
-#define __MU_SMTP_SERVERREQUESTHANDLER_H__
+#include <MailUnit/Server/Tcp/TcpSession.h>
 
-#include <memory>
-#include <boost/asio.hpp>
-#include <MailUnit/Server/RequestHandler.h>
-#include <MailUnit/Storage/Repository.h>
+using namespace MailUnit::Server;
+namespace asio = boost::asio;
 
-namespace MailUnit {
-namespace Smtp {
 
-class ServerRequestHandler : public MailUnit::Server::RequestHandler<boost::asio::ip::tcp::socket>
+TcpSession::TcpSession(boost::asio::io_service & _io_service) :
+    m_tcp_socket(_io_service),
+    mp_tls_socket(nullptr)
 {
-public:
-    ServerRequestHandler(std::shared_ptr<MailUnit::Storage::Repository> _repository);
-    std::shared_ptr<Server::Session> createSession(boost::asio::ip::tcp::socket _socket) override;
-    bool handleError(const boost::system::error_code & _err_code) override;
+}
 
-private:
-    std::shared_ptr<MailUnit::Storage::Repository> m_repository_ptr;
-}; // class ServerRequestHandler
+TcpSession::TcpSession(TcpSocket _socket) :
+    m_tcp_socket(std::move(_socket)),
+    mp_tls_socket(nullptr)
+{
+}
 
-} // namespace Smtp
-} // namespace MailUnit
+TcpSession::~TcpSession()
+{
+    delete mp_tls_socket;
+}
 
-#endif // __MU_SMTP_SERVERREQUESTHANDLER_H__
+void TcpSession::writeAsync(const InBuffer & _buffer, WriteCallback _callback)
+{
+    if(mp_tls_socket)
+        mp_tls_socket->async_write_some(_buffer, _callback);
+    else
+        m_tcp_socket.async_send(_buffer, _callback);
+}
+
+void TcpSession::readAsync(const OutBuffer & _buffer, ReadCallback _callback)
+{
+    if(mp_tls_socket)
+        mp_tls_socket->async_read_some(_buffer, _callback);
+    else
+        m_tcp_socket.async_receive(_buffer, _callback);
+}
+
+void TcpSession::switchToTlsAsync(TlsContext & _context, HandshakeCallback _callback)
+{
+    if(mp_tls_socket)
+    {
+        _callback(boost::system::error_code());
+        return;
+    }
+    mp_tls_socket = new TlsSocket(m_tcp_socket, _context);
+    mp_tls_socket->async_handshake(boost::asio::ssl::stream_base::server, _callback);
+}

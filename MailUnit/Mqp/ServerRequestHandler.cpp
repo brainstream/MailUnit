@@ -20,6 +20,7 @@
 #include <functional>
 #include <boost/noncopyable.hpp>
 #include <MailUnit/Logger.h>
+#include <MailUnit/Server/Tcp/TcpSession.h>
 #include <MailUnit/IO/AsyncLambdaWriter.h>
 #include <MailUnit/IO/AsyncFileWriter.h>
 #include <MailUnit/IO/AsyncSequenceOperation.h>
@@ -43,18 +44,18 @@ using namespace MailUnit::Storage;
 using namespace MailUnit::Server;
 using namespace MailUnit::IO;
 
-typedef typename boost::asio::ip::tcp::socket TcpSocket;
-
 namespace {
 
-class Session final : public std::enable_shared_from_this<Session>, private boost::noncopyable
+class MqpSession final :
+    public std::enable_shared_from_this<MqpSession>,
+    public TcpSession
 {
-    typedef typename AsyncSequenceOperation<std::vector<std::unique_ptr<Email>>, TcpSocket>::SequenceHolder EmailsHolder;
+    typedef typename AsyncSequenceOperation<std::vector<std::unique_ptr<Email>>>::SequenceHolder EmailsHolder;
 
 public:
-    inline explicit Session(TcpSocket _socket, std::shared_ptr<Repository> _repository);
-    ~Session();
-    inline void start();
+    inline explicit MqpSession(TcpSocket _socket, std::shared_ptr<Repository> _repository);
+    ~MqpSession();
+    void start() override;
 
 private:
     size_t findEndOfQuery(const char * _query_piece, size_t _length);
@@ -66,20 +67,18 @@ private:
     void write(const std::string & _data, std::function<void()> _callback);
 
 private:
-    TcpSocket m_socket;
     std::shared_ptr<Repository> m_repository_ptr;
     static const size_t s_buffer_size = 256;
     char * mp_buffer;
     bool m_position_in_quoted_text;
     std::string m_query;
-}; // class Session
+}; // class MqpSession
 
 } // namespace
 
-void ServerRequestHandler::handleConnection(TcpSocket _socket)
+std::shared_ptr<Session> ServerRequestHandler::createSession(TcpSocket _socket)
 {
-    LOG_INFO << "New connection accepted by the storage server";
-    std::make_shared<Session>(std::move(_socket), m_repository_ptr)->start();
+    return std::make_shared<MqpSession>(std::move(_socket), m_repository_ptr);
 }
 
 bool ServerRequestHandler::handleError(const boost::system::error_code & _err_code)
@@ -88,28 +87,30 @@ bool ServerRequestHandler::handleError(const boost::system::error_code & _err_co
     return false;
 }
 
-Session::Session(TcpSocket _socket, std::shared_ptr<Repository> _repository) :
-    m_socket(std::move(_socket)),
+MqpSession::MqpSession(TcpSocket _socket, std::shared_ptr<Repository> _repository) :
+    TcpSession(std::move(_socket)),
     m_repository_ptr(_repository),
     mp_buffer(new char[s_buffer_size]),
     m_position_in_quoted_text(false)
 {
+    LOG_DEBUG << "New MQP session has started";
 }
 
-Session::~Session()
+MqpSession::~MqpSession()
 {
+    LOG_DEBUG << "MQP session has closed";
     delete [] mp_buffer;
 }
 
-void Session::start()
+void MqpSession::start()
 {
     read();
 }
 
-void Session::read()
+void MqpSession::read()
 {
-    std::shared_ptr<Session> self(shared_from_this());
-    m_socket.async_receive(boost::asio::buffer(mp_buffer, s_buffer_size),
+    std::shared_ptr<MqpSession> self(shared_from_this());
+    readAsync(boost::asio::buffer(mp_buffer, s_buffer_size),
         [self](const boost::system::error_code & ec, std::size_t length)
         {
             if(ec) return; // TODO: log
@@ -128,7 +129,7 @@ void Session::read()
         });
 }
 
-void Session::processQuery()
+void MqpSession::processQuery()
 {
     std::string query = boost::trim_copy(m_query);
     m_query.clear();
@@ -150,7 +151,7 @@ void Session::processQuery()
         QueryDropResult * drop = boost::get<QueryDropResult>(query_result.get());
         if(drop)
         {
-            std::shared_ptr<Session> self(shared_from_this());
+            std::shared_ptr<MqpSession> self(shared_from_this());
             std::stringstream message;
             message << MQP_DELETED << drop->count << MQP_ENDLINE;
             write(message.str(), [self]() {
@@ -177,16 +178,15 @@ void Session::processQuery()
     }
 }
 
-bool Session::isQueryEndOfSessionRequest(const std::string & _query)
+bool MqpSession::isQueryEndOfSessionRequest(const std::string & _query)
 {
     return boost::algorithm::iequals("quite", _query) || boost::algorithm::iequals("q", _query);
 }
 
-void Session::writeEmails(EmailsHolder _emails)
+void MqpSession::writeEmails(EmailsHolder _emails)
 {
-    using EmailSequenceOperation = AsyncSequenceOperation<
-        std::vector<std::unique_ptr<Email>>, TcpSocket>;
-    using EmailOperation = AsyncSequenceItemOperation<std::unique_ptr<Email>, TcpSocket>;
+    using EmailSequenceOperation = AsyncSequenceOperation<std::vector<std::unique_ptr<Email>>>;
+    using EmailOperation = AsyncSequenceItemOperation<std::unique_ptr<Email>>;
 
     auto self = this->shared_from_this();
     size_t total_count = _emails().size();
@@ -206,7 +206,7 @@ void Session::writeEmails(EmailsHolder _emails)
             {
                 // TODO: error
             }
-            email_operation.addStep(std::make_unique<AsyncLambdaWriter<TcpSocket>>(
+            email_operation.addStep(std::make_unique<AsyncLambdaWriter>(
                 [&email_operation, &email, total_count](std::ostream & stream) {
                     stream <<
                         MQP_ITEM << email_operation.itemIndex() + 1 << '/' << total_count << MQP_ENDLINE <<
@@ -224,19 +224,19 @@ void Session::writeEmails(EmailsHolder _emails)
                     stream << MQP_ENDLINE;
                 }
             ));
-            email_operation.addStep(std::make_unique<AsyncFileWriter<TcpSocket>>(file));
+            email_operation.addStep(std::make_unique<AsyncFileWriter>(file));
         }
     );
-    emails_operation->run(m_socket, [self](const boost::system::error_code &) {
+    emails_operation->run(*this, [self](const boost::system::error_code &) {
         // TODO: error
         self->read();
         return true;
     });
 }
 
-void Session::writeError(ErrorCode _code, const std::exception * _exception)
+void MqpSession::writeError(ErrorCode _code, const std::exception * _exception)
 {
-    std::shared_ptr<Session> self(shared_from_this());
+    std::shared_ptr<MqpSession> self(shared_from_this());
     std::stringstream message;
     message << MQP_ERROR << _code << MQP_ENDLINE;
     write(message.str(), [self]() {
@@ -248,9 +248,9 @@ void Session::writeError(ErrorCode _code, const std::exception * _exception)
         LOG_ERROR << "An error occurred during the MQP query processing: " << _exception->what();
 }
 
-void Session::write(const std::string & _data, std::function<void()> _callback)
+void MqpSession::write(const std::string & _data, std::function<void()> _callback)
 {
-    boost::asio::async_write(m_socket, boost::asio::buffer(_data),
+    writeAsync(boost::asio::buffer(_data),
         [_callback](const boost::system::error_code & ec, std::size_t length)
         {
             // TODO: error handling
@@ -258,7 +258,7 @@ void Session::write(const std::string & _data, std::function<void()> _callback)
         });
 }
 
-size_t Session::findEndOfQuery(const char * _query_piece, size_t _length)
+size_t MqpSession::findEndOfQuery(const char * _query_piece, size_t _length)
 {
     for(size_t i = 0; i < _length; ++i)
     {
