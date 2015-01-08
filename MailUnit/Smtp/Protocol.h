@@ -21,8 +21,10 @@
 #include <string>
 #include <functional>
 #include <boost/noncopyable.hpp>
+#include <boost/optional.hpp>
 #include <MailUnit/Storage/Repository.h>
 #include <MailUnit/Smtp/ProtocolDef.h>
+#include <MailUnit/Smtp/ResponseCode.h>
 
 namespace MailUnit {
 namespace Smtp {
@@ -75,6 +77,7 @@ public:
 private:
     void nextState(const char * _data);
     void continueState(const char * _data);
+    void processResponseCode(const boost::optional<ResponseCode> & _code);
 
 private:
     Data * mp_data;

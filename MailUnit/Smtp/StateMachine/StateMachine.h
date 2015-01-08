@@ -64,7 +64,14 @@ public:
     > { };
 }; // class StateMachineDef
 
-typedef boost::msm::back::state_machine<StateMachineDef> StateMachine;
+class StateMachine : public boost::msm::back::state_machine<StateMachineDef>
+{
+public:
+    StateBase * currentState()
+    {
+        return get_state_by_id(current_state()[0]);
+    }
+}; // class StateMachine
 
 } // namespace Smtp
 } // namespace MailUnit

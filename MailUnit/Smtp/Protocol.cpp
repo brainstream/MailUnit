@@ -57,8 +57,7 @@ Protocol::~Protocol()
 
 void Protocol::processInput(const char * _data)
 {
-    StateBase * current_state = mp_data->state_machine_ptr->get_state_by_id(
-        mp_data->state_machine_ptr->current_state()[0]);
+    StateBase * current_state = mp_data->state_machine_ptr->currentState();
     if(nullptr == current_state)
     {
         mp_data->state_completed = true;
@@ -120,36 +119,19 @@ void Protocol::nextState(const char * _data)
         mp_data->transport.writeRequest(translateResponseCode(ResponseCode::unrecognizedCommand));
         return;
     }
-    StateBase * state = mp_data->state_machine_ptr->get_state_by_id(
-        mp_data->state_machine_ptr->current_state()[0]);
-    // FIXME: begin copy-paste
-    boost::optional<ResponseCode> response = state->processInput(_data, *this);
-    if(response.is_initialized())
-    {
-        mp_data->state_completed = true;
-        mp_data->transport.setAfterWriting([this]() {
-            if(mp_data->protocol_completed)
-                mp_data->transport.exitRequest();
-            else
-                mp_data->transport.readRequest();
-        });
-        mp_data->transport.writeRequest(translateResponseCode(response.get()));
-    }
-    else
-    {
-        mp_data->state_completed = false;
-        mp_data->transport.readRequest();
-    }
-    // FIXME: end copy-paste
+    StateBase * state = mp_data->state_machine_ptr->currentState();
+    processResponseCode(state->processInput(_data, *this));
 }
 
 void Protocol::continueState(const char * _data)
 {
-    StateBase * state = mp_data->state_machine_ptr->get_state_by_id(
-        mp_data->state_machine_ptr->current_state()[0]);  // ??????????????????
-    // FIXME: begin copy-paste
-    boost::optional<ResponseCode> response = state->processInput(_data, *this);
-    if(response.is_initialized())
+    StateBase * state = mp_data->state_machine_ptr->currentState();
+    processResponseCode(state->processInput(_data, *this));
+}
+
+void Protocol::processResponseCode(const boost::optional<ResponseCode> & _code)
+{
+    if(_code.is_initialized())
     {
         mp_data->state_completed = true;
         mp_data->transport.setAfterWriting([this]() {
@@ -158,14 +140,13 @@ void Protocol::continueState(const char * _data)
             else
                 mp_data->transport.readRequest();
         });
-        mp_data->transport.writeRequest(translateResponseCode(response.get()));
+        mp_data->transport.writeRequest(translateResponseCode(_code.get()));
     }
     else
     {
         mp_data->state_completed = false;
         mp_data->transport.readRequest();
     }
-    // FIXME: end copy-paste
 }
 
 RawEmail & Protocol::email()
