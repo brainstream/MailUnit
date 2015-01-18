@@ -183,6 +183,7 @@ set(SRC_SERVER_LIB
     MailUnit/Smtp/StateMachine/StateBase.h
     MailUnit/Smtp/StateMachine/SingleLineCmdState.h
     MailUnit/Smtp/StateMachine/SingleLineCmdState.cpp
+    MailUnit/Smtp/StateMachine/ReadyState.h
     MailUnit/Smtp/StateMachine/StartState.h
     MailUnit/Smtp/StateMachine/EhloState.h
     MailUnit/Smtp/StateMachine/MailFromState.h

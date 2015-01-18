@@ -23,18 +23,31 @@
 namespace MailUnit {
 namespace Smtp {
 
-template<unsigned int index>
+enum class EventId
+{
+    Error,
+    Init,
+    Ehlo,
+    MailFrom,
+    RcptTo,
+    DataHeader,
+    Data,
+    Quit,
+}; // enum class EventId
+
+template<EventId id>
 class Event
 {
 }; // class Event
 
-typedef Event<0> ErrorEvent;
-typedef Event<1> EhloEvent;
-typedef Event<2> MailFromEvent;
-typedef Event<3> RcptToEvent;
-typedef Event<4> DataHeaderEvent;
-typedef Event<5> DataEvent;
-typedef Event<6> QuitEvent;
+typedef Event<EventId::Error> ErrorEvent;
+typedef Event<EventId::Init> InitEvent;
+typedef Event<EventId::Ehlo> EhloEvent;
+typedef Event<EventId::MailFrom> MailFromEvent;
+typedef Event<EventId::RcptTo> RcptToEvent;
+typedef Event<EventId::DataHeader> DataHeaderEvent;
+typedef Event<EventId::Data> DataEvent;
+typedef Event<EventId::Quit> QuitEvent;
 
 } // namespace Smtp
 } // namespace MailUnit

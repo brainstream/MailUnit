@@ -23,6 +23,22 @@
 using namespace MailUnit::Smtp;
 using namespace MailUnit::Storage;
 
+bool ProtocolTransport::callNextAction()
+{
+    if(m_next_actions.empty())
+    {
+        return false;
+    }
+    Action action = m_next_actions.back();
+    m_next_actions.pop();
+    if(nullptr == action)
+    {
+        return callNextAction();
+    }
+    action();
+    return true;
+}
+
 struct Protocol::Data
 {
     Data(Repository & _repository, ProtocolTransport & _transport) :
@@ -55,13 +71,20 @@ Protocol::~Protocol()
     delete mp_data;
 }
 
+void Protocol::start()
+{
+    mp_data->state_machine_ptr->process_event(InitEvent());
+    StateBase * state = mp_data->state_machine_ptr->currentState();
+    processResponseCode(state->processInput(nullptr, *this));
+}
+
 void Protocol::processInput(const char * _data)
 {
     StateBase * current_state = mp_data->state_machine_ptr->currentState();
     if(nullptr == current_state)
     {
         mp_data->state_completed = true;
-        mp_data->transport.setAfterWriting([this]() {
+        mp_data->transport.addNextAction([this]() {
             mp_data->transport.exitRequest();
         });
         mp_data->transport.writeRequest(translateResponseCode(ResponseCode::internalError));
@@ -78,7 +101,7 @@ void Protocol::processInput(const char * _data)
     {
         mp_data->state_completed = true;
         mp_data->state_machine_ptr->process_event(ErrorEvent());
-        mp_data->transport.setAfterWriting([this]() {
+        mp_data->transport.addNextAction([this]() {
             mp_data->transport.readRequest();
         });
         mp_data->transport.writeRequest(translateResponseCode(error.responseCode()));
@@ -113,7 +136,7 @@ void Protocol::nextState(const char * _data)
     }
     else
     {
-        mp_data->transport.setAfterWriting([this]() {
+        mp_data->transport.addNextAction([this]() {
             mp_data->transport.readRequest();
         });
         mp_data->transport.writeRequest(translateResponseCode(ResponseCode::unrecognizedCommand));
@@ -134,7 +157,7 @@ void Protocol::processResponseCode(const boost::optional<ResponseCode> & _code)
     if(_code.is_initialized())
     {
         mp_data->state_completed = true;
-        mp_data->transport.setAfterWriting([this]() {
+        mp_data->transport.addNextAction([this]() {
             if(mp_data->protocol_completed)
                 mp_data->transport.exitRequest();
             else

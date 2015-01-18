@@ -23,6 +23,7 @@
 #include <boost/mpl/vector.hpp>
 #include <MailUnit/Smtp/StateMachine/Event.h>
 #include <MailUnit/Smtp/StateMachine/StartState.h>
+#include <MailUnit/Smtp/StateMachine/ReadyState.h>
 #include <MailUnit/Smtp/StateMachine/EhloState.h>
 #include <MailUnit/Smtp/StateMachine/MailFromState.h>
 #include <MailUnit/Smtp/StateMachine/InvalidMailFromState.h>
@@ -44,8 +45,9 @@ public:
 
     struct transition_table : boost::mpl::vector<
         //    Start                   Event               Next
-        _row< StartState,             EhloEvent,          EhloState            >,
-        _row< StartState,             QuitEvent,          QuitState            >,
+        _row< StartState,             InitEvent,          ReadyState           >,
+        _row< ReadyState,             EhloEvent,          EhloState            >,
+        _row< ReadyState,             QuitEvent,          QuitState            >,
         _row< EhloState,              MailFromEvent,      MailFromState        >,
         _row< EhloState,              QuitEvent,          QuitState            >,
         _row< MailFromState,          ErrorEvent,         InvalidMailFromState >,

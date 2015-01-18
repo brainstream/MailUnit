@@ -15,69 +15,29 @@
  *                                                                                             *
  ***********************************************************************************************/
 
-#ifndef __MU_SMTP_PROTOCOL_H__
-#define __MU_SMTP_PROTOCOL_H__
+#ifndef __MU_SMTP_STATEMACHINE_READYSTATE_H__
+#define __MU_SMTP_STATEMACHINE_READYSTATE_H__
 
-#include <string>
-#include <queue>
-#include <functional>
-#include <boost/noncopyable.hpp>
-#include <boost/optional.hpp>
-#include <MailUnit/Storage/Repository.h>
-#include <MailUnit/Smtp/ProtocolDef.h>
-#include <MailUnit/Smtp/ResponseCode.h>
+#include <MailUnit/Smtp/StateMachine/StateBase.h>
 
 namespace MailUnit {
 namespace Smtp {
 
-class ProtocolTransport
+class ReadyState : public State
 {
 public:
-    typedef std::function<void()> Action;
-
-public:
-    virtual ~ProtocolTransport() { }
-    virtual void readRequest() = 0;
-    virtual void writeRequest(const std::string & _data) = 0;
-    virtual void switchToTlsRequest() = 0;
-    virtual void exitRequest() = 0;
-
-    void addNextAction(Action _action)
+    boost::optional<ResponseCode> processInput(const char *, Protocol &) override
     {
-        m_next_actions.push(_action);
+        return ResponseCode::ready;
     }
 
 protected:
-    bool callNextAction();
-
-private:
-    std::queue<Action> m_next_actions;
-}; // class ProtocolTransport
-
-class Protocol final : private boost::noncopyable
-{
-    struct Data;
-public:
-    Protocol(Storage::Repository & _repository, ProtocolTransport & _transport);
-    ~Protocol();
-    void start();
-    void processInput(const char * _data);
-    Storage::RawEmail & email();
-    void beginMessageData();
-    void endMessageData();
-    void storeEmail();
-    void terminate();
-
-private:
-    void nextState(const char * _data);
-    void continueState(const char * _data);
-    void processResponseCode(const boost::optional<ResponseCode> & _code);
-
-private:
-    Data * mp_data;
-}; // class Protocol
+    void reset() override
+    {
+    }
+}; // class ReadyState
 
 } // namespace Smtp
 } // namespace MailUnit
 
-#endif // __MU_SMTP_PROTOCOL_H__
+#endif // __MU_SMTP_STATEMACHINE_READYSTATE_H__

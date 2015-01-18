@@ -87,7 +87,7 @@ SmtpSession::~SmtpSession()
 
 void SmtpSession::start()
 {
-    mp_protocol->processInput(nullptr);
+    mp_protocol->start(); // TODO: handle error
 }
 
 void SmtpSession::readRequest()
@@ -109,7 +109,7 @@ void SmtpSession::writeRequest(const std::string & _data)
         [self](const boost::system::error_code &, std::size_t)
         {
             // TODO: handle error
-            self->afterWritingAction();
+            self->callNextAction();
         });
 }
 

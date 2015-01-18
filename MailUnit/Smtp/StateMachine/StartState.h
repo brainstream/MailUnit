@@ -29,7 +29,7 @@ class StartState : public State
 public:
     boost::optional<ResponseCode> processInput(const char *, Protocol &) override
     {
-        return ResponseCode::ready;
+        throw StateException(ResponseCode::internalError, "StartState cannot process input");
     }
 
 protected:
