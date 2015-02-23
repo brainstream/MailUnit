@@ -31,7 +31,8 @@ enum class LogLevel
     debug,
     info,
     warning,
-    error
+    error,
+    fatal
 }; // enum class LogLevel
 
 
@@ -115,5 +116,6 @@ std::ostream & operator << (std::ostream & _stream, MailUnit::LogLevel _level);
 #define LOG_INFO  ::MailUnit::LogWriter(::MailUnit::LogLevel::info)
 #define LOG_WARN  ::MailUnit::LogWriter(::MailUnit::LogLevel::warning)
 #define LOG_ERROR ::MailUnit::LogWriter(::MailUnit::LogLevel::error)
+#define LOG_FATAL ::MailUnit::LogWriter(::MailUnit::LogLevel::fatal)
 
 #endif // __MU_LOGGER_H__

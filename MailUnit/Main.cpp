@@ -53,6 +53,7 @@
 #define LOG_LEVEL_INFO    "info"
 #define LOG_LEVEL_WARNING "warning"
 #define LOG_LEVEL_ERROR   "error"
+#define LOG_LEVEL_FATAL   "fatal"
 
 #define MIN_THREAD_COUNT 1
 #define MAX_THREAD_COUNT 255
@@ -78,6 +79,8 @@ void validate(boost::any & _out_value, const std::vector<std::string> & _in_valu
 {
     po::validators::check_first_occurrence(_out_value);
     const std::string & input = po::validators::get_single_string(_in_values);
+    if(boost::iequals(input, LOG_LEVEL_FATAL))
+        _out_value = boost::any(LogLevel::fatal);
     if(boost::iequals(input, LOG_LEVEL_ERROR))
         _out_value = boost::any(LogLevel::error);
     else if(boost::iequals(input, LOG_LEVEL_WARNING))
@@ -151,7 +154,7 @@ OptionsPtr loadConfig(int _argc, const char ** _argv, const fs::path & _app_dir)
         (LOPT_LOGLEVEL,
             po::value(&config->log_level)->default_value(LogLevel::error, LOG_LEVEL_ERROR),
             "Log level. \nValid values: "
-            LOG_LEVEL_DEBUG ", " LOG_LEVEL_INFO ", " LOG_LEVEL_WARNING ", " LOG_LEVEL_ERROR);
+            LOG_LEVEL_DEBUG ", " LOG_LEVEL_INFO ", " LOG_LEVEL_WARNING ", " LOG_LEVEL_ERROR ", " LOG_LEVEL_FATAL);
     full_description->add(common_description).add(cmd_line_only_description);
 
     po::variables_map var_map;

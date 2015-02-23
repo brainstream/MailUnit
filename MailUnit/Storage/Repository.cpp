@@ -27,6 +27,7 @@
 #include <SQLite/sqlite3.h>
 #include <MailUnit/Storage/Repository.h>
 #include <MailUnit/Storage/Edsl.h>
+#include <MailUnit/Logger.h>
 
 using namespace MailUnit::Storage;
 namespace fs = boost::filesystem;
@@ -324,6 +325,7 @@ uint32_t Repository::storeEmail(RawEmail & _raw_email)
     boost::scoped_ptr<Email> email(new Email(_raw_email, data_filepath));
     uint32_t message_id = insertMessage(*email, boost::uuids::to_string(data_id));
     insertExchange(*email, message_id);
+    LOG_DEBUG << "Message has been stored: " << message_id;
     return message_id;
 }
 
@@ -500,6 +502,7 @@ size_t Repository::dropEmails(const Edsl::Expression & _expression)
     for(const std::unique_ptr<Email> & email : *emails)
     {
         OS::deleteFile(email->dataFilePath());
+        LOG_DEBUG << "Message has been deleted: " << email->id();
     }
     return emails->size();
 }

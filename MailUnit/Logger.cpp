@@ -43,6 +43,9 @@ std::ostream & operator << (std::ostream & _stream, LogLevel _level)
 {
     switch(_level)
     {
+    case LogLevel::debug:
+        _stream << "DEBUG";
+        break;
     case LogLevel::info:
         _stream << "INFO";
         break;
@@ -52,8 +55,8 @@ std::ostream & operator << (std::ostream & _stream, LogLevel _level)
     case LogLevel::error:
         _stream << "ERROR";
         break;
-    case LogLevel::debug:
-        _stream << "DEBUG";
+    case LogLevel::fatal:
+        _stream << "FATAL";
         break;
     }
     return _stream;

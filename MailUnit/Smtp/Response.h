@@ -15,16 +15,17 @@
  *                                                                                             *
  ***********************************************************************************************/
 
-#ifndef __MU_SMTP_RESPONSECODE_H__
-#define __MU_SMTP_RESPONSECODE_H__
+#ifndef __MU_SMTP_RESPONSE_H__
+#define __MU_SMTP_RESPONSE_H__
 
-#include <string>
+#include <vector>
+#include <sstream>
+#include <MailUnit/Smtp/ProtocolExtension.h>
 
 namespace MailUnit {
 namespace Smtp {
 
-
-enum class ResponseCode
+enum class ResponseCode : short
 {
     status                         = 211,
     help                           = 214,
@@ -35,7 +36,7 @@ enum class ResponseCode
     userNotVerified                = 252,
     intermediate                   = 354,
     serviceNotAvailable            = 421,
-    mailboxAnavailable             = 450,
+    mailboxBusy                    = 450,
     internalError                  = 451,
     insufficientSystemStorage      = 452,
     invalidParameters              = 455,
@@ -52,11 +53,40 @@ enum class ResponseCode
     mailAddressNotRecognized       = 555
 }; // enum class ResponseCode
 
+std::string responseCodeDefaultMessage(ResponseCode _code);
 
-std::string translateResponseCode(ResponseCode _code);
+class Response
+{
+public:
+    Response(ResponseCode _code) :
+        Response(_code, responseCodeDefaultMessage(_code))
+    {
+    }
 
+    Response(ResponseCode _code, const std::string & _message) :
+        m_code(_code),
+        m_message(_message)
+    {
+    }
+
+    Response(const Response &) = default;
+    Response & operator = (const Response &) = default;
+    void addExtenstion(const ProtocolExtenstion & _extension);
+    void print(std::ostream & _stream) const;
+
+private:
+    ResponseCode m_code;
+    const std::string m_message;
+    std::vector<std::string> m_extenstions;
+}; // class Response
 
 } // namespace Smtp
 } // namespace MailUnit
 
-#endif // __MU_SMTP_RESPONSECODE_H__
+inline std::ostream & operator << (std::ostream & _stream, const MailUnit::Smtp::Response & _response)
+{
+    _response.print(_stream);
+    return _stream;
+}
+
+#endif // __MU_SMTP_RESPONSE_H__

@@ -18,14 +18,13 @@
 #ifndef __MU_SMTP_PROTOCOL_H__
 #define __MU_SMTP_PROTOCOL_H__
 
-#include <string>
 #include <queue>
-#include <functional>
+#include <string>
 #include <boost/noncopyable.hpp>
-#include <boost/optional.hpp>
+#include <MailUnit/Smtp/Response.h>
 #include <MailUnit/Storage/Repository.h>
-#include <MailUnit/Smtp/ProtocolDef.h>
-#include <MailUnit/Smtp/ResponseCode.h>
+
+#define MU_SMTP_ENDLINE "\r\n"
 
 namespace MailUnit {
 namespace Smtp {
@@ -37,10 +36,10 @@ public:
 
 public:
     virtual ~ProtocolTransport() { }
-    virtual void readRequest() = 0;
-    virtual void writeRequest(const std::string & _data) = 0;
-    virtual void switchToTlsRequest() = 0;
-    virtual void exitRequest() = 0;
+    virtual void requestForRead() = 0;
+    virtual void requestForWrite(const Response & _response) = 0;
+    virtual void requestForSwitchToTls() = 0;
+    virtual void requestForExit() = 0;
 
     void addNextAction(Action _action)
     {
@@ -56,25 +55,21 @@ private:
 
 class Protocol final : private boost::noncopyable
 {
-    struct Data;
 public:
     Protocol(Storage::Repository & _repository, ProtocolTransport & _transport);
     ~Protocol();
-    void start();
-    void processInput(const char * _data);
-    Storage::RawEmail & email();
-    void beginMessageData();
-    void endMessageData();
-    void storeEmail();
-    void terminate();
+    void start() noexcept;
+    void processInput(const char * _data, size_t _data_length) noexcept;
 
 private:
-    void nextState(const char * _data);
-    void continueState(const char * _data);
-    void processResponseCode(const boost::optional<ResponseCode> & _code);
+    void resetData() noexcept;
+    void extendData(const char * _data, size_t _data_length) noexcept;
 
 private:
-    Data * mp_data;
+    class ProtocolImpl;
+    ProtocolImpl * mp_impl;
+    char * mp_data;
+    size_t m_data_length;
 }; // class Protocol
 
 } // namespace Smtp

@@ -15,6 +15,7 @@
  *                                                                                             *
  ***********************************************************************************************/
 
+#include <sstream>
 #include <boost/noncopyable.hpp>
 #include <boost/scoped_ptr.hpp>
 #include <boost/asio/ssl.hpp>
@@ -39,10 +40,10 @@ public:
     inline SmtpSession(TcpSocket _socket, std::shared_ptr<Repository> _repository);
     ~SmtpSession() override;
     void start() override;
-    void readRequest() override;
-    void writeRequest(const std::string & _data) override;
-    void switchToTlsRequest() override;
-    void exitRequest() override;
+    void requestForRead() override;
+    void requestForWrite(const Response & _response) override;
+    void requestForSwitchToTls() override;
+    void requestForExit() override;
 
 private:
     static const size_t s_buffer_size = 1024;
@@ -65,7 +66,7 @@ std::shared_ptr<Session> ServerRequestHandler::createSession(boost::asio::ip::tc
 
 bool ServerRequestHandler::handleError(const boost::system::error_code & _err_code)
 {
-    LOG_ERROR << "The SMTP server has stopped due an error: " << _err_code.message();
+    LOG_FATAL << "The SMTP server has stopped due an error: " << _err_code.message();
     return false;
 }
 
@@ -87,10 +88,11 @@ SmtpSession::~SmtpSession()
 
 void SmtpSession::start()
 {
-    mp_protocol->start(); // TODO: handle error
+    mp_protocol->start();
+    callNextAction();
 }
 
-void SmtpSession::readRequest()
+void SmtpSession::requestForRead()
 {
     auto self(shared_from_this());
     readAsync(boost::asio::buffer(mp_buffer, s_buffer_size - 1),
@@ -98,14 +100,18 @@ void SmtpSession::readRequest()
         {
             if(ec) return; // TODO: log
             self->mp_buffer[length] = '\0';
-            self->mp_protocol->processInput(self->mp_buffer);
+            self->mp_protocol->processInput(self->mp_buffer, length);
+            // TODO: handle error
+            self->callNextAction();
         });
 }
 
-void SmtpSession::writeRequest(const std::string & _data)
+void SmtpSession::requestForWrite(const Response & _response)
 {
+    std::stringstream data;
+    data << _response << MU_SMTP_ENDLINE;
     auto self(shared_from_this());
-    writeAsync(boost::asio::buffer(_data),
+    writeAsync(boost::asio::buffer(data.str()),
         [self](const boost::system::error_code &, std::size_t)
         {
             // TODO: handle error
@@ -113,11 +119,11 @@ void SmtpSession::writeRequest(const std::string & _data)
         });
 }
 
-void SmtpSession::switchToTlsRequest()
+void SmtpSession::requestForSwitchToTls()
 {
 }
 
-void SmtpSession::exitRequest()
+void SmtpSession::requestForExit()
 {
     // Just do nothing
 }

@@ -171,31 +171,13 @@ set(SRC_SERVER_LIB
     MailUnit/Server/Tcp/TcpServer.cpp
     MailUnit/Server/Tcp/TcpSession.h
     MailUnit/Server/Tcp/TcpSession.cpp
-    MailUnit/Smtp/ProtocolDef.h
-    MailUnit/Smtp/Protocol.h
-    MailUnit/Smtp/Protocol.cpp
-    MailUnit/Smtp/ResponseCode.h
-    MailUnit/Smtp/ResponseCode.cpp
     MailUnit/Smtp/ServerRequestHandler.h
     MailUnit/Smtp/ServerRequestHandler.cpp
-    MailUnit/Smtp/StateMachine/StateMachine.h
-    MailUnit/Smtp/StateMachine/Event.h
-    MailUnit/Smtp/StateMachine/StateBase.h
-    MailUnit/Smtp/StateMachine/SingleLineCmdState.h
-    MailUnit/Smtp/StateMachine/SingleLineCmdState.cpp
-    MailUnit/Smtp/StateMachine/ReadyState.h
-    MailUnit/Smtp/StateMachine/StartState.h
-    MailUnit/Smtp/StateMachine/EhloState.h
-    MailUnit/Smtp/StateMachine/MailFromState.h
-    MailUnit/Smtp/StateMachine/MailFromState.cpp
-    MailUnit/Smtp/StateMachine/InvalidMailFromState.h
-    MailUnit/Smtp/StateMachine/RcptToState.h
-    MailUnit/Smtp/StateMachine/RcptToState.cpp
-    MailUnit/Smtp/StateMachine/InvalidRcptToState.h
-    MailUnit/Smtp/StateMachine/DataHeaderState.h
-    MailUnit/Smtp/StateMachine/DataState.h
-    MailUnit/Smtp/StateMachine/DataState.cpp
-    MailUnit/Smtp/StateMachine/QuitState.h
+    MailUnit/Smtp/Protocol.h
+    MailUnit/Smtp/Protocol.cpp
+    MailUnit/Smtp/ProtocolExtension.h
+    MailUnit/Smtp/Response.h
+    MailUnit/Smtp/Response.cpp
     MailUnit/Storage/StorageException.h
     MailUnit/Storage/Edsl.h
     MailUnit/Storage/Edsl.cpp
@@ -334,6 +316,9 @@ target_include_directories(${TARGET_SERVER_LIB} PRIVATE
     ${COMMON_INCLUDE_DIRS}
     ${OPENSSL_INCLUDE_DIR}
 )
+target_compile_definitions(${TARGET_SERVER_LIB} PRIVATE
+    -D_MU_SERVER_NAME=${PROJECT_NAME}
+)
 target_link_libraries(${TARGET_SERVER_LIB}
     ${TARGET_SQLITE}
     ${TARGET_LIB}
@@ -357,6 +342,7 @@ target_include_directories(${TARGET_SERVER} PRIVATE
 )
 target_compile_definitions(${TARGET_SERVER} PRIVATE
     -D_MU_SERVER
+    -D_MU_SERVER_NAME=${PROJECT_NAME}
 )
 target_link_libraries(${TARGET_SERVER}
     ${CMAKE_DL_LIBS}

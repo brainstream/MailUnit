@@ -15,24 +15,59 @@
  *                                                                                             *
  ***********************************************************************************************/
 
-#ifndef __MU_SMTP_STATEMACHINE_RCPTTOSTATE_H__
-#define __MU_SMTP_STATEMACHINE_RCPTTOSTATE_H__
+#ifndef __MU_SMTP_PROTOCOLEXTENSTION_H__
+#define __MU_SMTP_PROTOCOLEXTENSTION_H__
 
-#include <MailUnit/Smtp/StateMachine/SingleLineCmdState.h>
+#include <string>
+#include <ostream>
 
 namespace MailUnit {
 namespace Smtp {
 
+enum class ProtocolExtenstionId
+{
+    startTls
+}; // enum class ProtocolExtenstionId
 
-class RcptToState : public SingleLineCmdState
+class ProtocolExtenstion
 {
 public:
-    RcptToState();
-    boost::optional<ResponseCode> processInput(const char * _data, Protocol & _protocol) override;
-}; // class RcptToState
+    virtual ~ProtocolExtenstion()
+    {
+    }
 
+    virtual ProtocolExtenstionId id() const = 0;
+    virtual void print(std::ostream & _stream) const = 0;
+}; // class ProtocolExtenstion
+
+class StartTlsProtocolExtenstion : public ProtocolExtenstion
+{
+public:
+    StartTlsProtocolExtenstion()
+    {
+    }
+
+    StartTlsProtocolExtenstion(const StartTlsProtocolExtenstion &) = default;
+    StartTlsProtocolExtenstion & operator = (const StartTlsProtocolExtenstion &) = default;
+
+    ProtocolExtenstionId id() const override
+    {
+        return ProtocolExtenstionId::startTls;
+    }
+
+    void print(std::ostream & _stream) const override
+    {
+        _stream << "STARTTLS";
+    }
+}; // class StartTlsProtocolExtenstion
 
 } // namespace Smtp
 } // namespace MailUnit
 
-#endif // __MU_SMTP_STATEMACHINE_RCPTTOSTATE_H__
+inline std::ostream & operator << (std::ostream & _stream, const MailUnit::Smtp::ProtocolExtenstion & _ext)
+{
+    _ext.print(_stream);
+    return _stream;
+}
+
+#endif // __MU_SMTP_PROTOCOLEXTENSTION_H__

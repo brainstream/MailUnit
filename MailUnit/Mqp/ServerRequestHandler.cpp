@@ -83,7 +83,7 @@ std::shared_ptr<Session> ServerRequestHandler::createSession(TcpSocket _socket)
 
 bool ServerRequestHandler::handleError(const boost::system::error_code & _err_code)
 {
-    LOG_ERROR << "The storage server has stopped due an error: " << _err_code.message();
+    LOG_FATAL << "The storage server has stopped due an error: " << _err_code.message();
     return false;
 }
 
@@ -180,7 +180,7 @@ void MqpSession::processQuery()
 
 bool MqpSession::isQueryEndOfSessionRequest(const std::string & _query)
 {
-    return boost::algorithm::iequals("quite", _query) || boost::algorithm::iequals("q", _query);
+    return boost::algorithm::iequals("quit", _query) || boost::algorithm::iequals("q", _query);
 }
 
 void MqpSession::writeEmails(EmailsHolder _emails)
