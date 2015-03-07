@@ -256,6 +256,7 @@ set(OTHER_FILES
     .gitignore
     Cert/cert.pem
     Cert/key.pem
+    Cert/password.txt
     Doxygen/Doxyfile
     Doxygen/Pages/Main.dox
     Doxygen/Snippets/RFC/DateSpec.html
