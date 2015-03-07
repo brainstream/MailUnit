@@ -22,6 +22,8 @@
 #include <sstream>
 #include <MailUnit/Smtp/ProtocolExtension.h>
 
+#define MU_SMTP_ENDLINE "\r\n"
+
 namespace MailUnit {
 namespace Smtp {
 

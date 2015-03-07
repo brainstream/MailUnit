@@ -22,19 +22,6 @@ using namespace MailUnit::Server;
 namespace fs = boost::filesystem;
 namespace asio = boost::asio;
 
-namespace {
-
-asio::ssl::context::file_format fileFormat(const fs::path & _path)
-{
-     std::string ext = _path.extension().string();
-     if(boost::iequals("asn1", ext))
-         return asio::ssl::context::asn1;
-     else
-         return asio::ssl::context::pem;
-}
-
-} // namespace
-
 TlsContext::TlsContext(const TlsConfig & _config) :
     context(tlsv12_server)
 {
@@ -43,14 +30,12 @@ TlsContext::TlsContext(const TlsConfig & _config) :
         asio::ssl::context::no_tlsv1 |
         asio::ssl::context::no_sslv2 |
         asio::ssl::context::no_sslv3);
+    std::string pass = _config.password;
+    set_password_callback([pass](size_t, context_base::password_purpose) {
+        return pass;
+    });
     if(!_config.certPath.empty())
         use_certificate_chain_file(_config.certPath.string());
     if(!_config.keyPath.empty())
-        use_private_key_file(_config.keyPath.string(), fileFormat(_config.keyPath));
-    if(!_config.dhPath.empty())
-        use_tmp_dh_file(_config.dhPath.string());
-    std::string pass = _config.password;
-    set_password_callback([pass](size_t, context_base::password_purpose) {
-       return pass;
-    });
+        use_private_key_file(_config.keyPath.string(), asio::ssl::context::pem);
 }

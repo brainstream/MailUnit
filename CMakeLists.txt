@@ -192,6 +192,8 @@ set(SRC_SERVER_LIB
 
 set(SRC_SERVER
     MailUnit/Main.cpp
+    MailUnit/Config.h
+    MailUnit/Config.cpp
 )
 
 set(SRC_GUI_MOC
@@ -252,6 +254,8 @@ set(SRC_TESTS
 
 set(OTHER_FILES
     .gitignore
+    Cert/cert.pem
+    Cert/key.pem
     Doxygen/Doxyfile
     Doxygen/Pages/Main.dox
     Doxygen/Snippets/RFC/DateSpec.html
@@ -342,6 +346,7 @@ target_include_directories(${TARGET_SERVER} PRIVATE
 )
 target_compile_definitions(${TARGET_SERVER} PRIVATE
     -D_MU_SERVER
+    -D_MU_BINARY_NAME=${BINARY_NAME}
     -D_MU_SERVER_NAME=${PROJECT_NAME}
 )
 target_link_libraries(${TARGET_SERVER}

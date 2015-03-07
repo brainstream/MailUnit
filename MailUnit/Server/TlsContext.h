@@ -29,7 +29,6 @@ struct TlsConfig
 {
     boost::filesystem::path certPath;
     boost::filesystem::path keyPath;
-    boost::filesystem::path dhPath;
     std::string password;
 }; // struct TlsConfig
 

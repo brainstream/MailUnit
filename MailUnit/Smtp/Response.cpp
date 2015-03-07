@@ -113,11 +113,11 @@ void Response::print(std::ostream & _stream) const
     }
     else
     {
-        _stream << static_cast<short>(m_code) << '-' << m_message;
+        _stream << static_cast<short>(m_code) << '-' << m_message << MU_SMTP_ENDLINE;
         std::size_t len = m_extenstions.size();
         for(std::size_t i = 0; i < len - 1; ++i)
         {
-            _stream << static_cast<short>(m_code) << '-' << m_extenstions[i];
+            _stream << static_cast<short>(m_code) << '-' << m_extenstions[i] << MU_SMTP_ENDLINE;
         }
         _stream << static_cast<short>(m_code) << ' ' << m_extenstions.back();
     }

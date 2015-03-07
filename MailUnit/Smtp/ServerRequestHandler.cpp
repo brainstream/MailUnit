@@ -37,7 +37,7 @@ class SmtpSession final :
     public ProtocolTransport
 {
 public:
-    inline SmtpSession(TcpSocket _socket, std::shared_ptr<Repository> _repository);
+    inline SmtpSession(TcpSocket _socket, std::shared_ptr<Repository> _repository, const Config & _config);
     ~SmtpSession() override;
     void start() override;
     void requestForRead() override;
@@ -50,18 +50,20 @@ private:
     std::shared_ptr<Repository> m_repository_ptr;
     char * mp_buffer;
     Protocol * mp_protocol;
+    const Config & mr_config;
 }; // class SmtpSession
 
 } // namespace
 
-ServerRequestHandler::ServerRequestHandler(std::shared_ptr<Storage::Repository> _repository) :
-    m_repository_ptr(_repository)
+ServerRequestHandler::ServerRequestHandler(std::shared_ptr<Storage::Repository> _repository, const Config & _config) :
+    m_repository_ptr(_repository),
+    mr_config(_config)
 {
 }
 
 std::shared_ptr<Session> ServerRequestHandler::createSession(boost::asio::ip::tcp::socket _socket)
 {
-    return std::make_shared<SmtpSession>(std::move(_socket), m_repository_ptr);
+    return std::make_shared<SmtpSession>(std::move(_socket), m_repository_ptr, mr_config);
 }
 
 bool ServerRequestHandler::handleError(const boost::system::error_code & _err_code)
@@ -70,13 +72,16 @@ bool ServerRequestHandler::handleError(const boost::system::error_code & _err_co
     return false;
 }
 
-SmtpSession::SmtpSession(TcpSocket _socket, std::shared_ptr<Repository> _repository) :
+SmtpSession::SmtpSession(TcpSocket _socket, std::shared_ptr<Repository> _repository, const Config & _config) :
     TcpSession(std::move(_socket)),
     m_repository_ptr(_repository),
-    mp_buffer(new char[s_buffer_size])
+    mp_buffer(new char[s_buffer_size]),
+    mr_config(_config)
 {
     LOG_DEBUG << "New SMTP session has started";
     mp_protocol = new Protocol(*m_repository_ptr, *this);
+    if(mr_config.use_smtp_starttls)
+        mp_protocol->enableStartTls(true);
 }
 
 SmtpSession::~SmtpSession()
@@ -121,6 +126,23 @@ void SmtpSession::requestForWrite(const Response & _response)
 
 void SmtpSession::requestForSwitchToTls()
 {
+    TlsConfig tls_config = { };
+    tls_config.certPath = mr_config.smtp_cert_path;
+    tls_config.keyPath = mr_config.smtp_privet_key_path;
+    tls_config.password = mr_config.smtp_privet_key_pass;
+    auto self(shared_from_this());
+    TlsContext tls_context(tls_config);
+    switchToTlsAsync(tls_context,
+        [self, &tls_context](const boost::system::error_code & error)
+        {
+            if(error)
+            {
+                LOG_ERROR << "Unable to start a TLS session: " << error.message();
+                return;
+            }
+            LOG_DEBUG << "TLS session has started";
+            self->callNextAction();
+        });
 }
 
 void SmtpSession::requestForExit()

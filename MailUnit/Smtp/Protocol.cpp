@@ -112,7 +112,7 @@ private:
 
 enum class EventId
 {
-    init       = 0,
+    ready      = 0,
     ehlo       = 1,
     startTls   = 2,
     mailFrom   = 3,
@@ -132,7 +132,7 @@ public:
     }
 }; // class Event
 
-using InitEvent       = Event<EventId::init>;
+using ReadyEvent      = Event<EventId::ready>;
 using EhloEvent       = Event<EventId::ehlo>;
 using StartTlsEvent   = Event<EventId::startTls>;
 using MailFromEvent   = Event<EventId::mailFrom>;
@@ -214,12 +214,18 @@ class ProtocolController
 public:
     ProtocolController(Repository & _repositry, ProtocolTransport & _transport);
 
+    virtual ~ProtocolController()
+    {
+    }
+
     const std::vector<const ProtocolExtenstion *> & extensions() const
     {
         return m_extensions;
     }
 
-    void removeExtenstion(ProtocolExtenstionId _id);
+    void registerExtenstion(ProtocolExtenstionId _id);
+
+    void unregisterExtenstion(ProtocolExtenstionId _id);
 
     void setInputMode(InputMode _mode)
     {
@@ -295,7 +301,40 @@ ProtocolController::ProtocolController(Repository & _repositry, ProtocolTranspor
 {
 }
 
-class InitAction
+void ProtocolController::registerExtenstion(ProtocolExtenstionId _id)
+{
+    bool already_registered = m_extensions.end() != std::find_if(m_extensions.begin(), m_extensions.end(),
+        [_id](const ProtocolExtenstion * ext) {
+            return ext->id() == _id;
+        });
+    if(already_registered)
+    {
+        return;
+    }
+    switch(_id)
+    {
+    case ProtocolExtenstionId::startTls:
+        m_extensions.push_back(new StartTlsProtocolExtenstion());
+        break;
+    default:
+        LOG_ERROR << "Unknown protocol extenstion id: " << static_cast<int>(_id);
+        break;
+    }
+}
+
+void ProtocolController::unregisterExtenstion(ProtocolExtenstionId _id)
+{
+    auto ext_it = std::find_if(m_extensions.begin(), m_extensions.end(), [_id](const ProtocolExtenstion * ext) {
+        return ext->id() == _id;
+    });
+    if(m_extensions.end() != ext_it)
+    {
+        delete *ext_it;
+        m_extensions.erase(ext_it);
+    }
+}
+
+class ReadyAction
 {
 public:
     template<typename SourceStateT, typename TargetStateT>
@@ -304,7 +343,7 @@ public:
         _protocol.writeResponse(ResponseCode::ready);
         _protocol.listen();
     }
-}; // class InitAction
+}; // class ReadyAction
 
 class EhloAction
 {
@@ -326,6 +365,8 @@ public:
     template<typename SourceStateT, typename TargetStateT>
     void operator ()(const EventBase &, ProtocolController & _protocol, SourceStateT &, TargetStateT &)
     {
+        _protocol.unregisterExtenstion(ProtocolExtenstionId::startTls);
+        _protocol.writeResponse(ResponseCode::ready);
         _protocol.switchToTls();
         _protocol.listen();
     }
@@ -527,7 +568,7 @@ public:
         // +------------------+----------------- +---------------- -+-------------------+-----------------+
         // | Start            | Event            | Target           | Action            | Guard           |
         // +------------------+----------------- +---------------- -+-------------------+-----------------+
-        Row< StartState       , InitEvent        , ReadyState       , InitAction        , none            >,
+        Row< StartState       , ReadyEvent       , ReadyState       , ReadyAction        , none           >,
         // +------------------+----------------- +---------------- -+-------------------+-----------------+
         Row< ReadyState       , EhloEvent        , EhloState        , EhloAction        , none            >,
         Row< ReadyState       , QuitEvent        , QuitState        , QuitAction        , none            >,
@@ -536,7 +577,7 @@ public:
         Row< EhloState        , StartTlsEvent    , StartTlsState    , StartTlsAction    , StartTlsGuard   >,
         Row< EhloState        , QuitEvent        , QuitState        , QuitAction        , none            >,
         // +------------------+----------------- +---------------- -+-------------------+-----------------+
-        Row< StartTlsState    , EhloEvent        , EhloState        , EhloAction        , none            >,
+        Row< StartTlsState    , EhloEvent        , EhloState        , EhloAction        , none           >,
         // +------------------+----------------- +---------------- -+-------------------+-----------------+
         Row< MailFromState    , MailFromEvent    , MailFromState    , MailFromAction    , MailFromGuard   >,
         Row< MailFromState    , RcptToEvent      , RcptToState      , RcptToAction      , none            >,
@@ -648,9 +689,17 @@ Protocol::~Protocol()
     free(mp_data);
 }
 
+void Protocol::enableStartTls(bool _enable)
+{
+    if(_enable)
+        mp_impl->registerExtenstion(ProtocolExtenstionId::startTls);
+    else
+        mp_impl->unregisterExtenstion(ProtocolExtenstionId::startTls);
+}
+
 void Protocol::start() noexcept
 {
-    mp_impl->processEvent<InitEvent>(nullptr, 0);
+    mp_impl->processEvent<ReadyEvent>(nullptr, 0);
 }
 
 void Protocol::processInput(const char * _data, size_t _data_length) noexcept

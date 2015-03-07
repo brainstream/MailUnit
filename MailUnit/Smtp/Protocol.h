@@ -24,8 +24,6 @@
 #include <MailUnit/Smtp/Response.h>
 #include <MailUnit/Storage/Repository.h>
 
-#define MU_SMTP_ENDLINE "\r\n"
-
 namespace MailUnit {
 namespace Smtp {
 
@@ -58,6 +56,7 @@ class Protocol final : private boost::noncopyable
 public:
     Protocol(Storage::Repository & _repository, ProtocolTransport & _transport);
     ~Protocol();
+    void enableStartTls(bool _enable);
     void start() noexcept;
     void processInput(const char * _data, size_t _data_length) noexcept;
 
