@@ -593,7 +593,11 @@ void Protocol::ProtocolImpl::processEvent(const char * _data, std::size_t _data_
         "The EventT type must have a counstructor compatible with the EventBase's one");
     try
     {
-        process_event(EventT(_data, _data_length, rawEmail()));
+        if(process_event(EventT(_data, _data_length, rawEmail())) == boost::msm::back::HANDLED_GUARD_REJECT)
+        {
+            writeResponse(ResponseCode::unrecognizedCommand);
+            listen();
+        }
     }
     catch(const ProtocolException & error)
     {
