@@ -1,0 +1,26 @@
+#content {
+    padding: 10px 0;
+}
+.container {
+    width: 1200px;
+}
+#sidebar.affix {
+    position: fixed;
+    top: 5px;
+}
+#sidebar {
+    padding-left: 15px;
+}
+#sidebar .nav a {
+    padding: 0;
+    padding-bottom: 8px;
+    color: #545353;
+}
+#sidebar .nav a:hover,
+#sidebar .nav li.active > a {
+    color: #A94442;
+    background: none;
+}
+#sidebar .nav .nav a {
+    padding-left: 10px;
+}

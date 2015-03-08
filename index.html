@@ -1,62 +1,304 @@
+<!DOCTYPE html>
 <html>
     <head>
         <title>MailUnit</title>
         <meta charset="utf-8"/>
-        <link rel="stylesheet" href="bootstrap.min.css" />
-        <link rel="stylesheet" href="main.css" />
+        <link rel="stylesheet" href="Contents/bootstrap.min.css" />
+        <link rel="stylesheet" href="Contents/main.css" />
+	<script type="text/javascript" src="Contents/jquery-2.1.3.min.js"></script>
+	<script type="text/javascript" src="Contents/bootstrap.min.js"></script>
+	<script type="text/javascript" src="Contents/main.js"></script>
     </head>
     <body>
-        <div id="content" class="container">
-            <div class="jumbotron" id="head">
-                <h1>MailUnit</h1>
-                <p>MailUnit is a SMTP server designed especially for unit testing.</p>
-                <a class="btn btn-primary" href="https://github.com/brainstream/MailUnit"><span class="gh-ico"></span>Learn more on GitHub</a>
-                <a class="btn btn-success" href="https://github.com/brainstream/MailUnit/archive/master.zip">Download source code</a>
-            </div>
-
-            <div class="alert alert-danger" role="alert">
-                <strong>Warning</strong>: it is early unstable development version!	
-            </div>
-                            
-            <h3>SMTP server</h3>
-            <p>Only the main SMTP commands are supported now: EHLO, MAIL FROM, RCPT TO and QUIT.</p>
-
-            <h3>MQP server</h3>
-            <p>
-                MQP (Message Query Protocol) allows to query received by SMTP server messages using simple query language. See the <a href="https://github.com/brainstream/MailUnit/wiki/Message-Query-Protocol">wiki page</a> for details.
-            </p>
-
-            <h3>Building</h3>
-            <p>MailUnit has following dependencies</p>
-            <ul>
-                <li>Boost.Asio</li>
-                <li>Boost.Filesystem</li>
-                <li>Boost.Date_Time</li>
-                <li>Boost.Program_Options</li>
-                <li>Boost.Regex</li>
-                <li>Boost.Iostreams</li>
-                <li>OpenSSL</li>
-            </ul>
-            <p>Also a C++11 supported compiler is required.</p>
-            <p>MailUnit uses CMake building system. You should enter following command to build binary files.</p>
-            <p>
-                <code>cd MailUnit</code><br>
-                <code>cmake .</code><br>
-                <code>make</code><br>
-            </p>
-            <p>
-                It will create two files: the executeble file named <code>mailunit</code> and library with the same name.
-            </p>
-
-            <h3>Installing</h3>
-            <p>Currently there is no way to install MailUnit automatically. You should copy binary files manually to a suitable place.</p>
-        </div>
-
         <a href="https://github.com/brainstream/MailUnit">
             <img style="position: absolute; top: 0; right: 0; border: 0;"
                  src="https://camo.githubusercontent.com/a6677b08c955af8400f44c6298f40e7d19cc5b2d/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f677261795f3664366436642e706e67"
                  alt="Fork me on GitHub"
                  data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_gray_6d6d6d.png">
         </a>
+	
+        <div id="content" class="container">   
+            <div class="jumbotron" id="head">
+                <h1>MailUnit</h1>
+                <p>MailUnit is a SMTP server designed especially for unit testing.</p>
+                <a class="btn btn-primary" href="https://github.com/brainstream/MailUnit"><span class="gh-ico"></span>Learn more on GitHub</a>
+                <a class="btn btn-success" href="https://github.com/brainstream/MailUnit/archive/master.zip">Download source code</a>
+            </div>
+	    <div class="row">
+		<div class="col-lg-10 col-md-12">
+		    <div class="alert alert-danger" role="alert">
+			<strong>Warning</strong>: it is early unstable development version!	
+		    </div>
+
+		    <h3 id="overview">Overview</h3>
+		    <p>
+			MailUnit is a combination of two servers. <br>
+			SMTP server provides SMTP interface for simulation of delivering emails. All received messages are stored in database and can be analyzed later.<br>
+			MQP server allows access to stored messages received by SMTP server.<br>
+			Diagram below demonstrates the main idea of communication with those servers.
+		    </p>
+		    <img src="Images/principle.png">
+		    
+		    <h3 id="smtp">SMTP server</h3>
+		    <p>MailUnit currently supports main SMTP commands: EHLO, MAIL FROM, RCPT TO and QUIT.</p>
+		    <p>Additionally the STARTTLS extension is supported. It can be turned on via command line options or using the configuration file.</p>
+
+		    <h3 id="mqp">MQP server</h3>
+
+		    <p>Message Query Protocol (or MQP) allows to query received by SMTP server messages using simple query language.</p>
+
+		    <p>After you have connected to the MQP server you can send three kinds of request:</p>
+
+		    <ul class="task-list">
+			<li><code>get &lt;conditions&gt;;</code></li>
+			<li><code>drop &lt;conditions&gt;;</code></li>
+			<li><code>quit;</code></li>
+		    </ul>
+
+		    <p><strong>Important</strong>: connection will not be closed until you send the <code>quit</code> message!</p>
+
+		    <p>Every request must be terminated with <code>;</code>.<br>
+			The <code>&lt;conditions&gt;</code> is an optional sequence of the several conditions which can be joined using <code>or</code> or <code>and</code> operators. Also conditions can be grouped using parentheses. Conditions are useful to filter a working message set by following fields:</p>
+
+		    <table class="table table-condensed">
+			<thead>
+			    <tr>
+				<th>Field name</th>
+				<th>Allowed operators</th>
+				<th>Example</th>
+			    </tr>
+			</thead>
+			<tbody>
+			    <tr>
+				<td><code>from</code></td>
+				<td>
+				    <code>=</code>  <code>&lt;&gt;</code>
+				</td>
+				<td><code>get from = 'jake@example.com';</code></td>
+			    </tr>
+			    <tr>
+				<td><code>to</code></td>
+				<td>
+				    <code>=</code>  <code>&lt;&gt;</code>
+				</td>
+				<td>
+				    <code>get to &lt;&gt; 'jake@example.com';</code><br>
+				</td>
+			    </tr>
+			    <tr>
+				<td><code>cc</code></td>
+				<td>
+				    <code>=</code>  <code>&lt;&gt;</code>
+				</td>
+				<td>
+				    <code>get cc = 'jake@example.com';</code><br>
+				</td>
+			    </tr>
+			    <tr>
+				<td><code>bcc</code></td>
+				<td>
+				    <code>=</code>  <code>&lt;&gt;</code>
+				</td>
+				<td>
+				    <code>get bcc &lt;&gt; 'jake@example.com';</code><br>
+				</td>
+			    </tr>
+			    <tr>
+				<td><code>subject</code></td>
+				<td>
+				    <code>=</code>  <code>&lt;&gt;</code>
+				</td>
+				<td><code>get subject = 'The subject text';</code></td>
+			    </tr>
+			    <tr>
+				<td><code>time</code></td>
+				<td>
+				    <code>=</code>  <code>&lt;&gt;</code> <code>&gt;</code> <code>&lt;</code> <code>&gt;=</code> <code>&lt;=</code>
+				</td>
+				<td><code>get time &gt; 1420403844;</code></td>
+			    </tr>
+			</tbody>
+		    </table>
+
+		    <p>For string values only single quotes are allowed. The <code>time</code> condition accepts a value in UNIX time format.</p>
+
+		    <strong>More examples:</strong><br>
+		    <code>get;</code><br>
+		    <code>get to = 'jake@example.com';</code><br>
+		    <code>get to &lt;&gt; 'jake@example.com';</code><br>
+		    <code>get bcc = 'jake@example.com' and to &lt;&gt; 'jake@example.com';</code><br>
+		    <code>drop to &lt;&gt; 'jake@example.com' and time &lt;= 1420403844;</code><br>
+		    <code>drop (bcc = 'jake@example.com' and to &lt;&gt; 'jake@example.com') or subject = 'Hello, World';</code><br>
+
+		    <h4 id="mqp-get">The get command</h4>
+
+		    <p>The get command returns messages in following format:</p>
+
+<pre><code>ITEM: 1/2
+SIZE: 2057
+ID: 1037
+SUBJECT: &lt;subject&gt;
+FROM: jake@example.com
+TO: jake@example.com
+CC: jake@example.com
+BCC: jake@example.com
+
+&lt;message body&gt;
+ITEM: 2/2
+SIZE: 2057
+ID: 1038
+SUBJECT: &lt;subject&gt;
+FROM: jake@example.com
+			    
+&lt;message body&gt;</code></pre>
+		    <p>where</p>
+		    <ul>
+			<li>
+			    <code>ITEM</code>: 1-based index of message in the result set
+			</li>
+			<li>
+			    <code>SIZE</code>: size of the <code>&lt;message body&gt;</code>
+			</li>
+			<li>
+			    <code>ID</code>: id of the message
+			</li>
+			<li>
+			    <code>SUBJECT</code>, <code>FROM</code>, <code>TO</code>, <code>CC</code>, <code>BCC</code>: optional fields taken from the SMTP and message headers.
+			</li>
+			<li>
+			    <code>&lt;message body&gt;</code>: content of the message
+			</li>
+		    </ul>
+		    <p>All lines in the response separated by the <code>\r\n</code> sequence.</p>
+		    <p>When the result set is empty following response will be sent:</p>
+<pre><code>ITEM: 0/0
+SIZE: 0</code></pre>
+
+		    <h4 id="mqp-drop">The drop command</h4>
+		    <p>The drop command deletes messages from database and returns a response in the following format:</p>
+		    <pre><code>REMOVED: 42</code></pre>
+		    <p><code>42</code> is a count of removed messages.</p>
+
+		    <h4 id="mqp-quit">The quit command</h4>
+		    <p>The quit command closes connection. This command has reduced form: <code>q;</code>.</p>
+
+		    <h4 id="mqp-error">Error codes</h4>
+		    <p>Any request to the MQP server can return an error message in following format:</p>
+		    <pre><code>ERROR: &lt;code&gt;</code></pre>
+		    <p>Following table describes all error codes:</p>
+
+		    <table class="table table-condensed">
+			<thead>
+			    <tr>
+				<th>Error code</th>
+				<th>Description</th>
+			    </tr>
+			</thead>
+			<tbody>
+			    <tr>
+				<td>100</td>
+				<td>Unknown error</td>
+			    </tr>
+			    <tr>
+				<td>101</td>
+				<td>Query parsing error</td>
+			    </tr>
+			    <tr>
+				<td>102</td>
+				<td>Server storage error</td>
+			    </tr>
+			    <tr>
+				<td>103</td>
+				<td>Timeout</td>
+			    </tr>
+			</tbody>
+		    </table>
+
+		    <h3 id="config">Configuration and running</h3>
+		    MailUnit can accept several options via command line or using configuration file. Configuration file must be named <i>mailunit.conf</i>.
+		    Configuration files can be placed in following directories:<br>
+		    <strong>Linux/UNIX:</strong><br>
+		    <ul>
+			<li>./mailunit.conf (Near the executable file)</li>
+			<li>${HOME}/.config/mailunit/mailunit.conf</li>
+			<li>/etc/mailunit/mailunit.conf</li>
+		    </ul>
+		    <strong>MS Windows:</strong><br>
+		    <ul>
+			<li>.\mailunit.conf (Near the executable file)</li>
+			<li>%APPDATA%\mailunit\mailunit.conf</li>
+			<li>%ALLUSERSPROFILE%\mailunit\mailunit.conf</li>
+		    </ul>
+		    Options are combined in the following way:
+		    <ul>
+			<li>Command line options are most important</li>
+			<li>Config file placed near the executable file</li>
+			<li>Config file placed in user directory</li>
+			<li>System-wide config file</li>
+		    </ul>
+
+		    Run the following command to view all available options:
+		    <pre><code>mailunit --help</code></pre><br>
+		    All options (that not marked as &quot;Command line only options&quot;) can be specified in the config file using following syntax:
+		    <pre><code>&lt;long-name&gt;=&lt;value&gt</code></pre><br>
+		    Config file example:
+		    <pre><code>smtp-port=5870
+smtp-starttls=true
+smtp-cert=~/projects/mailunit/Cert/cert.pem
+smtp-pkey=~/projects/mailunit/Cert/key.pem
+smtp-pkeypass=mailunit
+mqp-port=5880
+log-level=debug
+log-file=~/temp/mailunit/logs/log
+log-std=true
+storage-dir=~/temp/mailunit</code></pre><br>
+		    
+		    <h3 id="build">Building</h3>
+		    <p>MailUnit has following dependencies</p>
+		    <ul>
+			<li>Boost.Asio</li>
+			<li>Boost.Filesystem</li>
+			<li>Boost.Date_Time</li>
+			<li>Boost.Program_Options</li>
+			<li>Boost.Regex</li>
+			<li>Boost.Iostreams</li>
+			<li>OpenSSL</li>
+		    </ul>
+		    <p>Also a C++11 supported compiler is required.</p>
+		    <p>MailUnit uses CMake building system. You should enter following command to build binary files.</p>
+		    <p>
+			<code>cd MailUnit</code><br>
+			<code>cmake .</code><br>
+			<code>make</code><br>
+		    </p>
+		    <p>
+			It will create two files: the executeble file named <code>mailunit</code> and library with the same name.
+		    </p>
+
+		    <h3 id="install">Installing</h3>
+		    <p>Currently there is no way to install MailUnit automatically. You should copy binary files manually to a suitable place.</p>
+		</div>
+		<div class="col-lg-2 hidden-md">
+		    <div id="sidebar" data-spy="affix" data-offset-top="300">
+			<ul class="nav">
+			    <li role="presentation"><a href="#overview">Overview</a></li>
+			    <li role="presentation"><a href="#smtp">SMTP Server</a></li>
+			    <li role="presentation">
+				<a href="#mqp">MQP Server</a>
+				<ul class="nav">
+				    <li role="presentation"><a href="#mqp-get">The get command</a></li>
+				    <li role="presentation"><a href="#mqp-drop">The drop command</a></li>
+				    <li role="presentation"><a href="#mqp-quit">The quit command</a></li>
+				    <li role="presentation"><a href="#mqp-error">Error codes</a></li>
+				</ul>
+			    </li>
+			    <li role="presentation"><a href="#config">Configuration and running</a></li>
+			    <li role="presentation"><a href="#build">Building</a></li>
+			    <li role="presentation"><a href="#install">Installation</a></li>
+			</ul>
+		    </div>
+		</div>
+	    </div>
+        </div>
     </body>
 </html>
