@@ -18,3 +18,11 @@
 #define BOOST_TEST_MAIN
 #define BOOST_TEST_MODULE "MailUnit"
 #include <boost/test/unit_test.hpp>
+#include <MailUnit/Logger.h>
+
+namespace MailUnit {
+
+Logger global_logger(Logger::Options { });
+Logger * const logger = &global_logger;
+
+} // namespace MailUnit

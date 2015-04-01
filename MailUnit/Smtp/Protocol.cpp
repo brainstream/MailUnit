@@ -601,6 +601,18 @@ public:
         ProtocolController(_repositry, _transport)
     {
     }
+
+protected:
+    void no_transition(const EventBase & , ProtocolImplDef &, int)
+    {
+        throw ProtocolException(ResponseCode::badCommandsSequence, "Bad commands sequence");
+    }
+
+    void exception_caught(const EventBase & , ProtocolImplDef &, std::exception & _error)
+    {
+        throw ProtocolException(ResponseCode::badCommandsSequence,
+            std::string("State machine's exception has occurred: ") + _error.what());
+    }
 }; // class ProtocolImplDef
 
 std::ptrdiff_t findEndOfLinePosition(const char * _data, size_t _data_length)
@@ -649,7 +661,7 @@ void Protocol::ProtocolImpl::processEvent(const char * _data, std::size_t _data_
     catch(const std::exception & error)
     {
         LOG_ERROR << "SMTP error: " << error.what();
-        writeResponse(ResponseCode::badCommandsSequence);
+        writeResponse(ResponseCode::internalError);
         listen();
     }
     catch(...)

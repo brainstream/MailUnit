@@ -250,6 +250,8 @@ set(SRC_TESTS
     Tests/MailUnit/DeferredPointer.cpp
     Tests/MailUnit/Edsl.cpp
     Tests/MailUnit/File.cpp
+    Tests/MailUnit/Repository.cpp
+    Tests/MailUnit/SmtpPorotocol.cpp
 )
 
 set(OTHER_FILES

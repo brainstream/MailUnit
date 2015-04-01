@@ -73,12 +73,18 @@ public:
 
     Response(const Response &) = default;
     Response & operator = (const Response &) = default;
+
     void addExtenstion(const ProtocolExtenstion & _extension);
     void print(std::ostream & _stream) const;
 
+    ResponseCode code() const
+    {
+        return m_code;
+    }
+
 private:
     ResponseCode m_code;
-    const std::string m_message;
+    std::string m_message;
     std::vector<std::string> m_extenstions;
 }; // class Response
 
