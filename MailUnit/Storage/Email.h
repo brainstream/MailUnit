@@ -81,7 +81,7 @@ public:
         return m_to_addresses;
     }
 
-    void addToAddress(const std::string & _address) // TODO: parse and raise an error
+    void addToAddress(const std::string & _address)
     {
         m_to_addresses.push_back(_address);
     }
@@ -125,6 +125,8 @@ public:
 
     boost::optional<AddressType> findAddress(const std::string & _address);
 
+    bool containsAddress(const std::string & _address, AddressType _type) const;
+
     const AddressSet & addresses(AddressType _type) const;
 
     bool addAddress(AddressType _type, const std::string & _address);
@@ -156,6 +158,7 @@ public:
 
 private:
     void parseHeaders(MU_NATIVE_FILE _file);
+    void appendFrom(const RawEmail & _raw);
     void appendBcc(const RawEmail & _raw);
 
 private:

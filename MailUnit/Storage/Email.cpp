@@ -77,6 +77,7 @@ Email::Email(const RawEmail & _raw, const boost::filesystem::path & _data_file_p
     fs::copy(_raw.dataFilePath(), m_data_file_path);
     OS::File file(m_data_file_path, OS::file_open_read);
     parseHeaders(file);
+    appendFrom(_raw);
     appendBcc(_raw);
 }
 
@@ -93,6 +94,28 @@ void Email::parseHeaders(MU_NATIVE_FILE _file)
     collectAddressesFromHeader(headers, MU_MAILHDR_TO, m_to_addresses);
     collectAddressesFromHeader(headers, MU_MAILHDR_CC, m_cc_addresses);
     collectAddressesFromHeader(headers, MU_MAILHDR_BCC, m_bcc_addresses);
+}
+
+void Email::appendFrom(const RawEmail & _raw)
+{
+    for(const std::string raw_from : _raw.fromAddresses())
+    {
+        MU_MAILBOXGROUP group = muMailboxGroupParse(raw_from.c_str());
+        size_t mailbox_count = muMailboxCount(group);
+        for(size_t i = 0; i < mailbox_count; ++i)
+        {
+            MU_MAILBOX mailbox = muMailbox(group, i);
+            if(MU_INVALID_HANDLE == mailbox)
+                continue;
+            const char * address = muMailboxAddress(mailbox);
+            if(nullptr == address)
+                continue;
+            std::string address_str(address);
+            if(!containsAddress(address_str, AddressType::from))
+                m_from_addresses.insert(address_str);
+        }
+        muFree(group);
+    }
 }
 
 void Email::appendBcc(const RawEmail & _raw)
@@ -112,7 +135,7 @@ void Email::appendBcc(const RawEmail & _raw)
             if(nullptr == address)
                 continue;
             std::string address_str(address);
-            if(!findAddress(address_str).is_initialized())
+            if(!containsAddress(address_str, AddressType::to) && !containsAddress(address_str, AddressType::cc))
                 m_bcc_addresses.insert(address_str);
         }
         muFree(group);
@@ -133,6 +156,15 @@ boost::optional<Email::AddressType> Email::findAddress(const std::string & _addr
     if(std::find_if(m_bcc_addresses.begin(), m_bcc_addresses.end(), predicate) != m_bcc_addresses.end())
         return AddressType::bcc;
     return nullptr;
+}
+
+bool Email::containsAddress(const std::string & _address, AddressType _type) const
+{
+    const AddressSet & addrs = addresses(_type);
+    auto predicate = [_address](const std::string & _other) {
+        return boost::algorithm::iequals(_address, _other);
+    };
+    return addrs.cend() != std::find_if(addrs.cbegin(), addrs.cend(), predicate);
 }
 
 const Email::AddressSet & Email::addresses(Email::AddressType _type) const

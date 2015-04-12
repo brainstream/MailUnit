@@ -404,7 +404,6 @@ void MailFromAction::operator ()(const EventBase & _event, ProtocolController & 
         throw ProtocolException(Response(ResponseCode::invalidParameters, "Address is required"),
             "The MAIL FROM request does not contain parameters");
     }
-    // TODO: Parse addresses
     _event.email().addFromAddress(std::string(&_event.data()[s_cmd_length], _event.dataLenght() - s_cmd_length));
     _protocol.writeResponse(ResponseCode::ok);
     _protocol.listen();
@@ -438,7 +437,6 @@ void RcptToAction::operator ()(const EventBase & _event, ProtocolController & _p
         throw ProtocolException(Response(ResponseCode::invalidParameters, "Address is required"),
             "The RCPT TP request does not contain parameters");
     }
-    // TODO: Parse addresses
     _event.email().addToAddress(std::string(&_event.data()[s_cmd_length], _event.dataLenght() - s_cmd_length));
     _protocol.writeResponse(ResponseCode::ok);
     _protocol.listen();
