@@ -185,20 +185,20 @@ MU_MAIL_HEADERLIST muMailHeadersParseString(const char * _input)
     return HeaderParser::parse(stream);
 }
 
-MU_MAIL_HEADERLIST muMailHeadersParseFile(MU_NATIVE_FILE _input)
+MU_MAIL_HEADERLIST MU_CALL muMailHeadersParseFile(MU_NATIVE_FILE _input)
 {
     boost::iostreams::file_descriptor fdesc(_input, boost::iostreams::never_close_handle);
     boost::iostreams::stream<boost::iostreams::file_descriptor> stream(fdesc);
     return HeaderParser::parse(stream);
 }
 
-size_t muMailHeadersCount(MU_MAIL_HEADERLIST _headers)
+size_t MU_CALL muMailHeadersCount(MU_MAIL_HEADERLIST _headers)
 {
     HeaderMap * map = handlePointer<HeaderMap>(_headers);
     return nullptr == map ? 0 : map->size();
 }
 
-MU_MAIL_HEADER muMailHeaderByIndex(MU_MAIL_HEADERLIST _headers, size_t _index)
+MU_MAIL_HEADER MU_CALL muMailHeaderByIndex(MU_MAIL_HEADERLIST _headers, size_t _index)
 {
     HeaderMap * map = handlePointer<HeaderMap>(_headers);
     if(nullptr == map || map->size() <= _index)
@@ -206,7 +206,7 @@ MU_MAIL_HEADER muMailHeaderByIndex(MU_MAIL_HEADERLIST _headers, size_t _index)
     return wrapPointer((*map)[_index], false);
 }
 
-MU_MAIL_HEADER muMailHeaderByName(MU_MAIL_HEADERLIST _headers, const char * _name)
+MU_MAIL_HEADER MU_CALL muMailHeaderByName(MU_MAIL_HEADERLIST _headers, const char * _name)
 {
     HeaderMap * map = handlePointer<HeaderMap>(_headers);
     if(nullptr == map)
@@ -215,13 +215,13 @@ MU_MAIL_HEADER muMailHeaderByName(MU_MAIL_HEADERLIST _headers, const char * _nam
     return nullptr == header ? MU_INVALID_HANDLE : wrapPointer(header, false);
 }
 
-size_t muMailHeaderValueCount(MU_MAIL_HEADER _header)
+size_t MU_CALL muMailHeaderValueCount(MU_MAIL_HEADER _header)
 {
     Header * header = handlePointer<Header>(_header);
     return nullptr == header ? 0 : header->values.size();
 }
 
-const char * muMailHeaderValue(MU_MAIL_HEADER _header, size_t _index)
+const char * MU_CALL muMailHeaderValue(MU_MAIL_HEADER _header, size_t _index)
 {
     Header * header = handlePointer<Header>(_header);
     return nullptr == header || header->values.size() <= _index ? nullptr :

@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>993</width>
-    <height>619</height>
+    <width>1007</width>
+    <height>509</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -24,21 +24,17 @@
    <bool>false</bool>
   </property>
   <widget class="QWidget" name="mp_central_widget">
-   <layout class="QHBoxLayout" name="horizontalLayout_2">
+   <layout class="QVBoxLayout" name="verticalLayout_2">
     <item>
-     <layout class="QHBoxLayout" name="mp_central_widget_layout">
+     <layout class="QHBoxLayout" name="horizontalLayout">
       <item>
-       <widget class="QListView" name="mp_list_servers">
+       <widget class="QTabWidget" name="mp_tabs">
         <property name="sizePolicy">
-         <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
+         <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QTabWidget" name="mp_tabs">
         <property name="tabShape">
          <enum>QTabWidget::Rounded</enum>
         </property>
@@ -62,7 +58,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>993</width>
+     <width>1007</width>
      <height>20</height>
     </rect>
    </property>
@@ -96,12 +92,52 @@
    <addaction name="mp_action_new_server"/>
    <addaction name="mp_action_exec_query"/>
   </widget>
+  <widget class="QDockWidget" name="mp_dock_widget_servers">
+   <property name="floating">
+    <bool>false</bool>
+   </property>
+   <property name="features">
+    <set>QDockWidget::DockWidgetMovable</set>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>1</number>
+   </attribute>
+   <widget class="QWidget" name="mp_dock_container">
+    <layout class="QVBoxLayout" name="verticalLayout">
+     <item>
+      <widget class="QListView" name="mp_list_servers">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>200</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="baseSize">
+        <size>
+         <width>200</width>
+         <height>0</height>
+        </size>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+  </widget>
   <action name="mp_action_about_qt">
    <property name="text">
     <string>About &amp;Qt...</string>
    </property>
   </action>
   <action name="mp_action_new_server">
+   <property name="icon">
+    <iconset theme="list-add"/>
+   </property>
    <property name="text">
     <string>&amp;New server...</string>
    </property>
@@ -117,6 +153,9 @@
   <action name="mp_action_exec_query">
    <property name="enabled">
     <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset theme="arrow-right"/>
    </property>
    <property name="text">
     <string>Execute query</string>

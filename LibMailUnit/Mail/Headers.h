@@ -231,7 +231,7 @@ typedef MU_HANDLE MU_MAIL_HEADERLIST;
  * @remarks
  *     Returned handle must be destroyed by calling the @ref muFree function.
  */
-MUAPI MU_MAIL_HEADERLIST muMailHeadersParseString(const char * _input);
+MU_EXPORT MU_MAIL_HEADERLIST MU_CALL muMailHeadersParseString(const char * _input);
 
 /**
  * @brief Parses headers of mail message from file.
@@ -247,12 +247,12 @@ MUAPI MU_MAIL_HEADERLIST muMailHeadersParseString(const char * _input);
  * @remarks
  *     Returned handle must be destroyed by calling the @ref muFree function.
  */
-MUAPI MU_MAIL_HEADERLIST muMailHeadersParseFile(MU_NATIVE_FILE _input);
+MU_EXPORT MU_MAIL_HEADERLIST MU_CALL muMailHeadersParseFile(MU_NATIVE_FILE _input);
 
 /**
  * @brief Returns a count of @a _headers.
  */
-MUAPI size_t muMailHeadersCount(MU_MAIL_HEADERLIST _headers);
+MU_EXPORT size_t MU_CALL muMailHeadersCount(MU_MAIL_HEADERLIST _headers);
 
 /**
  * @brief Returns a header at @a _index position or @a NULL.
@@ -260,14 +260,14 @@ MUAPI size_t muMailHeadersCount(MU_MAIL_HEADERLIST _headers);
  *     Returned handle does not require destruction.
  * @sa muMailHeadersCount
  */
-MUAPI MU_MAIL_HEADER muMailHeaderByIndex(MU_MAIL_HEADERLIST _headers, size_t _index);
+MU_EXPORT MU_MAIL_HEADER MU_CALL muMailHeaderByIndex(MU_MAIL_HEADERLIST _headers, size_t _index);
 
 /**
  * @brief Returns a header named @a _name or @a NULL.
  * @remarks
  *     Returned handle does not require destruction.
  */
-MUAPI MU_MAIL_HEADER muMailHeaderByName(MU_MAIL_HEADERLIST _headers, const char * _name);
+MU_EXPORT MU_MAIL_HEADER MU_CALL muMailHeaderByName(MU_MAIL_HEADERLIST _headers, const char * _name);
 
 /**
  * @brief Returns a count of values in the @a _header.
@@ -278,7 +278,7 @@ MUAPI MU_MAIL_HEADER muMailHeaderByName(MU_MAIL_HEADERLIST _headers, const char 
  *
  * @sa muMailHeaderValue
  */
-MUAPI size_t muMailHeaderValueCount(MU_MAIL_HEADER _header);
+MU_EXPORT size_t MU_CALL muMailHeaderValueCount(MU_MAIL_HEADER _header);
 
 /**
  * @brief Returns a value of @a _header at @a _index position or @a NULL.
@@ -289,6 +289,6 @@ MUAPI size_t muMailHeaderValueCount(MU_MAIL_HEADER _header);
  *
  * @sa muMailHeaderValueCount
 */
-MUAPI const char * muMailHeaderValue(MU_MAIL_HEADER _header, size_t _index);
+MU_EXPORT const char * MU_CALL muMailHeaderValue(MU_MAIL_HEADER _header, size_t _index);
 
-#endif // __LIBMU_MAIL_HEADERS_H__
+#endif /* __LIBMU_MAIL_HEADERS_H__ */

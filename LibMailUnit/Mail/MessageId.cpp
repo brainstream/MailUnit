@@ -32,7 +32,7 @@ struct MessageId
 
 } // namespace
 
-MU_MSGID muMessageIdParse(const char * _raw_message_id)
+MU_MSGID MU_CALL muMessageIdParse(const char * _raw_message_id)
 {
     MU_HANDLE handle = makeObjectHandle<MessageId>();
     MessageId * message_id = handlePointer<MessageId>(handle);
@@ -54,21 +54,21 @@ MU_MSGID muMessageIdParse(const char * _raw_message_id)
     return handle;
 }
 
-const char * muMessageIdString(MU_MSGID _msg_id)
+const char * MU_CALL muMessageIdString(MU_MSGID _msg_id)
 {
     if(nullptr == _msg_id)
         return nullptr;
     return handlePointer<MessageId>(_msg_id)->id_string.c_str();
 }
 
-const char * muMessageIdLeft(MU_MSGID _msg_id)
+const char * MU_CALL muMessageIdLeft(MU_MSGID _msg_id)
 {
     if(nullptr == _msg_id)
         return nullptr;
     return handlePointer<MessageId>(_msg_id)->left.c_str();
 }
 
-const char * muMessageIdRight(MU_MSGID _msg_id)
+const char * MU_CALL muMessageIdRight(MU_MSGID _msg_id)
 {
     if(nullptr == _msg_id)
         return nullptr;

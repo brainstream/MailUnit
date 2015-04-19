@@ -93,6 +93,9 @@ protected:
     void moveEvent(QMoveEvent * _event) override;
     void resizeEvent(QResizeEvent * _event) override;
 
+private:
+    void setupLayout();
+
 private slots:
     void addServer();
     void about();

@@ -42,7 +42,7 @@ typedef MU_HANDLE MU_MSGID;
  * @sa muMessageIdLeft
  * @sa muMessageIdRight
  */
-MUAPI MU_MSGID muMessageIdParse(const char * _raw_message_id);
+MU_EXPORT MU_MSGID MU_CALL muMessageIdParse(const char * _raw_message_id);
 
 /**
  * @brief Returns source string passed to the @ref muMessageIdParse function.
@@ -52,7 +52,7 @@ MUAPI MU_MSGID muMessageIdParse(const char * _raw_message_id);
  * @sa muMessageIdLeft
  * @sa muMessageIdRight
  */
-MUAPI const char * muMessageIdString(MU_MSGID _msg_id);
+MU_EXPORT const char * MU_CALL muMessageIdString(MU_MSGID _msg_id);
 
 /**
  * @brief Returns left part of message id.
@@ -62,7 +62,7 @@ MUAPI const char * muMessageIdString(MU_MSGID _msg_id);
  * @sa muMessageIdString
  * @sa muMessageIdRight
  */
-MUAPI const char * muMessageIdLeft(MU_MSGID _msg_id);
+MU_EXPORT const char * MU_CALL muMessageIdLeft(MU_MSGID _msg_id);
 
 /**
  * @brief Returns right part of message id.
@@ -72,6 +72,6 @@ MUAPI const char * muMessageIdLeft(MU_MSGID _msg_id);
  * @sa muMessageIdString
  * @sa muMessageIdLeft
  */
-MUAPI const char * muMessageIdRight(MU_MSGID _msg_id);
+MU_EXPORT const char * muMessageIdRight(MU_MSGID _msg_id);
 
-#endif // __LIBMU_MAIL_MESSAGEID_H__
+#endif /* __LIBMU_MAIL_MESSAGEID_H__ */

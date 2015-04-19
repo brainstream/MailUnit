@@ -28,4 +28,4 @@
 #include "Mail/DateTime.h"
 #include "Mail/Address.h"
 
-#endif // __LIBMU_MAILUNIT_H__
+#endif /* __LIBMU_MAILUNIT_H__ */

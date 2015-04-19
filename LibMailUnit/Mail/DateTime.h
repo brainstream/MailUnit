@@ -23,6 +23,9 @@
  * @htmlinclude RFC/DateSpec.html
 */
 
+#ifndef __LIBMU_MAIL_DATETIME_H__
+#define __LIBMU_MAIL_DATETIME_H__
+
 #include <time.h>
 #include "../Def.h"
 
@@ -87,7 +90,7 @@ typedef struct
  *     In success case returns @ref MBool::mtrue and @ref MBool::mfalse otherwise.
  *     The @a _date_time object will not be modified if parsing failed.
  */
-MUAPI MBool muDateTimeParse(const char * _raw_date_time, MDateTime * _date_time);
+MU_EXPORT MBool MU_CALL muDateTimeParse(const char * _raw_date_time, MDateTime * _date_time);
 
 /**
  * @brief Convert @ref MDateTime value to the UNIX time format
@@ -97,7 +100,7 @@ MUAPI MBool muDateTimeParse(const char * _raw_date_time, MDateTime * _date_time)
  *     The UNIX time representation of @a _date_time.
  * @sa muUnixTimeToDateTime
  */
-MUAPI time_t muDateTimeToUnixTime(const MDateTime * _date_time);
+MU_EXPORT time_t MU_CALL muDateTimeToUnixTime(const MDateTime * _date_time);
 
 /**
  * @brief Convert UNIX time value to @ref MDateTime
@@ -107,4 +110,6 @@ MUAPI time_t muDateTimeToUnixTime(const MDateTime * _date_time);
  *     A pointer to a variable that will contain a result. <i>Must not be NULL.</i>
  * @sa muDateTimeToUnixTime
  */
-MUAPI void muUnixTimeToDateTime(time_t _unix_time, MDateTime * _date_time);
+MU_EXPORT void MU_CALL muUnixTimeToDateTime(time_t _unix_time, MDateTime * _date_time);
+
+#endif /* __LIBMU_MAIL_DATETIME_H__ */

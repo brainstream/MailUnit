@@ -22,7 +22,7 @@
 using namespace LibMailUnit;
 using namespace LibMailUnit::Mail;
 
-MU_MAILBOXGROUP muMailboxGroupParse(const char * _raw_address_group)
+MU_MAILBOXGROUP MU_CALL muMailboxGroupParse(const char * _raw_address_group)
 {
     if(nullptr == _raw_address_group)
     {
@@ -37,14 +37,14 @@ MU_MAILBOXGROUP muMailboxGroupParse(const char * _raw_address_group)
     return wrapPointer(group, true);
 }
 
-size_t muMailboxCount(MU_MAILBOXGROUP _mailbox_group)
+size_t MU_CALL muMailboxCount(MU_MAILBOXGROUP _mailbox_group)
 {
     if(nullptr == _mailbox_group)
         return 0;
     return handlePointer<MailboxGroup>(_mailbox_group)->mailboxCount();
 }
 
-MU_MAILBOX muMailbox(MU_MAILBOXGROUP _mailbox_group, size_t _index)
+MU_MAILBOX MU_CALL muMailbox(MU_MAILBOXGROUP _mailbox_group, size_t _index)
 {
     if(nullptr == _mailbox_group)
         return MU_INVALID_HANDLE;
@@ -52,7 +52,7 @@ MU_MAILBOX muMailbox(MU_MAILBOXGROUP _mailbox_group, size_t _index)
     return _index >= group.mailboxCount() ? MU_INVALID_HANDLE : wrapPointer(&group[_index], false);
 }
 
-const char * muMailboxGroupName(MU_MAILBOXGROUP _mailbox_group)
+const char * MU_CALL muMailboxGroupName(MU_MAILBOXGROUP _mailbox_group)
 {
     if(nullptr == _mailbox_group)
         return nullptr;
@@ -60,7 +60,7 @@ const char * muMailboxGroupName(MU_MAILBOXGROUP _mailbox_group)
     return group->name().empty() ? nullptr : group->name().c_str();
 }
 
-const char * muMailboxName(MU_MAILBOX _mailbox)
+const char * MU_CALL muMailboxName(MU_MAILBOX _mailbox)
 {
     if(nullptr == _mailbox)
         return nullptr;
@@ -68,7 +68,7 @@ const char * muMailboxName(MU_MAILBOX _mailbox)
     return mailbox->name().empty() ? nullptr : mailbox->name().c_str();
 }
 
-const char * muMailboxAddress(MU_MAILBOX _mailbox)
+const char * MU_CALL muMailboxAddress(MU_MAILBOX _mailbox)
 {
     if(nullptr == _mailbox)
         return nullptr;

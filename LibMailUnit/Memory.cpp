@@ -17,7 +17,7 @@
 
 #include <LibMailUnit/InternalMemory.h>
 
-void muFree(MU_HANDLE _handle)
+void MU_CALL muFree(MU_HANDLE _handle)
 {
     delete _handle;
 }

@@ -23,22 +23,65 @@
 #ifndef __LIBMU_DEF_H__
 #define __LIBMU_DEF_H__
 
+#include <stdlib.h>
+
 /**
  * @cond HIDDEN
  */
 
+#ifdef __APPLE__
+#   error OX X is not supported yet
+#endif
+
+
+#ifdef __GNUC__
+#   if (__GNUC__ < 4) || (__GNUC__ == 4 && __GNUC_MINOR__ < 9)
+#       error g++ 4.9 or greater is required
+#   endif
+#endif
+#ifdef __MINGW32__
+#   if (__MINGW32_MAJOR_VERSION < 4) || (__MINGW32_MAJOR_VERSION == 4 && __MINGW32_MAJOR_VERSION < 9)
+#       error MinGW (or MinGW-w64) 4.9 or greater is required
+#   endif
+#endif
+
+
+#if defined(_WIN32)
+#   define MU_CALL __stdcall
+#elif defined(__i386__) || defined(__i386) || defined(_X86_) || defined(__X86__)
+#   ifdef __GNUC__
+#       define MU_CALL __attribute__((__stdcall__)) __attribute__((__force_align_arg_pointer__))
+#   else
+#       error Curretn compiler is not supported yet
+#   endif
+#elif defined(__x86_64__) || defined(_M_X64)
+#   define MU_CALL
+#endif
+
 
 #ifdef _WIN32
 #   include <windows.h>
-#   ifdef _MU_LIB
-#       define MUAPI extern "C" __declspec(dllexport)
+#   ifdef __cplusplus
+#      ifdef _MU_LIB
+#           define MU_EXPORT extern "C" __declspec(dllexport)
+#       else
+#           define MU_EXPORT extern "C" __declspec(dllimport)
+#       endif
 #   else
-#       define MUAPI extern "C" __declspec(dllimport)
+#      ifdef _MU_LIB
+#           define MU_EXPORT __declspec(dllexport)
+#       else
+#           define MU_EXPORT __declspec(dllimport)
+#       endif
 #   endif
 #   define MU_NATIVE_FILE HANDLE
 #   define MU_INVALID_NATIVE_FILE INVALID_HANDLE_VALUE
 #else
-#   define MUAPI extern "C"
+#   ifdef __cplusplus
+#       define MU_EXPORT extern "C"
+#   else
+#       define MU_EXPORT
+#   endif
 #   define MU_NATIVE_FILE int
 #   define MU_INVALID_NATIVE_FILE -1
 #endif

@@ -14,31 +14,3 @@
  * MailUnit Library. If not, see <http://www.gnu.org/licenses>.                                *
  *                                                                                             *
  ***********************************************************************************************/
-
-/**
- * @file
- * @brief Common functions for memory allocation.
- */
-
-#ifndef __LIBMU_MAIN_H__
-#define __LIBMU_MAIN_H__
-
-#include "Def.h"
-
-/**
- * @brief Type of object to handle and manipulate a memory.
- * @sa muFree
-*/
-typedef struct MHandle * MU_HANDLE;
-
-/**
- * @brief Invalid handle value.
- */
-#define MU_INVALID_HANDLE (MU_HANDLE)-1
-
-/**
- * @brief Releases an allocated memory.
- */
-MU_EXPORT void MU_CALL muFree(MU_HANDLE _handle);
-
-#endif /* __LIBMU_MAIN_H__ */

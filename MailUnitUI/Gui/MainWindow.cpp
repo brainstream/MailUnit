@@ -84,7 +84,7 @@ MainWindow::MainWindow(Config & _config) :
     mr_config(_config),
     mp_model(nullptr)
 {
-    setupUi(this);
+    setupLayout();
 //    m_servers.add(ServerConfig("C Local 5880", "localhost", 5880));
 //    m_servers.add(ServerConfig("A Local 5881", "localhost", 5881));
 //    m_servers.add(ServerConfig("D Local 5882", "localhost", 5882));
@@ -97,6 +97,12 @@ MainWindow::MainWindow(Config & _config) :
 MainWindow::~MainWindow()
 {
 
+}
+
+void MainWindow::setupLayout()
+{
+    setupUi(this);
+    //mp_splitter->setSizes({ mp_list_servers->minimumWidth(), mp_tabs->maximumWidth() });
 }
 
 void MainWindow::moveEvent(QMoveEvent * _event)

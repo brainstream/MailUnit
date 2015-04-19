@@ -111,7 +111,7 @@ std::pair<short, short> parseTimeZone(const std::string & _zone_string)
 
 } // namespace
 
-MBool muDateTimeParse(const char * _raw_date_time, MDateTime * _date_time)
+MBool MU_CALL muDateTimeParse(const char * _raw_date_time, MDateTime * _date_time)
 {
     if(nullptr == _date_time)
     {
@@ -177,7 +177,7 @@ MBool muDateTimeParse(const char * _raw_date_time, MDateTime * _date_time)
     return mtrue;
 }
 
-time_t muDateTimeToUnixTime(const MDateTime * _date_time)
+time_t MU_CALL muDateTimeToUnixTime(const MDateTime * _date_time)
 {
     boost::posix_time::ptime ptime(
         boost::gregorian::date(_date_time->year, _date_time->month, _date_time->day),
