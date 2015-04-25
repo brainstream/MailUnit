@@ -51,18 +51,21 @@ BOOST_AUTO_TEST_CASE(parseString)
     BOOST_CHECK_EQUAL("Simple value", value);
     value = muMailHeaderValue(header, 1);
     BOOST_CHECK_EQUAL("Simple value 2", value);
+    muFree(header);
 
     header = muMailHeaderByName(headers, "Name2");
     BOOST_CHECK_NE(MU_INVALID_HANDLE, header);
     BOOST_CHECK_EQUAL(1, muMailHeaderValueCount(header));
     value = muMailHeaderValue(header, 0);
     BOOST_CHECK_EQUAL("Value\twith folding", value);
+    muFree(header);
 
     header = muMailHeaderByName(headers, "Name3");
     BOOST_CHECK_NE(MU_INVALID_HANDLE, header);
     BOOST_CHECK_EQUAL(1, muMailHeaderValueCount(header));
     value = muMailHeaderValue(header, 0);
     BOOST_CHECK_EQUAL("Value\twith folding on two lines", value);
+    muFree(header);
 
     muFree(headers);
 }
@@ -96,18 +99,21 @@ BOOST_AUTO_TEST_CASE(parseFileTest)
     BOOST_CHECK_EQUAL("Simple value", value);
     value = muMailHeaderValue(header, 1);
     BOOST_CHECK_EQUAL("Simple value 2", value);
+    muFree(header);
 
     header = muMailHeaderByName(headers, "Name2");
     BOOST_CHECK_NE(MU_INVALID_HANDLE, header);
     BOOST_CHECK_EQUAL(1, muMailHeaderValueCount(header));
     value = muMailHeaderValue(header, 0);
     BOOST_CHECK_EQUAL("Value\twith folding", value);
+    muFree(header);
 
     header = muMailHeaderByName(headers, "Name3");
     BOOST_CHECK_NE(MU_INVALID_HANDLE, header);
     BOOST_CHECK_EQUAL(1, muMailHeaderValueCount(header));
     value = muMailHeaderValue(header, 0);
     BOOST_CHECK_EQUAL("Value\twith folding on two lines", value);
+    muFree(header);
 
     muFree(headers);
 }

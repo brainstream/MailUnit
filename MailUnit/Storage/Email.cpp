@@ -30,6 +30,7 @@ void collectAddressesFromHeader(MU_MAIL_HEADERLIST _headers, const char * _heade
             MU_MAILBOX mailbox = muMailbox(group, mailbox_index);
             if(MU_INVALID_HANDLE != mailbox)
                 _collection.insert(muMailboxAddress(mailbox));
+            muFree(mailbox);
         }
         muFree(group);
     }
@@ -42,6 +43,7 @@ std::time_t getDateTimeFromHeaders(MU_MAIL_HEADERLIST _headers)
     if(MU_INVALID_HANDLE == date_time_header || muMailHeaderValueCount(date_time_header) == 0)
         return 0;
     const char * date_time_string = muMailHeaderValue(date_time_header, 0);
+    muFree(date_time_header);
     if(nullptr == date_time_string)
         return 0;
     MDateTime date_time;
@@ -89,6 +91,7 @@ void Email::parseHeaders(MU_NATIVE_FILE _file)
     MU_MAIL_HEADER subject_header = muMailHeaderByName(headers, MU_MAILHDR_SUBJECT);
     if(MU_INVALID_HANDLE != subject_header && muMailHeaderValueCount(subject_header) > 0)
         m_subject = muMailHeaderValue(subject_header, 0);
+    muFree(subject_header);
     m_sending_time = getDateTimeFromHeaders(headers);
     collectAddressesFromHeader(headers, MU_MAILHDR_FROM, m_from_addresses);
     collectAddressesFromHeader(headers, MU_MAILHDR_TO, m_to_addresses);
@@ -106,13 +109,20 @@ void Email::appendFrom(const RawEmail & _raw)
         {
             MU_MAILBOX mailbox = muMailbox(group, i);
             if(MU_INVALID_HANDLE == mailbox)
+            {
+                muFree(mailbox);
                 continue;
+            }
             const char * address = muMailboxAddress(mailbox);
             if(nullptr == address)
+            {
+                muFree(mailbox);
                 continue;
+            }
             std::string address_str(address);
             if(!containsAddress(address_str, AddressType::from))
                 m_from_addresses.insert(address_str);
+            muFree(mailbox);
         }
         muFree(group);
     }
@@ -130,13 +140,20 @@ void Email::appendBcc(const RawEmail & _raw)
         {
             MU_MAILBOX mailbox = muMailbox(group, i);
             if(MU_INVALID_HANDLE == mailbox)
+            {
+                muFree(mailbox);
                 continue;
+            }
             const char * address = muMailboxAddress(mailbox);
             if(nullptr == address)
+            {
+                muFree(mailbox);
                 continue;
+            }
             std::string address_str(address);
             if(!containsAddress(address_str, AddressType::to) && !containsAddress(address_str, AddressType::cc))
                 m_bcc_addresses.insert(address_str);
+            muFree(mailbox);
         }
         muFree(group);
     }

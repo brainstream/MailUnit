@@ -255,7 +255,7 @@ MU_EXPORT size_t MU_CALL muMailHeadersCount(MU_MAIL_HEADERLIST _headers);
 /**
  * @brief Returns a header at @a _index position or @a NULL.
  * @remarks
- *     Returned handle does not require destruction.
+ *     Returned handle must be destroyed by calling the @ref muFree function.
  * @sa muMailHeadersCount
  */
 MU_EXPORT MU_MAIL_HEADER MU_CALL muMailHeaderByIndex(MU_MAIL_HEADERLIST _headers, size_t _index);
@@ -263,7 +263,7 @@ MU_EXPORT MU_MAIL_HEADER MU_CALL muMailHeaderByIndex(MU_MAIL_HEADERLIST _headers
 /**
  * @brief Returns a header named @a _name or @a NULL.
  * @remarks
- *     Returned handle does not require destruction.
+ *     Returned handle must be destroyed by calling the @ref muFree function.
  */
 MU_EXPORT MU_MAIL_HEADER MU_CALL muMailHeaderByName(MU_MAIL_HEADERLIST _headers, const char * _name);
 

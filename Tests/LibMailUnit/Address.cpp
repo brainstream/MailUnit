@@ -35,6 +35,7 @@ BOOST_AUTO_TEST_CASE(ParseMailboxTest)
     BOOST_CHECK(nullptr == muMailboxName(mailbox));
     BOOST_CHECK_EQUAL("my.test@test.example.com", muMailboxAddress(mailbox));
     muFree(mailbox_group);
+    muFree(mailbox);
 }
 
 BOOST_AUTO_TEST_CASE(ParseNamedMailboxTest)
@@ -49,6 +50,7 @@ BOOST_AUTO_TEST_CASE(ParseNamedMailboxTest)
     BOOST_CHECK_EQUAL("The name", muMailboxName(mailbox));
     BOOST_CHECK_EQUAL("my.test@test.example.com", muMailboxAddress(mailbox));
     muFree(mailbox_group);
+    muFree(mailbox);
 }
 
 BOOST_AUTO_TEST_CASE(ParseMailboxGroupTest)
@@ -63,12 +65,13 @@ BOOST_AUTO_TEST_CASE(ParseMailboxGroupTest)
     BOOST_CHECK_NE(MU_INVALID_HANDLE, mailbox);
     BOOST_CHECK(nullptr == muMailboxName(mailbox));
     BOOST_CHECK_EQUAL("my.test@test.example.com", muMailboxAddress(mailbox));
+    muFree(mailbox);
 
     mailbox = muMailbox(mailbox_group, 1);
     BOOST_CHECK_NE(MU_INVALID_HANDLE, mailbox);
     BOOST_CHECK(nullptr == muMailboxName(mailbox));
     BOOST_CHECK_EQUAL("my.test.2@test.example.com", muMailboxAddress(mailbox));
-
+    muFree(mailbox);
     muFree(mailbox_group);
 }
 
@@ -84,12 +87,13 @@ BOOST_AUTO_TEST_CASE(ParseNamedMailboxGroupTest)
     BOOST_CHECK_NE(MU_INVALID_HANDLE, mailbox);
     BOOST_CHECK(nullptr == muMailboxName(mailbox));
     BOOST_CHECK_EQUAL("my.test@test.example.com", muMailboxAddress(mailbox));
+    muFree(mailbox);
 
     mailbox = muMailbox(mailbox_group, 1);
     BOOST_CHECK_NE(MU_INVALID_HANDLE, mailbox);
     BOOST_CHECK(nullptr == muMailboxName(mailbox));
     BOOST_CHECK_EQUAL("my.test.2@test.example.com", muMailboxAddress(mailbox));
-
+    muFree(mailbox);
     muFree(mailbox_group);
 }
 
@@ -106,12 +110,13 @@ BOOST_AUTO_TEST_CASE(ParseNamedMailboxGroupWithNamedMailboxesTest)
     BOOST_CHECK_NE(MU_INVALID_HANDLE, mailbox);
     BOOST_CHECK_EQUAL("Mailbox 1", muMailboxName(mailbox));
     BOOST_CHECK_EQUAL("my.test@test.example.com", muMailboxAddress(mailbox));
+    muFree(mailbox);
 
     mailbox = muMailbox(mailbox_group, 1);
     BOOST_CHECK_NE(MU_INVALID_HANDLE, mailbox);
     BOOST_CHECK_EQUAL("Mailbox 2", muMailboxName(mailbox));
     BOOST_CHECK_EQUAL("my.test.2@test.example.com", muMailboxAddress(mailbox));
-
+    muFree(mailbox);
     muFree(mailbox_group);
 }
 

@@ -52,7 +52,7 @@ MU_EXPORT size_t MU_CALL muMailboxCount(MU_MAILBOXGROUP _mailbox_group);
 /**
  * @brief Returns a mailbox at @a _index position in @a _mailbox_group or @a MU_INVALID_HANDLE.
  * @remarks
- *     Returned handle does not require destruction.
+ *     Returned handle must be destroyed by calling the @ref muFree function.
  */
 MU_EXPORT MU_MAILBOX MU_CALL muMailbox(MU_MAILBOXGROUP _mailbox_group, size_t _index);
 
