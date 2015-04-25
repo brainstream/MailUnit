@@ -97,6 +97,7 @@ void Email::parseHeaders(MU_NATIVE_FILE _file)
     collectAddressesFromHeader(headers, MU_MAILHDR_TO, m_to_addresses);
     collectAddressesFromHeader(headers, MU_MAILHDR_CC, m_cc_addresses);
     collectAddressesFromHeader(headers, MU_MAILHDR_BCC, m_bcc_addresses);
+    muFree(headers);
 }
 
 void Email::appendFrom(const RawEmail & _raw)
