@@ -28,8 +28,8 @@
 
 #include "../Memory.h"
 
-typedef MU_HANDLE MU_MAILBOXGROUP;
-typedef MU_HANDLE MU_MAILBOX;
+MU_DECLARE_HANDEL(MU_MAILBOXGROUP);
+MU_DECLARE_HANDEL(MU_MAILBOX);
 
 /**
  * @brief Parses string described in @ref rfc-address-id "RFC"

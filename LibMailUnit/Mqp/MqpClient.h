@@ -15,8 +15,13 @@
  *                                                                                             *
  ***********************************************************************************************/
 
-#include <LibMailUnit/Memory.h>
+#ifndef __LIBMU_MQP_MQPCLIENT_H__
+#define __LIBMU_MQP_MQPCLIENT_H__
 
-typedef MU_HANDLE MU_MQPCLIENT;
+#include "../Memory.h"
 
-MU_EXPORT  MU_MQPCLIENT muMqpCreateClient(const char * _host, unsigned short _port);
+MU_DECLARE_HANDEL(MU_MQPCLIENT);
+
+MU_EXPORT MU_MQPCLIENT MU_CALL muMqpCreateClient(const char * _host, unsigned short _port);
+
+#endif /* __LIBMU_MQP_MQPCLIENT_H__ */

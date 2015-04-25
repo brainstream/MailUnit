@@ -28,7 +28,7 @@
 
 #include "../Memory.h"
 
-typedef MU_HANDLE MU_MSGID;
+MU_DECLARE_HANDEL(MU_MSGID);
 
 /**
  * @brief Parses string described in @ref rfc-message-id "RFC"

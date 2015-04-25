@@ -29,7 +29,9 @@
  * @brief Type of object to handle and manipulate a memory.
  * @sa muFree
 */
-typedef struct MHandle * MU_HANDLE;
+typedef void * MU_HANDLE;
+
+#define MU_DECLARE_HANDEL(type) typedef MU_HANDLE type
 
 /**
  * @brief Invalid handle value.

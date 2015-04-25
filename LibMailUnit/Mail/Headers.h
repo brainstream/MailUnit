@@ -216,10 +216,8 @@ typedef struct
     const size_t values_count;
 } MMailHeader;
 
-
-typedef MU_HANDLE MU_MAIL_HEADER;
-typedef MU_HANDLE MU_MAIL_HEADERLIST;
-
+MU_DECLARE_HANDEL(MU_MAIL_HEADER);
+MU_DECLARE_HANDEL(MU_MAIL_HEADERLIST);
 
 /**
  * @brief Parses headers of mail message from string.

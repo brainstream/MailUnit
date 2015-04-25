@@ -23,15 +23,17 @@
 #include <LibMailUnit/Def.h>
 #include <LibMailUnit/Memory.h>
 
-struct MHandle : private boost::noncopyable
+namespace LibMailUnit {
+
+class Handle : private boost::noncopyable
 {
 public:
-    explicit MHandle(void * _pointer) :
+    explicit Handle(void * _pointer) :
         mp_pointer(_pointer)
     {
     }
 
-    virtual ~MHandle()
+    virtual ~Handle()
     {
     }
 
@@ -42,16 +44,14 @@ public:
 
 private:
     void * mp_pointer;
-}; // struct MHandle
-
-namespace LibMailUnit {
+}; // class Handle
 
 template<typename Type>
-struct DestructibleHandle : MHandle
+class DestructibleHandle : public Handle
 {
 public:
     explicit DestructibleHandle(Type * _pointer) :
-        MHandle(_pointer)
+        Handle(_pointer)
     {
     }
 
@@ -59,12 +59,12 @@ public:
     {
         delete static_cast<Type *>(pointer());
     }
-}; // struct DestructibleHandle
+}; // class DestructibleHandle
 
 template<typename Type>
 inline MU_HANDLE wrapPointer(Type * _pointer, bool _destructible)
 {
-    return _destructible ? new DestructibleHandle<Type>(_pointer) : new MHandle(_pointer);
+    return _destructible ? new DestructibleHandle<Type>(_pointer) : new Handle(_pointer);
 }
 
 template<typename Type, typename... CtorArgs>
@@ -76,7 +76,7 @@ inline MU_HANDLE makeObjectHandle(CtorArgs... _ctor_args)
 template<typename Type>
 inline Type * handlePointer(MU_HANDLE _handle)
 {
-    return static_cast<Type *>(_handle->pointer());
+    return static_cast<Type *>(static_cast<Handle *>(_handle)->pointer());
 }
 
 } // namespace LibMailUnit
