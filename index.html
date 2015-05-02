@@ -253,10 +253,7 @@ FROM: jake@example.com
 					<pre><code>ITEM: 0/0
 SIZE: 0</code></pre>
 					<h4 id="mqp-drop">The drop command</h4>
-					<p>The drop command deletes messages from database and returns a response in the following format:</p>
-					<pre><code>REMOVED: 42</code></pre>
-					<p>
-						<code>42</code>is a count of removed messages.</p>
+					<p>The drop command deletes messages from database and returns only header described <a href="#mqp-response-header">above</a>.</p>
 					<h4 id="mqp-quit">The quit command</h4>
 					<p>The quit command closes connection. This command has reduced form:
 						<code>q;</code>.</p>
