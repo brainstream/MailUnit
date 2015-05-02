@@ -145,8 +145,6 @@ set(SRC_LIB
     LibMailUnit/Mail/Mailbox.cpp
     LibMailUnit/Mail/MailboxGroup.h
     LibMailUnit/Mail/MailboxGroup.cpp
-    LibMailUnit/Mqp/MqpClient.h
-    LibMailUnit/Mqp/MqpClient.cpp
 )
 
 set(SRC_SERVER_LIB

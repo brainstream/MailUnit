@@ -27,7 +27,7 @@ MqpClient::MqpClient(const ServerConfig & _config, QObject * _parent /*= nullptr
 {
 }
 
-void MqpClient::query(const QString & _query)
+void MqpClient::sendRequest(const QString & _request)
 {
     if(busy())
     {
@@ -39,7 +39,7 @@ void MqpClient::query(const QString & _query)
     connect(mp_socket, SIGNAL(error(QAbstractSocket::SocketError)),
         this, SLOT(onSocketError(QAbstractSocket::SocketError)));
     connect(mp_socket, SIGNAL(disconnected()), this, SLOT(onSocketDisconnected()));
-    m_query = _query.trimmed();
+    m_query = _request.trimmed();
     if(!m_query.endsWith(';'))
     {
         m_query += ';';
@@ -52,19 +52,122 @@ void MqpClient::onSocketConnected()
     mp_socket->write(m_query.toUtf8());
 }
 
+
 void MqpClient::onSocketDisconnected()
 {
-    delete mp_socket;
+    mp_socket->deleteLater();
     mp_socket = nullptr;
 }
 
 void MqpClient::onSocketReadyRead()
 {
-    QString data = QString::fromUtf8(mp_socket->readAll());
-    emit messageReceived(data);
+    disconnect(mp_socket, SIGNAL(readyRead()), this, SLOT(onSocketReadyRead()));
+    quint32 message_count = readHeader();
+    for(quint32 i = 0; i < message_count; ++i)
+    {
+        readMessage();
+    }
+    mp_socket->write("quit;");
 }
 
 void MqpClient::onSocketError(QAbstractSocket::SocketError _error)
 {
 
+}
+
+quint32 MqpClient::readHeader()
+{
+    static const QString hdr_status  = "STATUS: ";
+    static const QString hdr_matched = "MATCHED: ";
+    static const QString hdr_deleted = "DELETED: ";
+    quint32 status_code = 0;
+    quint32 affected_count = 0;
+    bool has_messages = false;
+    for(;;)
+    {
+        if(!mp_socket->canReadLine()) {
+            mp_socket->waitForReadyRead();
+            continue;
+        }
+        QString line(mp_socket->readLine());
+        line = line.trimmed();
+        if(line.isEmpty()) break;
+        if(line.startsWith(hdr_status))
+        {
+            status_code = line.mid(hdr_status.length()).toUInt();
+        }
+        else if(line.startsWith(hdr_matched))
+        {
+            has_messages = true;
+            affected_count = line.mid(hdr_matched.length()).toUInt();
+        }
+        else if(line.startsWith(hdr_deleted))
+        {
+            affected_count = line.mid(hdr_matched.length()).toUInt();
+        }
+    }
+    emit headerReceived(status_code, affected_count);
+    return has_messages ? affected_count : 0;
+}
+
+void MqpClient::readMessage()
+{
+    static const QString hdr_item    = "ITEM: ";
+    static const QString hdr_size    = "SIZE: ";
+    static const QString hdr_id      = "ID: ";
+    static const QString hdr_subject = "SUBJECT: ";
+    static const QString hdr_from    = "FROM: ";
+    static const QString hdr_to      = "TO: ";
+    static const QString hdr_cc      = "CC: ";
+    static const QString hdr_bcc     = "BCC: ";
+    Message message;
+    size_t size = 0;
+    for(;;)
+    {
+        if(!mp_socket->canReadLine()) {
+            mp_socket->waitForReadyRead();
+            continue;
+        }
+        QString line(mp_socket->readLine());
+        line = line.trimmed();
+        if(line.isEmpty()) break;
+        if(line.startsWith(hdr_item))
+        {
+
+        }
+        else if(line.startsWith(hdr_size))
+        {
+            size = line.mid(hdr_size.length()).toULong();
+        }
+        else if(line.startsWith(hdr_id))
+        {
+
+        }
+        else if(line.startsWith(hdr_from))
+        {
+
+        }
+        else if(line.startsWith(hdr_cc))
+        {
+
+        }
+        else if(line.startsWith(hdr_bcc))
+        {
+
+        }
+        else if(line.startsWith(hdr_subject))
+        {
+            message.subject = line.mid(hdr_subject.length());
+        }
+    }
+    for(size_t size_left = size; size_left > 0;)
+    {
+        if(mp_socket->atEnd()) {
+            mp_socket->waitForReadyRead();
+        }
+        QByteArray data = mp_socket->read(size_left);
+        message.body.append(data);
+        size_left -= data.length();
+    }
+    emit messageReceived(message);
 }

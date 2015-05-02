@@ -69,13 +69,13 @@
     <addaction name="mp_action_about"/>
     <addaction name="mp_action_about_qt"/>
    </widget>
-   <widget class="QMenu" name="mp_menu_server">
+   <widget class="QMenu" name="mp_menu_file">
     <property name="title">
-     <string>&amp;Server</string>
+     <string>&amp;File</string>
     </property>
     <addaction name="mp_action_new_server"/>
    </widget>
-   <addaction name="mp_menu_server"/>
+   <addaction name="mp_menu_file"/>
    <addaction name="mp_menu_help"/>
   </widget>
   <widget class="QStatusBar" name="mp_statusbar"/>
@@ -136,7 +136,9 @@
   </action>
   <action name="mp_action_new_server">
    <property name="icon">
-    <iconset theme="list-add"/>
+    <iconset theme="list-add">
+     <normaloff/>
+    </iconset>
    </property>
    <property name="text">
     <string>&amp;New server...</string>
@@ -155,7 +157,9 @@
     <bool>false</bool>
    </property>
    <property name="icon">
-    <iconset theme="arrow-right"/>
+    <iconset theme="arrow-right">
+     <normaloff/>
+    </iconset>
    </property>
    <property name="text">
     <string>Execute query</string>

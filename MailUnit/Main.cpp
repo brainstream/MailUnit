@@ -76,6 +76,7 @@ void start(const std::shared_ptr<Config> _config)
     startTcpServer(service, smtp_server_endpoint, std::make_shared<Smtp::ServerRequestHandler>(repo, *_config));
 
     // TODO: interface from config
+    //asio::ip::tcp::endpoint storage_server_endpoint(asio::ip::address_v4::from_string("0.0.0.0"), _config->mqp_port);
     asio::ip::tcp::endpoint storage_server_endpoint(asio::ip::tcp::v4(), _config->mqp_port);
     startTcpServer(service, storage_server_endpoint, std::make_shared<Mqp::ServerRequestHandler>(repo));
 

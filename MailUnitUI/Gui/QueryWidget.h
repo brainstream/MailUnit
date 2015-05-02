@@ -20,7 +20,6 @@
 
 #include <QtGui/QWidget>
 #include <ui_QueryWidget.h>
-#include <MailUnitUI/ServerConfig.h>
 #include <MailUnitUI/MqpClient.h>
 
 namespace MailUnit {
@@ -33,20 +32,23 @@ class QueryWidget : public QWidget, private Ui::QueryWidget
 public:
     explicit QueryWidget(const ServerConfig & _server, QWidget * _parent = nullptr);
 
-    const ServerConfig & server() const
+    QString name() const
     {
-        return m_server;
+        return QString("%1:%2")
+            .arg(mp_client->hostname())
+            .arg(mp_client->port());
     }
 
 public slots:
     void execute();
 
 private slots:
-    void onMessageReceived(const QString & _data);
+    void onHeaderReceived(quint32 _status, quint32 _count);
+    void onMessageReceived(const Message & _message);
+    void onRequestFinished();
 
 private:
-    ServerConfig m_server;
-    MqpClient * mp_mqp_client;
+    MqpClient * mp_client;
 };
 
 } // namespace Gui

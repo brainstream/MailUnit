@@ -162,11 +162,8 @@ void MainWindow::currentTabChanged(int _index)
     }
     else
     {
-        mp_statusbar->showMessage(QString("%2:%3")
-            .arg(query_widget->server().host())
-            .arg(query_widget->server().port()));
+        mp_statusbar->showMessage(query_widget->name());
     }
-
 }
 
 void MainWindow::closeTab(int _index)

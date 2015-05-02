@@ -27,17 +27,19 @@
 #include <MailUnit/Mqp/ServerRequestHandler.h>
 #include <MailUnit/Mqp/Error.h>
 
-#define MQP_ENDLINE   "\r\n"
-#define MQP_ITEM      "ITEM: "
-#define MQP_SIZE      "SIZE: "
-#define MQP_ID        "ID: "
-#define MQP_SUBJECT   "SUBJECT: "
-#define MQP_FROM      "FROM: "
-#define MQP_TO        "TO: "
-#define MQP_CC        "CC: "
-#define MQP_BCC       "BCC: "
-#define MQP_ERROR     "ERROR: "
-#define MQP_DELETED   "DELETED: "
+#define MQP_ENDLINE "\r\n"
+#define MQP_ENDHDR  "\r\n\r\n"
+#define MQP_ITEM    "ITEM: "
+#define MQP_SIZE    "SIZE: "
+#define MQP_ID      "ID: "
+#define MQP_SUBJECT "SUBJECT: "
+#define MQP_FROM    "FROM: "
+#define MQP_TO      "TO: "
+#define MQP_CC      "CC: "
+#define MQP_BCC     "BCC: "
+#define MQP_STATUS  "STATUS: "
+#define MQP_DELETED "DELETED: "
+#define MQP_MATCHED "MATCHED: "
 
 using namespace MailUnit::Mqp;
 using namespace MailUnit::Storage;
@@ -63,7 +65,8 @@ private:
     void processQuery();
     bool isQueryEndOfSessionRequest(const std::string & _query);
     void writeEmails(EmailsHolder _emails);
-    void writeError(ErrorCode _code, const std::exception * _exception);
+    void writeEmailBodies(EmailsHolder _emails);
+    void writeError(StatusCode _code, const std::exception * _exception);
     void write(const std::string & _data, std::function<void()> _callback);
 
 private:
@@ -153,7 +156,7 @@ void MqpSession::processQuery()
         {
             std::shared_ptr<MqpSession> self(shared_from_this());
             std::stringstream message;
-            message << MQP_DELETED << drop->count << MQP_ENDLINE;
+            message << MQP_DELETED << drop->count << MQP_ENDHDR;
             write(message.str(), [self]() {
                 self->read();
             });
@@ -162,19 +165,19 @@ void MqpSession::processQuery()
     }
     catch(const StorageException & error)
     {
-        writeError(ErrorCode::StorageError, &error);
+        writeError(StatusCode::StorageError, &error);
     }
     catch(const Edsl::EdslException & error)
     {
-        writeError(ErrorCode::ParseError, &error);
+        writeError(StatusCode::ParseError, &error);
     }
     catch(const std::exception & error)
     {
-        writeError(ErrorCode::UnknowError, &error);
+        writeError(StatusCode::UnknowError, &error);
     }
     catch(...)
     {
-        writeError(ErrorCode::UnknowError, nullptr);
+        writeError(StatusCode::UnknowError, nullptr);
     }
 }
 
@@ -185,19 +188,32 @@ bool MqpSession::isQueryEndOfSessionRequest(const std::string & _query)
 
 void MqpSession::writeEmails(EmailsHolder _emails)
 {
+    auto self = this->shared_from_this();
+    size_t total_count = _emails().size();
+    std::stringstream message;
+    message << MQP_STATUS << StatusCode::Success << MQP_ENDLINE
+            << MQP_MATCHED << total_count << MQP_ENDHDR;
+    if(0 == total_count)
+    {
+        write(message.str(), [self]() {
+            self->read();
+        });
+    }
+    else
+    {
+        write(message.str(), [self, _emails]() {
+            self->writeEmailBodies(_emails);
+        });
+    }
+}
+
+void MqpSession::writeEmailBodies(EmailsHolder _emails)
+{
     using EmailSequenceOperation = AsyncSequenceOperation<std::vector<std::unique_ptr<Email>>>;
     using EmailOperation = AsyncSequenceItemOperation<std::unique_ptr<Email>>;
 
     auto self = this->shared_from_this();
     size_t total_count = _emails().size();
-    if(0 == total_count)
-    {
-        std::string message = MQP_ITEM "0/0" MQP_ENDLINE MQP_SIZE "0" MQP_ENDLINE;
-        write(message, [self]() {
-            self->read();
-        });
-        return;
-    }
     std::shared_ptr<EmailSequenceOperation> emails_operation = EmailSequenceOperation::create(_emails,
         [self, total_count](EmailOperation & email_operation) {
             const std::unique_ptr<Email> & email = email_operation.item();
@@ -234,11 +250,11 @@ void MqpSession::writeEmails(EmailsHolder _emails)
     });
 }
 
-void MqpSession::writeError(ErrorCode _code, const std::exception * _exception)
+void MqpSession::writeError(StatusCode _code, const std::exception * _exception)
 {
     std::shared_ptr<MqpSession> self(shared_from_this());
     std::stringstream message;
-    message << MQP_ERROR << _code << MQP_ENDLINE;
+    message << MQP_STATUS << _code << MQP_ENDHDR;
     write(message.str(), [self]() {
         self->read();
     });

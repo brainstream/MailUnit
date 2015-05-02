@@ -20,6 +20,7 @@
 
 #include <QtNetwork/QTcpSocket>
 #include <MailUnitUI/ServerConfig.h>
+#include <MailUnitUI/Message.h>
 
 namespace MailUnit {
 namespace Gui {
@@ -30,7 +31,8 @@ class MqpClient : public QObject
 
 public:
     explicit MqpClient(const ServerConfig & _config, QObject * _parent = nullptr);
-    void query(const QString & _query);
+
+    void sendRequest(const QString & _request);
 
     bool busy() const
     {
@@ -42,35 +44,25 @@ public:
         return m_hostname;
     }
 
-    bool trySetHostName(const QString & _hostname)
-    {
-        if(busy())
-            return false;
-        m_hostname = _hostname;
-        return true;
-    }
-
     quint16 port() const
     {
         return m_port;
     }
 
-    bool trySetPort(quint16 _port)
-    {
-        if(busy())
-            return false;
-        m_port = _port;
-        return true;
-    }
-
 signals:
-    void messageReceived(const QString & _message);
+    void headerReceived(quint32 _status_code, quint32 _afected_count);
+    void messageReceived(const Message & _message);
+    void finished();
 
 private slots:
     void onSocketConnected();
     void onSocketDisconnected();
     void onSocketReadyRead();
     void onSocketError(QAbstractSocket::SocketError _error);
+
+private:
+    quint32 readHeader();
+    void readMessage();
 
 private:
     QString m_hostname;

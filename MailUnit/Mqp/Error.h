@@ -23,19 +23,20 @@
 namespace MailUnit {
 namespace Mqp {
 
-enum class ErrorCode
+enum class StatusCode
 {
-    UnknowError  = 100,
-    ParseError   = 101,
-    StorageError = 102,
-    Timeout      = 103
-}; // enum class ErrorCode
+    Success      = 100,
+    UnknowError  = 200,
+    ParseError   = 201,
+    StorageError = 202,
+    Timeout      = 203
+}; // enum class StatusCode
 
 
 } // namespace Mqp
 } // namespace MailUnit
 
-inline std::ostream & operator << (std::ostream & _stream, MailUnit::Mqp::ErrorCode _error_code)
+inline std::ostream & operator << (std::ostream & _stream, MailUnit::Mqp::StatusCode _error_code)
 {
     _stream << static_cast<int>(_error_code);
     return _stream;
