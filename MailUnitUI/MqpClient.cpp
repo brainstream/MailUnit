@@ -15,48 +15,34 @@
  *                                                                                             *
  ***********************************************************************************************/
 
+#include <QtCore/QThread>
 #include <MailUnitUI/MqpClient.h>
 
 using namespace MailUnit::Gui;
 
-MqpClient::MqpClient(const ServerConfig & _config, QObject * _parent /*= nullptr*/) :
-    QObject(_parent),
-    m_hostname(_config.host()),
-    m_port(_config.port()),
-    mp_socket(nullptr)
+MqpClient::MqpClient(const ServerConfig & _server, const QString & _request) :
+    m_server(_server)
 {
+    m_request = _request.trimmed();
+    if(!m_request.endsWith(';'))
+        m_request += ';';
 }
 
-void MqpClient::sendRequest(const QString & _request)
+void MqpClient::run()
 {
-    if(busy())
-    {
-        throw std::runtime_error("MQP Client is busy"); // FIXME: custom exception
-    }
     mp_socket = new QTcpSocket(this);
     connect(mp_socket, SIGNAL(connected()), this, SLOT(onSocketConnected()));
     connect(mp_socket, SIGNAL(readyRead()), this, SLOT(onSocketReadyRead()));
     connect(mp_socket, SIGNAL(error(QAbstractSocket::SocketError)),
         this, SLOT(onSocketError(QAbstractSocket::SocketError)));
-    connect(mp_socket, SIGNAL(disconnected()), this, SLOT(onSocketDisconnected()));
-    m_query = _request.trimmed();
-    if(!m_query.endsWith(';'))
-    {
-        m_query += ';';
-    }
-    mp_socket->connectToHost(m_hostname, m_port);
+    connect(mp_socket, SIGNAL(disconnected()), mp_socket, SLOT(deleteLater()));
+    connect(mp_socket, SIGNAL(disconnected()), SIGNAL(finished()));
+    mp_socket->connectToHost(m_server.host(), m_server.port());
 }
 
 void MqpClient::onSocketConnected()
 {
-    mp_socket->write(m_query.toUtf8());
-}
-
-
-void MqpClient::onSocketDisconnected()
-{
-    mp_socket->deleteLater();
-    mp_socket = nullptr;
+    mp_socket->write(m_request.toUtf8());
 }
 
 void MqpClient::onSocketReadyRead()
@@ -72,7 +58,6 @@ void MqpClient::onSocketReadyRead()
 
 void MqpClient::onSocketError(QAbstractSocket::SocketError _error)
 {
-
 }
 
 quint32 MqpClient::readHeader()
@@ -170,4 +155,43 @@ void MqpClient::readMessage()
         size_left -= data.length();
     }
     emit messageReceived(message);
+}
+
+namespace {
+
+class MqpRequestThread : public QThread
+{
+public:
+    explicit MqpRequestThread(MqpClient & _client) :
+        mr_client(_client)
+    {
+    }
+
+protected:
+    void run() override
+    {
+        mr_client.run();
+        exec();
+    }
+
+private:
+    MqpClient & mr_client;
+};
+
+} // namespace
+
+void MailUnit::Gui::sendMqpRequestAsync(const ServerConfig & _server, const QString & _request, MqpClientNotifier * _notifier /*= nullptr*/)
+{
+    MqpClient * client = new MqpClient(_server, _request);
+    MqpRequestThread * thread = new MqpRequestThread(*client);
+    client->moveToThread(thread);
+    if(nullptr != _notifier)
+    {
+        QObject::connect(client, SIGNAL(headerReceived(quint32,quint32)), _notifier, SIGNAL(headerReceived(quint32,quint32)));
+        QObject::connect(client, SIGNAL(messageReceived(Message)), _notifier, SIGNAL(messageReceived(Message)));
+        QObject::connect(client, SIGNAL(finished()), _notifier, SIGNAL(finished()));
+    }
+    QObject::connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
+    QObject::connect(thread, SIGNAL(finished()), client, SLOT(deleteLater()));
+    thread->start();
 }

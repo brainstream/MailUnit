@@ -35,6 +35,10 @@ public:
     {
     }
 
+    ServerConfig(const ServerConfig &) = default;
+
+    ServerConfig & operator = (const ServerConfig &) = default;
+
     const QString & name() const
     {
         return m_name;

@@ -34,9 +34,7 @@ public:
 
     QString name() const
     {
-        return QString("%1:%2")
-            .arg(mp_client->hostname())
-            .arg(mp_client->port());
+        return QString("%1:%2").arg(m_server.host()).arg(m_server.port());
     }
 
 public slots:
@@ -48,7 +46,9 @@ private slots:
     void onRequestFinished();
 
 private:
-    MqpClient * mp_client;
+    ServerConfig m_server;
+    MqpClientNotifier * mp_notifier;
+    bool m_busy;
 };
 
 } // namespace Gui

@@ -18,6 +18,7 @@
 #ifndef __MUGUI_MESSAGE_H__
 #define __MUGUI_MESSAGE_H__
 
+#include <QtCore/QMetaType>
 #include <QtCore/QString>
 
 namespace MailUnit {
@@ -25,6 +26,16 @@ namespace Gui {
 
 struct Message
 {
+    Message()
+    {
+        static bool registered = false;
+        if(!registered)
+        {
+            registered = true;
+            qRegisterMetaType<Message>("Message");
+        }
+    }
+
     QString subject;
     QByteArray body;
 }; // struct Message

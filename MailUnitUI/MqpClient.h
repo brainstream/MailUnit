@@ -25,51 +25,47 @@
 namespace MailUnit {
 namespace Gui {
 
-class MqpClient : public QObject
+class MqpClientNotifier : public QObject
 {
     Q_OBJECT
 
 public:
-    explicit MqpClient(const ServerConfig & _config, QObject * _parent = nullptr);
-
-    void sendRequest(const QString & _request);
-
-    bool busy() const
+    explicit MqpClientNotifier(QObject * _parent = nullptr) :
+        QObject(_parent)
     {
-        return nullptr != mp_socket;
-    }
-
-    const QString & hostname() const
-    {
-        return m_hostname;
-    }
-
-    quint16 port() const
-    {
-        return m_port;
     }
 
 signals:
     void headerReceived(quint32 _status_code, quint32 _afected_count);
     void messageReceived(const Message & _message);
     void finished();
+}; // class MqpClientNotifier
+
+class MqpClient : public MqpClientNotifier
+{
+    Q_OBJECT
+    friend void sendMqpRequestAsync(const ServerConfig &, const QString &, MqpClientNotifier *);
+
+private:
+    explicit MqpClient(const ServerConfig & _server, const QString & _request);
+    quint32 readHeader();
+    void readMessage();
+
+public:
+    void run();
 
 private slots:
     void onSocketConnected();
-    void onSocketDisconnected();
     void onSocketReadyRead();
     void onSocketError(QAbstractSocket::SocketError _error);
 
 private:
-    quint32 readHeader();
-    void readMessage();
-
-private:
-    QString m_hostname;
-    quint16 m_port;
     QTcpSocket * mp_socket;
-    QString m_query;
+    ServerConfig m_server;
+    QString m_request;
 }; // class MqpClient
+
+void sendMqpRequestAsync(const ServerConfig & _server, const QString & _request, MqpClientNotifier * _notifier = nullptr);
 
 } // namespace Gui
 } // namespace MailUnit
