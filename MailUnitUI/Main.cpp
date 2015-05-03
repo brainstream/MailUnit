@@ -16,9 +16,9 @@
  ***********************************************************************************************/
 
 #include <boost/preprocessor/stringize.hpp>
-#include <QtCore/QDir>
-#include <QtGui/QApplication>
-#include <QtGui/QDesktopServices>
+#include <QDir>
+#include <QApplication>
+#include <QDesktopServices>
 #include <MailUnit/OS/FileSystem.h>
 #include <MailUnitUI/Config.h>
 #include <MailUnitUI/Gui/MainWindow.h>

@@ -23,10 +23,14 @@
 #    Enables unit tests. The Boost.Test library is required.
 # ENABLE_GUI=ON
 #    Enables graphic user interface. The Qt 4 or later is required.
+# QT5_DIR=<path to Qt5 installation>
+#    Provides a path to search Qt5 installation. This variable can be also specified as
+#    a system environvent variable.
+#    Example: -DQT5_DIR=/opt/qt/5.4/gcc_64/
 #
 ###############################################################################################
 
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.0)
 
 project(MailUnit)
 set(BINARY_NAME       mailunit)
@@ -89,17 +93,20 @@ find_package(Boost REQUIRED COMPONENTS
 # Begin Qt libraries initialization
 ####
 if(ENABLE_GUI)
-    find_package(Qt4 REQUIRED)
-    include(${QT_USE_FILE})
-    set(GUI_LIBS
-        Qt4::QtCore
-        Qt4::QtGui
-        Qt4::QtNetwork
-        Qt4::QtXml
-    )
-    set(GUI_INCLUDE_DIRS
-        ${QT_INCLUDE_DIR}
-    )
+    if(QT5_DIR)
+        set(CMAKE_PREFIX_PATH ${QT5_DIR})
+    elseif(DEFINED ENV{QT5_DIR})
+        set(CMAKE_PREFIX_PATH $ENV{QT5_DIR})
+    endif()
+    find_package(Qt5Core)
+    if(Qt5Core_FOUND)
+        message(STATUS "Qt version: ${Qt5Core_VERSION_STRING}")
+    else()
+        message(FATAL_ERROR "ERROR: Qt5 not found. Please specify path to Qt5 installation in the QT5_DIR cmake variable or the QT5_DIR system environment variable")
+    endif()
+    find_package(Qt5Widgets REQUIRED)
+    find_package(Qt5Network REQUIRED)
+    find_package(Qt5Xml REQUIRED)
 endif(ENABLE_GUI)
 ####
 # End Qt libraries initialization
@@ -366,15 +373,20 @@ target_link_libraries(${TARGET_SERVER}
 # mailunitui
 #
 if(ENABLE_GUI)
-    QT4_WRAP_CPP(GUI_MOC ${SRC_GUI_MOC})
-    QT4_WRAP_UI(GUI_UI ${SRC_GUI_UI})
-    QT4_ADD_RESOURCES(GUI_RSC ${SRC_GUI_RSC})
+    qt5_wrap_cpp(GUI_MOC ${SRC_GUI_MOC})
+    qt5_wrap_ui(GUI_UI ${SRC_GUI_UI})
+    qt5_add_resources(GUI_RSC ${SRC_GUI_RSC})
     add_executable(${TARGET_GUI}
         ${SRC_GUI}
         ${GUI_MOC}
         ${GUI_UI}
         ${GUI_RSC}
         ${SRC_GUI_BIN}
+    )
+    qt5_use_modules(${TARGET_GUI}
+        Widgets
+        Network
+        Xml
     )
     add_dependencies(${TARGET_GUI}
         ${TARGET_LIB}
@@ -390,7 +402,6 @@ if(ENABLE_GUI)
     target_link_libraries(${TARGET_GUI}
         ${TARGET_SQLITE}
         ${TARGET_LIB}
-        ${GUI_LIBS}
         ${Boost_LIBRARIES}
     )
 endif(ENABLE_GUI)

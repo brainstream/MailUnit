@@ -18,8 +18,8 @@
 #ifndef __MUGUI_MESSAGE_H__
 #define __MUGUI_MESSAGE_H__
 
-#include <QtCore/QMetaType>
-#include <QtCore/QString>
+#include <QMetaType>
+#include <QString>
 
 namespace MailUnit {
 namespace Gui {

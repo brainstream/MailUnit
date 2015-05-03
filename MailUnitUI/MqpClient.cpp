@@ -15,7 +15,7 @@
  *                                                                                             *
  ***********************************************************************************************/
 
-#include <QtCore/QThread>
+#include <QThread>
 #include <MailUnitUI/MqpClient.h>
 
 using namespace MailUnit::Gui;

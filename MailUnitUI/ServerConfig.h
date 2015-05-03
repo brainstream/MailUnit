@@ -18,9 +18,9 @@
 #ifndef __MUGUI_SERVERCONFIG_H__
 #define __MUGUI_SERVERCONFIG_H__
 
-#include <QtCore/QString>
-#include <QtCore/QObject>
-#include <QtCore/QVector>
+#include <QString>
+#include <QObject>
+#include <QVector>
 
 namespace MailUnit {
 namespace Gui {

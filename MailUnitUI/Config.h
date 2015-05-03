@@ -18,9 +18,9 @@
 #ifndef __MUGUI_CONFIG_H__
 #define __MUGUI_CONFIG_H__
 
-#include <QtCore/QFile>
-#include <QtCore/QPoint>
-#include <QtCore/QSize>
+#include <QFile>
+#include <QPoint>
+#include <QSize>
 #include <MailUnitUI/ServerConfig.h>
 
 namespace MailUnit {

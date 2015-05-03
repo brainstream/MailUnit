@@ -15,10 +15,10 @@
  *                                                                                             *
  ***********************************************************************************************/
 
-#include <QtCore/QDir>
-#include <QtCore/QFileInfo>
-#include <QtXml/QXmlSimpleReader>
-#include <QtXml/QXmlStreamWriter>
+#include <QDir>
+#include <QFileInfo>
+#include <QXmlSimpleReader>
+#include <QXmlStreamWriter>
 #include <MailUnitUI/Config.h>
 
 using namespace MailUnit::Gui;
@@ -226,7 +226,8 @@ void Config::reload()
     QXmlSimpleReader reader;
     XmlContentHandler handler(*this);
     reader.setContentHandler(&handler);
-    reader.parse(&file);
+    QXmlInputSource xml_input_source(&file);
+    reader.parse(&xml_input_source);
     file.close();
 }
 

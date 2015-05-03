@@ -18,8 +18,8 @@
 #ifndef __MUGUI_GUI_MAINWINDOW_H__
 #define __MUGUI_GUI_MAINWINDOW_H__
 
-#include <QtCore/QVector>
-#include <QtGui/QMainWindow>
+#include <QVector>
+#include <QMainWindow>
 #include <MailUnitUI/Config.h>
 #include <ui_MainWindow.h>
 

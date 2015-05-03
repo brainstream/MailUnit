@@ -18,7 +18,7 @@
 #ifndef _MUGUI_MQPCLIENT_H__
 #define _MUGUI_MQPCLIENT_H__
 
-#include <QtNetwork/QTcpSocket>
+#include <QTcpSocket>
 #include <MailUnitUI/ServerConfig.h>
 #include <MailUnitUI/Message.h>
 

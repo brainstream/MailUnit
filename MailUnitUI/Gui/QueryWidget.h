@@ -18,7 +18,7 @@
 #ifndef __MUGUI_GUI_QUERYWIDGET_H__
 #define __MUGUI_GUI_QUERYWIDGET_H__
 
-#include <QtGui/QWidget>
+#include <QWidget>
 #include <ui_QueryWidget.h>
 #include <MailUnitUI/MqpClient.h>
 

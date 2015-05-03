@@ -1,7 +1,7 @@
 #ifndef __MUGUI_GUI_ABOUTDIALOG_H__
 #define __MUGUI_GUI_ABOUTDIALOG_H__
 
-#include <QtGui/QDialog>
+#include <QDialog>
 #include <ui_AboutDialog.h>
 
 namespace MailUnit {

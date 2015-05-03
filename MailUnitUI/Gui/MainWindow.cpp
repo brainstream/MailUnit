@@ -15,8 +15,8 @@
  *                                                                                             *
  ***********************************************************************************************/
 
-#include <QtCore/QtAlgorithms>
-#include <QtGui/QMessageBox>
+#include <QtAlgorithms>
+#include <QMessageBox>
 #include <MailUnitUI/Gui/MainWindow.h>
 #include <MailUnitUI/Gui/QueryWidget.h>
 #include <MailUnitUI/Gui/ServerDialog.h>
