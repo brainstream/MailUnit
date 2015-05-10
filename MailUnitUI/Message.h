@@ -20,6 +20,7 @@
 
 #include <QMetaType>
 #include <QString>
+#include <QStringList>
 
 namespace MailUnit {
 namespace Gui {
@@ -36,6 +37,11 @@ struct Message
         }
     }
 
+    quint32 id;
+    QStringList from;
+    QStringList to;
+    QStringList cc;
+    QStringList bcc;
     QString subject;
     QByteArray body;
 }; // struct Message

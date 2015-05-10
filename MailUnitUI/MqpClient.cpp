@@ -107,7 +107,7 @@ void MqpClient::readMessage()
     static const QString hdr_to      = "TO: ";
     static const QString hdr_cc      = "CC: ";
     static const QString hdr_bcc     = "BCC: ";
-    Message message;
+    Message message =  { };
     size_t size = 0;
     for(;;)
     {
@@ -120,7 +120,7 @@ void MqpClient::readMessage()
         if(line.isEmpty()) break;
         if(line.startsWith(hdr_item))
         {
-
+            // TODO: parse
         }
         else if(line.startsWith(hdr_size))
         {
@@ -128,19 +128,23 @@ void MqpClient::readMessage()
         }
         else if(line.startsWith(hdr_id))
         {
-
+            message.id = line.mid(hdr_id.length()).toUInt();
         }
         else if(line.startsWith(hdr_from))
         {
-
+            message.from.append(line.mid(hdr_from.length()));
+        }
+        else if(line.startsWith(hdr_to))
+        {
+            message.to.append(line.mid(hdr_to.length()));
         }
         else if(line.startsWith(hdr_cc))
         {
-
+            message.cc.append(line.mid(hdr_cc.length()));
         }
         else if(line.startsWith(hdr_bcc))
         {
-
+            message.bcc.append(line.mid(hdr_bcc.length()));
         }
         else if(line.startsWith(hdr_subject))
         {

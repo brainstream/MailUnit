@@ -66,6 +66,25 @@ void QueryWidget::onMessageReceived(const Message & _message)
 {
     ++mp_state->loaded_count;
     mp_progress_bar->setValue(static_cast<int>(mp_state->loaded_count));
+    mp_edit_result->appendPlainText(QString("ID: %1").arg(_message.id));
+    for(const QString & from : _message.from)
+    {
+        mp_edit_result->appendPlainText(QString("From: ") + from);
+    }
+    for(const QString & to : _message.to)
+    {
+        mp_edit_result->appendPlainText(QString("To: ") + to);
+    }
+    for(const QString & cc : _message.cc)
+    {
+        mp_edit_result->appendPlainText(QString("CC: ") + cc);
+    }
+    for(const QString & bcc : _message.bcc)
+    {
+        mp_edit_result->appendPlainText(QString("BCC: ") + bcc);
+    }
+    mp_edit_result->appendPlainText(QString("Subject: ") +_message.subject);
+    mp_edit_result->appendPlainText("_____\n");
     mp_edit_result->appendPlainText(_message.body);
     mp_edit_result->appendPlainText("____________________________________\n\n");
 }
