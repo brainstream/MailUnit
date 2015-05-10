@@ -156,14 +156,6 @@ void MainWindow::currentTabChanged(int _index)
 {
     QueryWidget * query_widget = static_cast<QueryWidget *>(mp_tabs->widget(_index));
     mp_action_exec_query->setEnabled(nullptr != query_widget);
-    if(nullptr == query_widget)
-    {
-        mp_statusbar->clearMessage();
-    }
-    else
-    {
-        mp_statusbar->showMessage(query_widget->name());
-    }
 }
 
 void MainWindow::closeTab(int _index)

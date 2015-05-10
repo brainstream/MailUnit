@@ -25,6 +25,30 @@
 namespace MailUnit {
 namespace Gui {
 
+enum class MqpResponseType
+{
+    matched,
+    deleted,
+    error
+}; // enum class MqpResponseType
+
+struct MqpResponseHeader
+{
+    MqpResponseHeader()
+    {
+        static bool registered = false;
+        if(!registered)
+        {
+            registered = true;
+            qRegisterMetaType<MqpResponseHeader>("MqpResponseHeader");
+        }
+    }
+
+    MqpResponseType response_type;
+    quint32 status_code;
+    quint32 affected_count;
+}; // struct MqpResponseHeader
+
 class MqpClientNotifier : public QObject
 {
     Q_OBJECT
@@ -36,7 +60,7 @@ public:
     }
 
 signals:
-    void headerReceived(quint32 _status_code, quint32 _afected_count);
+    void headerReceived(const MqpResponseHeader & _header);
     void messageReceived(const Message & _message);
     void finished();
 }; // class MqpClientNotifier

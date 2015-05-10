@@ -78,7 +78,6 @@
    <addaction name="mp_menu_file"/>
    <addaction name="mp_menu_help"/>
   </widget>
-  <widget class="QStatusBar" name="mp_statusbar"/>
   <widget class="QToolBar" name="mp_toolbar">
    <property name="windowTitle">
     <string>toolBar</string>

@@ -23,38 +23,71 @@ QueryWidget::QueryWidget(const ServerConfig & _server, QWidget * _parent /*= nul
     QWidget(_parent),
     m_server(_server),
     mp_notifier(nullptr),
-    m_busy(false)
+    mp_state(nullptr)
 {
     setupUi(this);
+    mp_label_server->setText(QString("%1 [%2:%3]")
+        .arg(_server.name())
+        .arg(_server.host())
+        .arg(_server.port()));
+    mp_label_status->setText(tr("Ready"));
+    mp_progress_bar->setVisible(false);
     mp_notifier = new MqpClientNotifier(this);
-    connect(mp_notifier, SIGNAL(headerReceived(quint32,quint32)), this, SLOT(onHeaderReceived(quint32,quint32)));
+    connect(mp_notifier, SIGNAL(headerReceived(MqpResponseHeader)), this, SLOT(onHeaderReceived(MqpResponseHeader)));
     connect(mp_notifier, SIGNAL(messageReceived(Message)), this, SLOT(onMessageReceived(Message)));
     connect(mp_notifier, SIGNAL(finished()), this, SLOT(onRequestFinished()));
 }
 
+QueryWidget::~QueryWidget()
+{
+    delete mp_state;
+}
+
 void QueryWidget::execute()
 {
-    if(m_busy) return;
-    m_busy = true;
+    if(mp_state) return;
+    mp_state = new LoadingState({ });
     mp_edit_result->clear();
+    mp_progress_bar->setRange(0, 0);
+    mp_label_status->setVisible(false);
+    mp_progress_bar->setVisible(true);
     sendMqpRequestAsync(m_server, mp_edit_query->toPlainText(), mp_notifier);
 }
 
-void QueryWidget::onHeaderReceived(quint32 _status, quint32 _count)
+void QueryWidget::onHeaderReceived(const MqpResponseHeader & _header)
 {
-    QString text = QString("Status code: %1. Messages count: %2\n").arg(_status).arg(_count);
-    mp_edit_result->appendPlainText(text);
+    mp_state->header = _header;
+    mp_state->loaded_count = 0;
+    mp_progress_bar->setRange(0, static_cast<int>(_header.affected_count));
+    mp_progress_bar->setValue(0);
 }
 
 void QueryWidget::onMessageReceived(const Message & _message)
 {
+    ++mp_state->loaded_count;
+    mp_progress_bar->setValue(static_cast<int>(mp_state->loaded_count));
     mp_edit_result->appendPlainText(_message.body);
     mp_edit_result->appendPlainText("____________________________________\n\n");
 }
 
 void QueryWidget::onRequestFinished()
 {
-    m_busy = false;
+    switch(mp_state->header.response_type)
+    {
+    case MqpResponseType::matched:
+        mp_label_status->setText(tr("Loaded %1 message(s)").arg(mp_state->loaded_count));
+        break;
+    case MqpResponseType::deleted:
+        mp_label_status->setText(tr("Deleted %1 message(s)").arg(mp_state->loaded_count));
+        break;
+    default:
+        mp_label_status->setText(tr("Error: %1").arg(mp_state->header.status_code));
+        break;
+    }
+    mp_progress_bar->setVisible(false);
+    mp_label_status->setVisible(true);
+    delete mp_state;
+    mp_state = nullptr;
 }
 
 

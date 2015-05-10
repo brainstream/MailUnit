@@ -29,26 +29,29 @@ class QueryWidget : public QWidget, private Ui::QueryWidget
 {
     Q_OBJECT
 
+private:
+    struct LoadingState
+    {
+        MqpResponseHeader header;
+        quint32 loaded_count;
+    }; // struct LoadingState
+
 public:
     explicit QueryWidget(const ServerConfig & _server, QWidget * _parent = nullptr);
-
-    QString name() const
-    {
-        return QString("%1:%2").arg(m_server.host()).arg(m_server.port());
-    }
+    ~QueryWidget() override;
 
 public slots:
     void execute();
 
 private slots:
-    void onHeaderReceived(quint32 _status, quint32 _count);
+    void onHeaderReceived(const MqpResponseHeader & _header);
     void onMessageReceived(const Message & _message);
     void onRequestFinished();
 
 private:
     ServerConfig m_server;
     MqpClientNotifier * mp_notifier;
-    bool m_busy;
+    LoadingState * mp_state;
 };
 
 } // namespace Gui

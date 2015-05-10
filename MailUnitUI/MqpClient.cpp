@@ -65,8 +65,8 @@ quint32 MqpClient::readHeader()
     static const QString hdr_status  = "STATUS: ";
     static const QString hdr_matched = "MATCHED: ";
     static const QString hdr_deleted = "DELETED: ";
-    quint32 status_code = 0;
-    quint32 affected_count = 0;
+    MqpResponseHeader header = { };
+    header.response_type = MqpResponseType::error;
     bool has_messages = false;
     for(;;)
     {
@@ -79,20 +79,22 @@ quint32 MqpClient::readHeader()
         if(line.isEmpty()) break;
         if(line.startsWith(hdr_status))
         {
-            status_code = line.mid(hdr_status.length()).toUInt();
+            header.status_code = line.mid(hdr_status.length()).toUInt();
         }
         else if(line.startsWith(hdr_matched))
         {
             has_messages = true;
-            affected_count = line.mid(hdr_matched.length()).toUInt();
+            header.affected_count = line.mid(hdr_matched.length()).toUInt();
+            header.response_type = MqpResponseType::matched;
         }
         else if(line.startsWith(hdr_deleted))
         {
-            affected_count = line.mid(hdr_matched.length()).toUInt();
+            header.affected_count = line.mid(hdr_matched.length()).toUInt();
+            header.response_type = MqpResponseType::deleted;
         }
     }
-    emit headerReceived(status_code, affected_count);
-    return has_messages ? affected_count : 0;
+    emit headerReceived(header);
+    return has_messages ? header.affected_count : 0;
 }
 
 void MqpClient::readMessage()
@@ -187,7 +189,7 @@ void MailUnit::Gui::sendMqpRequestAsync(const ServerConfig & _server, const QStr
     client->moveToThread(thread);
     if(nullptr != _notifier)
     {
-        QObject::connect(client, SIGNAL(headerReceived(quint32,quint32)), _notifier, SIGNAL(headerReceived(quint32,quint32)));
+        QObject::connect(client, SIGNAL(headerReceived(MqpResponseHeader)), _notifier, SIGNAL(headerReceived(MqpResponseHeader)));
         QObject::connect(client, SIGNAL(messageReceived(Message)), _notifier, SIGNAL(messageReceived(Message)));
         QObject::connect(client, SIGNAL(finished()), _notifier, SIGNAL(finished()));
     }
