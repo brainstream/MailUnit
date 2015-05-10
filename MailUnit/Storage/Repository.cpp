@@ -114,7 +114,12 @@ void EdsToSqlMapper::mapToSqlWhereClause(const Edsl::ConditionSequence & _sequen
 
 void EdsToSqlMapper::operator ()(const Edsl::BinaryCondition & _bin_condition)
 {
-    if(boost::algorithm::iequals("FROM", _bin_condition.identifier))
+    if(boost::algorithm::iequals("ID", _bin_condition.identifier))
+    {
+        mr_sql << TableMessage::table_name << '.' << TableMessage::column_id <<
+            _bin_condition.operator_ << _bin_condition.value;
+    }
+    else if(boost::algorithm::iequals("FROM", _bin_condition.identifier))
     {
         addMailboxCause(_bin_condition.operator_, Email::AddressType::from,
             boost::get<std::string>(_bin_condition.value));
