@@ -29,9 +29,9 @@
 						<strong>Warning</strong>: it is early unstable development version!</div>
 					<h3 id="overview">Overview</h3>
 					<p>MailUnit is a combination of two servers.
-						<br>SMTP server provides SMTP interface for simulation of delivering emails. All received messages are stored in database and
+						<br>SMTP server provides SMTP interface for simulation of delivering emails. All received messages are stored in a database and
 						can be analyzed later.
-						<br>MQP server allows access to stored messages received by SMTP server.
+						<br>MQP server enables access to stored messages received by SMTP server.
 						<br>Diagram below demonstrates the main idea of communication with those servers.</p>
 					<img src="Images/principle.png">
 					<h3 id="smtp">SMTP server</h3>
@@ -39,7 +39,7 @@
 					<p>Additionally the STARTTLS extension is supported. It can be turned on via command line options or using the configuration
 						file.</p>
 					<h3 id="mqp">MQP server</h3>
-					<p>Message Query Protocol (or MQP) allows to query received by SMTP server messages using simple query language.</p>
+					<p>Message Query Protocol (or MQP) enables querying for received by SMTP server messages using a simple query language.</p>
 					<p>After you have connected to the MQP server you can send three kinds of request:</p>
 					<ul class="task-list">
 						<li>
@@ -71,6 +71,20 @@
 							</tr>
 						</thead>
 						<tbody>
+                            <tr>
+								<td>
+									<code>id</code>
+								</td>
+								<td>
+									<code>=</code>
+									<code>&lt;&gt;</code>
+                                    <code>&gt;</code>
+                                    <code>&lt</code>
+								</td>
+								<td>
+									<code>get id = 42;</code>
+								</td>
+							</tr>
 							<tr>
 								<td>
 									<code>from</code>
