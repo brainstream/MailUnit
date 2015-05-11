@@ -173,7 +173,7 @@ boost::optional<Email::AddressType> Email::findAddress(const std::string & _addr
         return AddressType::cc;
     if(std::find_if(m_bcc_addresses.begin(), m_bcc_addresses.end(), predicate) != m_bcc_addresses.end())
         return AddressType::bcc;
-    return nullptr;
+    return boost::optional<Email::AddressType>();
 }
 
 bool Email::containsAddress(const std::string & _address, AddressType _type) const

@@ -29,30 +29,30 @@ namespace fs = boost::filesystem;
 MU_NATIVE_FILE File::openNativeFile(const fs::path & _filepath, uint16_t _nf_flags)
 {
 #ifdef _WIN32
-    int desired_access = 0;
+    unsigned long desired_access = 0;
     int share_nf_flags = FILE_SHARE_READ;
     int create_flag = OPEN_EXISTING;
-    if(_nf_flags & nf_open_read && _nf_flags & nf_open_write)
+    if(_nf_flags & file_open_read && _nf_flags & file_open_write)
         desired_access = GENERIC_ALL;
-    else if(_nf_flags & nf_open_read)
+    else if(_nf_flags & file_open_read)
         desired_access = GENERIC_READ;
-    else if(_nf_flags & nf_open_write)
+    else if(_nf_flags & file_open_write)
         desired_access = GENERIC_WRITE;
     else
         return INVALID_HANDLE_VALUE;
-    if(_nf_flags & nf_open_write)
+    if(_nf_flags & file_open_write)
     {
-        if(_nf_flags & nf_open_create && _nf_flags & nf_open_append)
+        if(_nf_flags & file_open_create && _nf_flags & file_open_append)
             create_flag = CREATE_NEW;
-        else if(_nf_flags & nf_open_create)
+        else if(_nf_flags & file_open_create)
             create_flag = CREATE_ALWAYS;
-        else if(_nf_flags & nf_open_append)
+        else if(_nf_flags & file_open_append)
             create_flag = OPEN_EXISTING;
         else
             create_flag = TRUNCATE_EXISTING;
     }
     int file_attrs = FILE_ATTRIBUTE_NORMAL;
-    if(desired_access == GENERIC_READ)
+    if(GENERIC_READ == desired_access)
         file_attrs |= FILE_ATTRIBUTE_READONLY;
     return CreateFileW(_filepath.c_str(), desired_access, share_nf_flags, NULL, create_flag, file_attrs, NULL);
 #else
@@ -92,7 +92,7 @@ void MailUnit::OS::closeNativeFile(MU_NATIVE_FILE _native_file)
 boost::filesystem::path MailUnit::OS::systemConfigDirectory()
 {
 #ifdef _WIN32
-    const wchar_t * dirpath = _wgetenv("ALLUSERSPROFILE");
+    const wchar_t * dirpath = _wgetenv(L"ALLUSERSPROFILE");
     if(nullptr == dirpath) return fs::path();
     return fs::path(dirpath) / BOOST_PP_STRINGIZE(_MU_CONFIG_DIRECTORY);
 #elif __APPLE__
@@ -105,7 +105,7 @@ boost::filesystem::path MailUnit::OS::systemConfigDirectory()
 boost::filesystem::path MailUnit::OS::userConfigDirectory()
 {
 #ifdef _WIN32
-    const wchar_t * home = _wgetenv("APPDATA");
+    const wchar_t * home = _wgetenv(L"APPDATA");
     if(nullptr == home) return fs::path();
     return fs::path(home) / BOOST_PP_STRINGIZE(_MU_CONFIG_DIRECTORY);
 #elif __APPLE__
@@ -128,7 +128,7 @@ boost::filesystem::path MailUnit::OS::toAbsolutePath(const boost::filesystem::pa
     {
 
 #ifdef _WIN32
-        fs::path home = fs::path(_wgetenv("HOMEDRIVE")) / _wgetenv("HOMEPATH");
+        fs::path home = fs::path(_wgetenv(L"HOMEDRIVE")) / _wgetenv(L"HOMEPATH");
 #else
         fs::path home = getenv("HOME");
 #endif

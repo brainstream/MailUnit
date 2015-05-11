@@ -94,10 +94,10 @@ void MailUnit::loadConfig(int _argc, const char ** _argv, const boost::filesyste
     std::shared_ptr<po::options_description> full_description(new po::options_description);
     po::options_description cmd_line_only_description("Command line only options");
     po::options_description common_description("Options");
-    PathString log_file;
-    PathString data_dir;
-    PathString smtp_cert_path;
-    PathString smtp_pkey_path;
+    std::string log_file;
+    std::string data_dir;
+    std::string smtp_cert_path;
+    std::string smtp_pkey_path;
     const boost::uintmax_t defult_max_filesize = Logger::defult_max_filesize;
     cmd_line_only_description.add_options()
         (LOPT_HELP "," SOPT_HELP, "Print this help.");
@@ -152,17 +152,17 @@ void MailUnit::loadConfig(int _argc, const char ** _argv, const boost::filesyste
     }
     config->use_smtp_starttls = var_map.count(LOPT_SMTP_STARTTLS) > 0;
     if(!smtp_cert_path.empty())
-        config->smtp_cert_path = toAbsolutePath(smtp_cert_path, _app_dir);
+        config->smtp_cert_path = toAbsolutePath(utf8ToPathString(smtp_cert_path), _app_dir);
     if(!smtp_pkey_path.empty())
-        config->smtp_privet_key_path = toAbsolutePath(smtp_pkey_path, _app_dir);
+        config->smtp_privet_key_path = toAbsolutePath(utf8ToPathString(smtp_pkey_path), _app_dir);
     if(config->use_smtp_starttls && (config->smtp_cert_path.empty() || config->smtp_privet_key_path.empty()))
     {
         throw ConfigLoadingException("The certificate and private key are required to use SSL/TLS", full_description);
     }
     config->use_stdlog = var_map.count(LOPT_STDLOG) > 0;
     if(!log_file.empty())
-        config->log_filepath = toAbsolutePath(log_file, _app_dir);
+        config->log_filepath = toAbsolutePath(utf8ToPathString(log_file), _app_dir);
     if(!data_dir.empty())
-        config->data_dirpath = toAbsolutePath(data_dir, _app_dir);
+        config->data_dirpath = toAbsolutePath(utf8ToPathString(data_dir), _app_dir);
     _config_loaded_callback(config);
 }

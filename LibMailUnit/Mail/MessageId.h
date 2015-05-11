@@ -72,6 +72,6 @@ MU_EXPORT const char * MU_CALL muMessageIdLeft(MU_MSGID _msg_id);
  * @sa muMessageIdString
  * @sa muMessageIdLeft
  */
-MU_EXPORT const char * muMessageIdRight(MU_MSGID _msg_id);
+MU_EXPORT const char * MU_CALL muMessageIdRight(MU_MSGID _msg_id);
 
 #endif /* __LIBMU_MAIL_MESSAGEID_H__ */

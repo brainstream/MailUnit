@@ -38,9 +38,8 @@
 #   if (__GNUC__ < 4) || (__GNUC__ == 4 && __GNUC_MINOR__ < 9)
 #       error g++ 4.9 or greater is required
 #   endif
-#endif
-#ifdef __MINGW32__
-#   if (__MINGW32_MAJOR_VERSION < 4) || (__MINGW32_MAJOR_VERSION == 4 && __MINGW32_MAJOR_VERSION < 9)
+#elif __MINGW32__
+#   if (__MINGW32_MAJOR_VERSION < 4) || (__MINGW32_MAJOR_VERSION == 4 && __MINGW32_MINOR_VERSION < 9)
 #       error MinGW (or MinGW-w64) 4.9 or greater is required
 #   endif
 #endif
