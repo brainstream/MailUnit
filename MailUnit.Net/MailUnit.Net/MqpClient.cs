@@ -92,12 +92,10 @@ namespace MailUnit.Net {
             }
             if(trimmedLine.StartsWith(matchedPrefix)) {
                 action = MqpResponseAction.Matched;
-                UInt32.TryParse(trimmedLine.Substring(matchedPrefix.Length), out affectedCount);
-                return true;
+                return UInt32.TryParse(trimmedLine.Substring(matchedPrefix.Length), out affectedCount);
             } else if(trimmedLine.StartsWith(deletedPrefix)) {
                 action = MqpResponseAction.Deleted;
-                UInt32.TryParse(trimmedLine.Substring(deletedPrefix.Length), out affectedCount);
-                return true;
+                return UInt32.TryParse(trimmedLine.Substring(deletedPrefix.Length), out affectedCount);
             } else {
                 return false;
             }
@@ -120,7 +118,6 @@ namespace MailUnit.Net {
         List<string> to = new List<string>();
         List<string> cc = new List<string>();
         List<string> bcc = new List<string>();
-        
         
         public bool ParseHeaderLine(string line) {
             string trimmedLine = line.Trim();
