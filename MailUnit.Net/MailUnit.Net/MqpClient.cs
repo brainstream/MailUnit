@@ -130,8 +130,8 @@ namespace MailUnit.Net {
                 return UInt32.TryParse(trimmedLine.Substring(idPrefix.Length), out id);
             } else if(trimmedLine.StartsWith(sizePrefix)) {
                 return UInt32.TryParse(trimmedLine.Substring(sizePrefix.Length), out size);
-            } else if(trimmedLine.StartsWith(subject)) {
-                subject = trimmedLine.Substring(sizePrefix.Length);
+            } else if(trimmedLine.StartsWith(subjectPrefix)) {
+                subject = trimmedLine.Substring(subjectPrefix.Length);
             } else if(trimmedLine.StartsWith(fromPrefix)) {
                 from.Add(trimmedLine.Substring(fromPrefix.Length));
             } else if(trimmedLine.StartsWith(toPrefix)) {
@@ -229,12 +229,13 @@ namespace MailUnit.Net {
                     }
                 }));
             }
+            task.Start();
             return task;
         }
     }
     
     public static class MqpClient {
-        public static Task<MqpResponse> SendQueryAsync(string hostname, int port, string query) {
+        public static Task<MqpResponse> SendQueryAsync(string hostname, ushort port, string query) {
             return Task<MqpResponse>.Run(() => {
                 var client = new TcpClient();
                 NetworkStream stream = null;

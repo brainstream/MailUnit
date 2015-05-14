@@ -156,7 +156,8 @@ void MqpSession::processQuery()
         {
             std::shared_ptr<MqpSession> self(shared_from_this());
             std::stringstream message;
-            message << MQP_DELETED << drop->count << MQP_ENDHDR;
+            message << MQP_STATUS << StatusCode::Success << MQP_ENDLINE <<
+                       MQP_DELETED << drop->count << MQP_ENDHDR;
             write(message.str(), [self]() {
                 self->read();
             });

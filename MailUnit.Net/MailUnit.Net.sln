@@ -3,19 +3,25 @@ Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MailUnit.Net", "MailUnit.Net\MailUnit.Net.csproj", "{9601AB88-AEA7-4C5A-97FF-EBF28F027524}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestMqpClient", "TestMqpClient\TestMqpClient.csproj", "{2F0AC905-3350-4AF8-BA7C-834F70691122}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{2F0AC905-3350-4AF8-BA7C-834F70691122}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2F0AC905-3350-4AF8-BA7C-834F70691122}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2F0AC905-3350-4AF8-BA7C-834F70691122}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2F0AC905-3350-4AF8-BA7C-834F70691122}.Release|Any CPU.Build.0 = Release|Any CPU
 		{9601AB88-AEA7-4C5A-97FF-EBF28F027524}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{9601AB88-AEA7-4C5A-97FF-EBF28F027524}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9601AB88-AEA7-4C5A-97FF-EBF28F027524}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9601AB88-AEA7-4C5A-97FF-EBF28F027524}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(MonoDevelopProperties) = preSolution
-		StartupItem = MailUnit.Net\MailUnit.Net.csproj
+		StartupItem = TestMqpClient\TestMqpClient.csproj
 		Policies = $0
 		$0.DotNetNamingPolicy = $1
 		$1.DirectoryNamespaceAssociation = None
