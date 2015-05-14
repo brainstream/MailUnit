@@ -188,7 +188,7 @@ namespace MailUnit.Net {
         readonly MqpResponseHeader header;
         readonly NetworkStream stream;
         long isCompleted;
-        long recievedMessageCount;
+        long receivedMessageCount;
         
         public event EventHandler Completed;
         
@@ -221,7 +221,7 @@ namespace MailUnit.Net {
                 }
                 return new MqpResponseMessage(messageHeader, body);
             });
-            if(Interlocked.Increment(ref recievedMessageCount) == header.AffectedCount) {
+            if(Interlocked.Increment(ref receivedMessageCount) == header.AffectedCount) {
                 Interlocked.Exchange(ref isCompleted, 1);
                 task.ContinueWith(completedTask => new Task(() => {
                     if(Completed != null) {
