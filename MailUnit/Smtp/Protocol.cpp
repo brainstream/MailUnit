@@ -502,13 +502,15 @@ bool DataAction::tryWriteTail(const EventBase & _event, DataState & _state)
     char * tail = new char[tail_length];
     strncpy(tail, _state.tail(), left_length);
     strncpy(&tail[left_length], data, right_length);
-    boost::iterator_range<const char *> tail_range(tail, tail + tail_length);
-    boost::iterator_range<const char *> end_of_data_range = boost::find_first(tail_range, END_OF_DATA);
     bool result = false;
-    if(end_of_data_range)
+    const char * end_of_data = std::strstr(tail, END_OF_DATA);
+    if(end_of_data)
     {
-        std::size_t length = (end_of_data_range.begin() - tail_range.begin()) + s_end_of_data_mark_length;
-        _event.email().data().write(data, length);
+        end_of_data += s_end_of_data_mark_length;
+        const char * begin_data = tail + left_length;
+        std::ptrdiff_t data_length = end_of_data - begin_data;
+        if(data_length > 0)
+            _event.email().data().write(begin_data, data_length);
         result = true;
     }
     delete [] tail;
