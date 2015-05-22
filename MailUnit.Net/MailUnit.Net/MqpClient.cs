@@ -26,10 +26,17 @@ using MailUnit.Net.Private;
 namespace MailUnit.Net {
     namespace Private {
         static class NetworkStreamExt {
+            static System.IO.FileStream file;
+
+            static NetworkStreamExt() {
+                file = new System.IO.FileStream("D:\\temp\\mailunit_raw.txt", System.IO.FileMode.OpenOrCreate | System.IO.FileMode.Truncate);
+            }
+
             public static void ReadMqpHeader(this NetworkStream stream, Action<string> lineHandler) {
                 var lineBuffer = new List<byte>(128);
                 while(true) {
                     byte readedByte = unchecked((byte)stream.ReadByte());
+                    file.WriteByte(readedByte);
                     if(readedByte != '\n') {
                         lineBuffer.Add(readedByte);
                         continue;
@@ -220,11 +227,11 @@ namespace MailUnit.Net {
             });
             if(Interlocked.Increment(ref receivedMessageCount) == header.AffectedCount) {
                 Interlocked.Exchange(ref isCompleted, 1);
-                task.ContinueWith(completedTask => new Task(() => {
+                task.ContinueWith(completedTask => {
                     if(Completed != null) {
                         Completed(this, EventArgs.Empty);
                     }
-                }));
+                });
             }
             task.Start();
             return task;

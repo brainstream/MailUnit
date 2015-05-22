@@ -5,3 +5,4 @@ Doxygen/html/
 CMakeLists.txt.user*
 /.project
 *.autosave
+*.user
