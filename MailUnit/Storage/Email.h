@@ -38,7 +38,7 @@ class RawEmail : private boost::noncopyable
 public:
     explicit RawEmail(const boost::filesystem::path & _data_file_path) :
         m_data_file_path(_data_file_path),
-        m_data_out(_data_file_path.string())
+        m_data_out(_data_file_path.string(), std::ios_base::binary)
     {
     }
 

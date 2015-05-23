@@ -218,7 +218,7 @@ void MqpSession::writeEmailBodies(EmailsHolder _emails)
     std::shared_ptr<EmailSequenceOperation> emails_operation = EmailSequenceOperation::create(_emails,
         [self, total_count](EmailOperation & email_operation) {
             const std::unique_ptr<Email> & email = email_operation.item();
-            std::shared_ptr<std::ifstream> file(new std::ifstream(email->dataFilePath().string()));
+            std::shared_ptr<std::ifstream> file(new std::ifstream(email->dataFilePath().string(), std::ios_base::binary));
             if(!file->is_open())
             {
                 // TODO: error
