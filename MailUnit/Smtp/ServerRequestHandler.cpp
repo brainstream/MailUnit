@@ -16,9 +16,11 @@
  ***********************************************************************************************/
 
 #include <sstream>
+#include <atomic>
 #include <boost/noncopyable.hpp>
 #include <boost/scoped_ptr.hpp>
 #include <boost/asio/ssl.hpp>
+#include <boost/date_time/posix_time/posix_time.hpp>
 #include <MailUnit/Logger.h>
 #include <MailUnit/Server/Tcp/TcpSession.h>
 #include <MailUnit/Smtp/Protocol.h>
@@ -46,11 +48,17 @@ public:
     void requestForExit() override;
 
 private:
+    void startDeadlineTimer();
+    void stopDeadlineTimer();
+
+private:
     static const size_t s_buffer_size = 1024;
     std::shared_ptr<Repository> m_repository_ptr;
     char * mp_buffer;
     Protocol * mp_protocol;
     const Config & mr_config;
+    static const size_t s_deadline_timeout = 30000;
+    std::atomic<boost::asio::deadline_timer *> m_deadline_timer;
 }; // class SmtpSession
 
 } // namespace
@@ -87,6 +95,7 @@ SmtpSession::SmtpSession(TcpSocket _socket, std::shared_ptr<Repository> _reposit
 SmtpSession::~SmtpSession()
 {
     LOG_DEBUG << "SMTP session has closed";
+    stopDeadlineTimer();
     delete [] mp_buffer;
     delete mp_protocol;
 }
@@ -99,11 +108,13 @@ void SmtpSession::start()
 
 void SmtpSession::requestForRead()
 {
+    startDeadlineTimer();
     auto self(shared_from_this());
     readAsync(boost::asio::buffer(mp_buffer, s_buffer_size - 1),
         [self](const boost::system::error_code & ec, std::size_t length)
         {
             if(ec) return; // TODO: log
+            self->stopDeadlineTimer();
             self->mp_buffer[length] = '\0';
             self->mp_protocol->processInput(self->mp_buffer, length);
             // TODO: handle error
@@ -148,4 +159,38 @@ void SmtpSession::requestForSwitchToTls()
 void SmtpSession::requestForExit()
 {
     // Just do nothing
+}
+
+void SmtpSession::startDeadlineTimer()
+{
+    stopDeadlineTimer();
+    boost::asio::deadline_timer * timer = new boost::asio::deadline_timer(tcpSocket().get_io_service(),
+        boost::posix_time::milliseconds(s_deadline_timeout));
+    std::shared_ptr<SmtpSession> self(shared_from_this());
+    m_deadline_timer.exchange(timer);
+    timer->async_wait([self](const boost::system::error_code & error) {
+        if(error)
+        {
+           return;
+           // TODO: error
+           // TODO: handle boost::asio::error::operation_aborted
+        }
+        std::stringstream message;
+        message << Response(ResponseCode::serviceNotAvailable, "Error: timeout exceeded") << MU_SMTP_ENDLINE;
+        self->writeAsync(boost::asio::buffer(message.str()), [self](const boost::system::error_code &, std::size_t) {
+          // TODO: handle error
+          self->tcpSocket().close();
+        });
+        LOG_DEBUG << "SMTP timeout has occurred";
+    });
+}
+
+void SmtpSession::stopDeadlineTimer()
+{
+    boost::asio::deadline_timer * timer = m_deadline_timer.exchange(nullptr);
+    if(nullptr != timer)
+    {
+        timer->cancel();
+        delete timer;
+    }
 }

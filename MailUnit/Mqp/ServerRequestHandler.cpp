@@ -71,7 +71,7 @@ private:
     void writeError(StatusCode _code, const std::exception * _exception);
     void write(const std::string & _data, std::function<void()> _callback);
     void startDeadlineTimer();
-    void stopDedlineTimer();
+    void stopDeadlineTimer();
 
 private:
     std::shared_ptr<Repository> m_repository_ptr;
@@ -108,7 +108,7 @@ MqpSession::MqpSession(TcpSocket _socket, std::shared_ptr<Repository> _repositor
 MqpSession::~MqpSession()
 {
     delete [] mp_buffer;
-    stopDedlineTimer();
+    stopDeadlineTimer();
     LOG_DEBUG << "MQP session has closed";
 }
 
@@ -125,7 +125,7 @@ void MqpSession::read()
         [self](const boost::system::error_code & ec, std::size_t length)
         {
             if(ec) return; // TODO: log
-            self->stopDedlineTimer();
+            self->stopDeadlineTimer();
             self->mp_buffer[length] = '\0';
             size_t end_pos = self->findEndOfQuery(self->mp_buffer, length);
             if(end_pos == length)
@@ -309,7 +309,7 @@ size_t MqpSession::findEndOfQuery(const char * _query_piece, size_t _length)
 
 void MqpSession::startDeadlineTimer()
 {
-    stopDedlineTimer();
+    stopDeadlineTimer();
     boost::asio::deadline_timer * timer = new boost::asio::deadline_timer(tcpSocket().get_io_service(),
         boost::posix_time::milliseconds(s_deadline_timeout));
     std::shared_ptr<MqpSession> self(shared_from_this());
@@ -330,7 +330,7 @@ void MqpSession::startDeadlineTimer()
     });
 }
 
-void MqpSession::stopDedlineTimer()
+void MqpSession::stopDeadlineTimer()
 {
     boost::asio::deadline_timer * timer = m_deadline_timer.exchange(nullptr);
     if(nullptr != timer)
