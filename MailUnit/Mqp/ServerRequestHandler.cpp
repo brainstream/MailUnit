@@ -18,7 +18,9 @@
 #include <memory>
 #include <sstream>
 #include <functional>
+#include <atomic>
 #include <boost/noncopyable.hpp>
+#include <boost/date_time/posix_time/posix_time.hpp>
 #include <MailUnit/Logger.h>
 #include <MailUnit/Server/Tcp/TcpSession.h>
 #include <MailUnit/IO/AsyncLambdaWriter.h>
@@ -68,9 +70,13 @@ private:
     void writeEmailBodies(EmailsHolder _emails);
     void writeError(StatusCode _code, const std::exception * _exception);
     void write(const std::string & _data, std::function<void()> _callback);
+    void startDeadlineTimer();
+    void stopDedlineTimer();
 
 private:
     std::shared_ptr<Repository> m_repository_ptr;
+    static const size_t s_deadline_timeout = 30000;
+    std::atomic<boost::asio::deadline_timer *> m_deadline_timer;
     static const size_t s_buffer_size = 256;
     char * mp_buffer;
     bool m_position_in_quoted_text;
@@ -101,8 +107,9 @@ MqpSession::MqpSession(TcpSocket _socket, std::shared_ptr<Repository> _repositor
 
 MqpSession::~MqpSession()
 {
-    LOG_DEBUG << "MQP session has closed";
     delete [] mp_buffer;
+    stopDedlineTimer();
+    LOG_DEBUG << "MQP session has closed";
 }
 
 void MqpSession::start()
@@ -112,11 +119,13 @@ void MqpSession::start()
 
 void MqpSession::read()
 {
+    startDeadlineTimer();
     std::shared_ptr<MqpSession> self(shared_from_this());
     readAsync(boost::asio::buffer(mp_buffer, s_buffer_size),
         [self](const boost::system::error_code & ec, std::size_t length)
         {
             if(ec) return; // TODO: log
+            self->stopDedlineTimer();
             self->mp_buffer[length] = '\0';
             size_t end_pos = self->findEndOfQuery(self->mp_buffer, length);
             if(end_pos == length)
@@ -296,4 +305,34 @@ size_t MqpSession::findEndOfQuery(const char * _query_piece, size_t _length)
         }
     }
     return _length;
+}
+
+void MqpSession::startDeadlineTimer()
+{
+    stopDedlineTimer();
+    boost::asio::deadline_timer * timer = new boost::asio::deadline_timer(tcpSocket().get_io_service(),
+        boost::posix_time::milliseconds(s_deadline_timeout));
+    std::shared_ptr<MqpSession> self = shared_from_this();
+    timer->async_wait([self](const boost::system::error_code & _error) {
+       if(_error)
+       {
+           // TODO: error
+       }
+       std::stringstream message;
+       message << MQP_STATUS << StatusCode::Timeout << MQP_ENDHDR;
+       self->write(message.str(), [self] {
+           self->tcpSocket().close();
+       });
+       LOG_DEBUG << "MQP timeout has occurred";
+    });
+}
+
+void MqpSession::stopDedlineTimer()
+{
+    boost::asio::deadline_timer * timer = m_deadline_timer.exchange(nullptr);
+    if(nullptr != timer)
+    {
+        timer->cancel();
+        delete timer;
+    }
 }
