@@ -312,11 +312,14 @@ void MqpSession::startDeadlineTimer()
     stopDedlineTimer();
     boost::asio::deadline_timer * timer = new boost::asio::deadline_timer(tcpSocket().get_io_service(),
         boost::posix_time::milliseconds(s_deadline_timeout));
-    std::shared_ptr<MqpSession> self = shared_from_this();
-    timer->async_wait([self](const boost::system::error_code & _error) {
-       if(_error)
+    std::shared_ptr<MqpSession> self(shared_from_this());
+    m_deadline_timer.exchange(timer);
+    timer->async_wait([self](const boost::system::error_code & error) {
+       if(error)
        {
+           return;
            // TODO: error
+           // TODO: handle boost::asio::error::operation_aborted
        }
        std::stringstream message;
        message << MQP_STATUS << StatusCode::Timeout << MQP_ENDHDR;
