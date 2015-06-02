@@ -84,7 +84,8 @@ SmtpSession::SmtpSession(TcpSocket _socket, std::shared_ptr<Repository> _reposit
     TcpSession(std::move(_socket)),
     m_repository_ptr(_repository),
     mp_buffer(new char[s_buffer_size]),
-    mr_config(_config)
+    mr_config(_config),
+    m_deadline_timer(nullptr)
 {
     LOG_DEBUG << "New SMTP session has started";
     mp_protocol = new Protocol(*m_repository_ptr, *this);

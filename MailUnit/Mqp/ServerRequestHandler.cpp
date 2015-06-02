@@ -99,6 +99,7 @@ bool ServerRequestHandler::handleError(const boost::system::error_code & _err_co
 MqpSession::MqpSession(TcpSocket _socket, std::shared_ptr<Repository> _repository) :
     TcpSession(std::move(_socket)),
     m_repository_ptr(_repository),
+    m_deadline_timer(nullptr),
     mp_buffer(new char[s_buffer_size]),
     m_position_in_quoted_text(false)
 {
