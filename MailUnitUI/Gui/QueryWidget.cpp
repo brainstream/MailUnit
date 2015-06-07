@@ -23,9 +23,13 @@ QueryWidget::QueryWidget(const ServerConfig & _server, QWidget * _parent /*= nul
     QWidget(_parent),
     m_server(_server),
     mp_notifier(nullptr),
-    mp_state(nullptr)
+    mp_state(nullptr),
+    mp_messages(new QList<const Message *>)
 {
     setupUi(this);
+    mp_listview_result = new MessageListView(*mp_messages, this);
+    mp_layout_result->insertWidget(0, mp_listview_result);
+
     mp_label_server->setText(QString("%1 [%2:%3]")
         .arg(_server.name())
         .arg(_server.host())
@@ -36,18 +40,24 @@ QueryWidget::QueryWidget(const ServerConfig & _server, QWidget * _parent /*= nul
     connect(mp_notifier, SIGNAL(headerReceived(MqpResponseHeader)), this, SLOT(onHeaderReceived(MqpResponseHeader)));
     connect(mp_notifier, SIGNAL(messageReceived(Message)), this, SLOT(onMessageReceived(Message)));
     connect(mp_notifier, SIGNAL(finished()), this, SLOT(onRequestFinished()));
+    connect(mp_listview_result, SIGNAL(messageSelected(const Message*)), this, SLOT(onMessageSelected(const Message*)));
 }
 
 QueryWidget::~QueryWidget()
 {
     delete mp_state;
+    for(const Message * msg : *mp_messages)
+        delete msg;
+    delete mp_messages;
 }
 
 void QueryWidget::execute()
 {
     if(mp_state) return;
     mp_state = new LoadingState({ });
-    mp_edit_result->clear();
+    mp_messages->clear();
+    mp_listview_result->sync();
+    mp_edit_msg_body->clear();
     mp_progress_bar->setRange(0, 0);
     mp_label_status->setVisible(false);
     mp_progress_bar->setVisible(true);
@@ -66,27 +76,8 @@ void QueryWidget::onMessageReceived(const Message & _message)
 {
     ++mp_state->loaded_count;
     mp_progress_bar->setValue(static_cast<int>(mp_state->loaded_count));
-    mp_edit_result->appendPlainText(QString("ID: %1").arg(_message.id));
-    for(const QString & from : _message.from)
-    {
-        mp_edit_result->appendPlainText(QString("From: ") + from);
-    }
-    for(const QString & to : _message.to)
-    {
-        mp_edit_result->appendPlainText(QString("To: ") + to);
-    }
-    for(const QString & cc : _message.cc)
-    {
-        mp_edit_result->appendPlainText(QString("CC: ") + cc);
-    }
-    for(const QString & bcc : _message.bcc)
-    {
-        mp_edit_result->appendPlainText(QString("BCC: ") + bcc);
-    }
-    mp_edit_result->appendPlainText(QString("Subject: ") +_message.subject);
-    mp_edit_result->appendPlainText("_____\n");
-    mp_edit_result->appendPlainText(_message.body);
-    mp_edit_result->appendPlainText("____________________________________\n\n");
+    mp_messages->append(new Message(_message));
+    mp_listview_result->sync();
 }
 
 void QueryWidget::onRequestFinished()
@@ -109,4 +100,9 @@ void QueryWidget::onRequestFinished()
     mp_state = nullptr;
 }
 
-
+void QueryWidget::onMessageSelected(const Message * _message)
+{
+    mp_edit_msg_body->clear();
+    if(nullptr != _message)
+        mp_edit_msg_body->setPlainText(_message->body);
+}

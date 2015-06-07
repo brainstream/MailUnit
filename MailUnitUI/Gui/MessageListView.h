@@ -15,50 +15,30 @@
  *                                                                                             *
  ***********************************************************************************************/
 
-#ifndef __MUGUI_GUI_QUERYWIDGET_H__
-#define __MUGUI_GUI_QUERYWIDGET_H__
-
-#include <QWidget>
-#include <ui_QueryWidget.h>
-#include <MailUnitUI/MqpClient.h>
-#include <MailUnitUI/Gui/MessageListView.h>
+#include <QList>
+#include <QListView>
+#include <MailUnitUI/Message.h>
 
 namespace MailUnit {
 namespace Gui {
 
-class QueryWidget : public QWidget, private Ui::QueryWidget
+class MessageListView : public QListView
 {
     Q_OBJECT
 
-private:
-    struct LoadingState
-    {
-        MqpResponseHeader header;
-        quint32 loaded_count;
-    }; // struct LoadingState
-
 public:
-    explicit QueryWidget(const ServerConfig & _server, QWidget * _parent = nullptr);
-    ~QueryWidget() override;
+    explicit MessageListView(const QList<const Message *> & _messages, QWidget * _parent = nullptr);
+    void sync();
 
-public slots:
-    void execute();
+protected slots:
+    void currentChanged(const QModelIndex & _current, const QModelIndex & _previous) override;
 
-private slots:
-    void onHeaderReceived(const MqpResponseHeader & _header);
-    void onMessageReceived(const Message & _message);
-    void onRequestFinished();
-    void onMessageSelected(const Message * _message);
+signals:
+    void messageSelected(const Message * _message);
 
 private:
-    ServerConfig m_server;
-    MqpClientNotifier * mp_notifier;
-    LoadingState * mp_state;
-    QList<const Message *> * mp_messages;
-    MessageListView * mp_listview_result;
-};
+    const QList<const Message *> & mr_messages;
+}; // class MessageListView
 
 } // namespace Gui
 } // namespace MailUnit
-
-#endif // __MUGUI_GUI_QUERYWIDGET_H__

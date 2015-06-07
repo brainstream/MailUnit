@@ -212,6 +212,7 @@ set(SRC_GUI_MOC
     MailUnitUI/Gui/ServerDialog.h
     MailUnitUI/Gui/AboutDialog.h
     MailUnitUI/Gui/QueryWidget.h
+    MailUnitUI/Gui/MessageListView.h
 )
 
 set(SRC_GUI_UI
@@ -241,6 +242,7 @@ set(SRC_GUI
     MailUnitUI/MqpClient.cpp
     MailUnitUI/Gui/MainWindow.cpp
     MailUnitUI/Gui/QueryWidget.cpp
+    MailUnitUI/Gui/MessageListView.cpp
 )
 
 set(SQLITE_SRC
