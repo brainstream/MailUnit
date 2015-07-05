@@ -98,10 +98,7 @@ void MessageListViewModel::sync()
 {
     int old_row_count = m_row_count;
     m_row_count = mr_messages.length();
-    if(old_row_count >= m_row_count)
-        return;
-    beginInsertRows(QModelIndex(), old_row_count, m_row_count);
-    endInsertRows();
+    emit dataChanged(createIndex(old_row_count, 0), createIndex(m_row_count, 0));
 }
 
 MessageListView::MessageListView(const QList<const Message *> & _messages, QWidget * _parent /*= nullptr*/) :

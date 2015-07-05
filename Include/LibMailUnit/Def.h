@@ -15,11 +15,6 @@
  *                                                                                             *
  ***********************************************************************************************/
 
-/**
- * @file
- * @brief Contains auxiliary definitions.
- */
-
 #ifndef __LIBMU_DEF_H__
 #define __LIBMU_DEF_H__
 
@@ -28,22 +23,6 @@
 /**
  * @cond HIDDEN
  */
-
-#ifdef __APPLE__
-#   error OX X is not supported yet
-#endif
-
-
-#ifdef __GNUC__
-#   if (__GNUC__ < 4) || (__GNUC__ == 4 && __GNUC_MINOR__ < 9)
-#       error g++ 4.9 or greater is required
-#   endif
-#elif __MINGW32__
-#   if (__MINGW32_MAJOR_VERSION < 4) || (__MINGW32_MAJOR_VERSION == 4 && __MINGW32_MINOR_VERSION < 9)
-#       error MinGW (or MinGW-w64) 4.9 or greater is required
-#   endif
-#endif
-
 
 #if defined(_WIN32)
 #   define MU_CALL __stdcall
@@ -56,7 +35,6 @@
 #elif defined(__x86_64__) || defined(_M_X64)
 #   define MU_CALL
 #endif
-
 
 #ifdef _WIN32
 #   include <windows.h>
@@ -96,8 +74,26 @@
  */
 typedef enum
 {
-    mfalse = 0, /**< The @a true value */
-    mtrue  = 1  /**< The @a false value */
+    mfalse = 0, /**< The @a false value */
+    mtrue  = 1  /**< The @a true value */
 } MBool;
+
+/**
+ * @brief Type of object to handle and manipulate a memory.
+ * @sa muFree
+*/
+typedef struct MHandle * MU_HANDLE;
+
+#define MU_DECLARE_HANDEL(type) typedef MU_HANDLE type
+
+/**
+ * @brief Invalid handle value.
+ */
+#define MU_INVALID_HANDLE (MU_HANDLE)-1
+
+/**
+ * @brief Releases an allocated memory.
+ */
+MU_EXPORT void MU_CALL muFree(MU_HANDLE _handle);
 
 #endif // __LIBMU_DEF_H__

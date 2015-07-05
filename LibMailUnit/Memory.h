@@ -15,32 +15,58 @@
  *                                                                                             *
  ***********************************************************************************************/
 
-/**
- * @file
- * @brief Common functions for memory allocation.
- */
+#ifndef __LIBMUIMPL_MEMORY_H__
+#define __LIBMUIMPL_MEMORY_H__
 
-#ifndef __LIBMU_MAIN_H__
-#define __LIBMU_MAIN_H__
+#include <typeinfo>
+#include <stdexcept>
+#include <functional>
+#include <boost/noncopyable.hpp>
+#include <Include/LibMailUnit/Def.h>
 
-#include "Def.h"
+struct MHandle : private boost::noncopyable
+{
+private:
+    template<typename Type>
+    class Object { virtual ~Object() { } };
 
-/**
- * @brief Type of object to handle and manipulate a memory.
- * @sa muFree
-*/
-typedef void * MU_HANDLE;
+public:
+    template<typename Type>
+    MHandle(Type * _object, bool _destructible) :
+        m_handle_object_type(typeid(MHandle::Object<Type>)),
+        mp_object(_object)
+    {
+        if(_destructible)
+        {
+            m_destruct_funct = [this]() {
+                delete static_cast<Type *>(mp_object);
+            };
+        }
+    }
 
-#define MU_DECLARE_HANDEL(type) typedef MU_HANDLE type
+    ~MHandle()
+    {
+        if(m_destruct_funct)
+        {
+           m_destruct_funct();
+        }
+    }
 
-/**
- * @brief Invalid handle value.
- */
-#define MU_INVALID_HANDLE (MU_HANDLE)-1
+    template<typename Type>
+    Type * pointer() const
+    {
+        const std::type_info & typeinfo = typeid(MHandle::Object<Type>);
+        if(m_handle_object_type != typeinfo)
+        {
+            throw std::runtime_error("Unable to cast a handle pointer to a requested type");
+        }
+        return static_cast<Type *>(mp_object);
+    }
 
-/**
- * @brief Releases an allocated memory.
- */
-MU_EXPORT void MU_CALL muFree(MU_HANDLE _handle);
+private:
+    const std::type_info & m_handle_object_type;
+    void * mp_object;
+    std::function<void()> m_destruct_funct;
+}; // struct MHandle
 
-#endif /* __LIBMU_MAIN_H__ */
+#endif // __LIBMUIMPL_MEMORY_H__

@@ -15,13 +15,11 @@
  *                                                                                             *
  ***********************************************************************************************/
 
-#include <LibMailUnit/InternalMemory.h>
-
-using namespace LibMailUnit;
+#include <LibMailUnit/Memory.h>
 
 void MU_CALL muFree(MU_HANDLE _handle)
 {
     if(MU_INVALID_HANDLE == _handle || nullptr == _handle)
         return;
-    delete static_cast<Handle *>(_handle);
+    delete _handle;
 }

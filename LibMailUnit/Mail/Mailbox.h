@@ -20,6 +20,7 @@
 
 #include <memory>
 #include <string>
+#include <vector>
 
 namespace LibMailUnit {
 namespace Mail {
@@ -50,6 +51,37 @@ private:
     std::string m_name;
     std::string m_address;
 }; // class Mailbox
+
+
+class MailboxGroup final
+{
+public:
+    MailboxGroup(const std::string & _input);
+
+    const std::string & name() const
+    {
+        return m_name;
+    }
+
+    size_t mailboxCount() const
+    {
+        return m_mailboxes.size();
+    }
+
+    bool empty() const
+    {
+        return m_mailboxes.empty();
+    }
+
+    Mailbox & operator [](size_t _index)
+    {
+        return *m_mailboxes[_index].get();
+    }
+
+private:
+    std::string m_name;
+    std::vector<std::shared_ptr<Mailbox>> m_mailboxes;
+}; // class MailboxGroup
 
 } // namespace Mail
 } // namespace LibMailUnit

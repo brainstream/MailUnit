@@ -17,7 +17,7 @@
 
 #include <boost/test/unit_test.hpp>
 #include <MailUnit/OS/FileSystem.h>
-#include <LibMailUnit/Mail/Headers.h>
+#include <Include/LibMailUnit/Mail.h>
 
 using namespace MailUnit::OS;
 namespace fs = boost::filesystem;

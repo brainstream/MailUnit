@@ -41,16 +41,14 @@ set(TARGET_TESTS      mailunit-tests)
 set(TARGET_SQLITE     sqlite)
 set(TARGET_GUI        mailunitui)
 
-if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-    message(STATUS "Application will be built in the Debug configuration")
-    set(CMAKE_VERBOSE_MAKEFILE ON)
-    add_definitions(-DMU_DEBUG)
+if(APPLE)
+    message(FATAL_ERROR "OS X is not supported yet")
 endif()
 
 message(STATUS "Compiler: " ${CMAKE_CXX_COMPILER_ID} " " ${CMAKE_CXX_COMPILER_VERSION})
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "4.9")
-        message("g++ 4.9 or greater is required")
+        message(FATAL_ERROR "g++ 4.9 or greater is required")
     else()
         list(APPEND CMAKE_CXX_FLAGS "-std=c++14 -Wall")
     endif()
@@ -58,6 +56,12 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 #elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
 else()
     message(FATAL_ERROR "Unsupported compiler")
+endif()
+
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    message(STATUS "Application will be built in the Debug configuration")
+    set(CMAKE_VERBOSE_MAKEFILE ON)
+    add_definitions(-DMU_DEBUG)
 endif()
 
 find_package(Threads REQUIRED)
@@ -137,27 +141,22 @@ add_definitions(
 #######################################################
 
 set(SRC_LIB
-    LibMailUnit/MailUnit.h
-    LibMailUnit/Def.h
+    Include/LibMailUnit/Mail.h
+    Include/LibMailUnit/Def.h
     LibMailUnit/Memory.h
-    LibMailUnit/InternalMemory.h
     LibMailUnit/Memory.cpp
     LibMailUnit/Mail/Headers.h
     LibMailUnit/Mail/Headers.cpp
-    LibMailUnit/Mail/MessageId.h
     LibMailUnit/Mail/MessageId.cpp
-    LibMailUnit/Mail/DateTime.h
     LibMailUnit/Mail/DateTime.cpp
-    LibMailUnit/Mail/Address.h
-    LibMailUnit/Mail/Address.cpp
     LibMailUnit/Mail/Mailbox.h
     LibMailUnit/Mail/Mailbox.cpp
-    LibMailUnit/Mail/MailboxGroup.h
-    LibMailUnit/Mail/MailboxGroup.cpp
+    LibMailUnit/Mail/Mime.h
+    LibMailUnit/Mail/Mime.cpp
 )
 
 set(SRC_SERVER_LIB
-    MailUnit/StringEx.h
+    MailUnit/String.h
     MailUnit/DeferredPointer.h
     MailUnit/OS/FileSystem.h
     MailUnit/OS/FileSystem.cpp
@@ -275,6 +274,7 @@ set(OTHER_FILES
     Doxygen/Snippets/RFC/DateSpec.html
     Doxygen/Snippets/RFC/AddressSpec.html
     Doxygen/Snippets/RFC/IdentificationFieldsSpec.html
+    Doxygen/Snippets/RFC/ContentTypeSpec.html
 )
 
 

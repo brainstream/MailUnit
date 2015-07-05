@@ -16,7 +16,7 @@
  ***********************************************************************************************/
 
 #include <boost/test/unit_test.hpp>
-#include <LibMailUnit/InternalMemory.h>
+#include <LibMailUnit/Memory.h>
 
 namespace LibMailUnit {
 namespace Test {
@@ -47,27 +47,15 @@ struct Test
     bool * dtor_flag;
 };
 
-BOOST_AUTO_TEST_CASE(makeObjectHandleTest)
-{
-    bool destructor_called = false;
-    MU_HANDLE handle = LibMailUnit::makeObjectHandle<Test>(10, "test", &destructor_called);
-    Test * test = LibMailUnit::handlePointer<Test>(handle);
-    BOOST_CHECK_EQUAL(10, test->num);
-    BOOST_CHECK_EQUAL(std::string("test"), test->str);
-    BOOST_CHECK(!destructor_called);
-    muFree(handle);
-    BOOST_CHECK(destructor_called);
-}
-
-BOOST_AUTO_TEST_CASE(wrapPointerTest)
+BOOST_AUTO_TEST_CASE(handleTest)
 {
     bool destructor_called = false;
     Test * test = new Test(&destructor_called);
-    MU_HANDLE handle = LibMailUnit::wrapPointer(test, false);
-    BOOST_CHECK_EQUAL(test, LibMailUnit::handlePointer<Test>(handle));
+    MU_HANDLE handle = new MHandle(test, false);
+    BOOST_CHECK_EQUAL(test, handle->pointer<Test>());
     muFree(handle);
     BOOST_CHECK_EQUAL(false, destructor_called);
-    handle = LibMailUnit::wrapPointer(test, true);
+    handle = new MHandle(test, true);
     muFree(handle);
     BOOST_CHECK_EQUAL(true, destructor_called);
 }

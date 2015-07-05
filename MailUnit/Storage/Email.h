@@ -26,8 +26,8 @@
 #include <boost/optional.hpp>
 #include <boost/noncopyable.hpp>
 #include <boost/filesystem.hpp>
-#include <LibMailUnit/Def.h>
-#include <MailUnit/StringEx.h>
+#include <Include/LibMailUnit/Def.h>
+#include <MailUnit/String.h>
 #include <MailUnit/Storage/StorageException.h>
 
 namespace MailUnit {

@@ -15,46 +15,57 @@
  *                                                                                             *
  ***********************************************************************************************/
 
-#ifndef __LIBMU_MAIL_MAILBOXGROUP_H__
-#define __LIBMU_MAIL_MAILBOXGROUP_H__
+#ifndef __LIBMU_MAIL_MIME_H__
+#define __LIBMU_MAIL_MIME_H__
 
+#include <memory>
+#include <istream>
 #include <vector>
-#include <LibMailUnit/Mail/Mailbox.h>
+#include <boost/noncopyable.hpp>
+#include <LibMailUnit/Mail/Headers.h>
 
 namespace LibMailUnit {
 namespace Mail {
 
-class MailboxGroup final
+class MimeMessagePart : private boost::noncopyable
 {
 public:
-    MailboxGroup(const std::string & _input);
+    explicit MimeMessagePart(std::istream & _stream);
+    virtual ~MimeMessagePart();
 
-    const std::string & name() const
+    const HeaderMap & headers() const
     {
-        return m_name;
+        return *m_headers_ptr;
     }
 
-    size_t mailboxCount() const
+    const std::vector<const MimeMessagePart *> parts() const
     {
-        return m_mailboxes.size();
-    }
-
-    bool empty() const
-    {
-        return m_mailboxes.empty();
-    }
-
-    Mailbox & operator [](size_t _index)
-    {
-        return *m_mailboxes[_index].get();
+        return m_parts;
     }
 
 private:
-    std::string m_name;
-    std::vector<std::shared_ptr<Mailbox>> m_mailboxes;
-}; // class MailboxGroup
+    void parse(std::istream & _stream);
+
+private:
+    std::shared_ptr<HeaderMap> m_headers_ptr;
+    std::vector<const MimeMessagePart *> m_parts;
+}; // class MimeMessagePart
+
+class MimeMessage final : public MimeMessagePart
+{
+public:
+    explicit MimeMessage(std::istream & _stream);
+
+    // TODO: subject
+    // TODO: from
+    // TODO: to
+    // TODO: cc
+
+private:
+
+}; // class MimeMessage
 
 } // namespace Mail
 } // namespace LibMailUnit
 
-#endif // __LIBMU_MAIL_MAILBOXGROUP_H__
+#endif // __LIBMU_MAIL_MIME_H__

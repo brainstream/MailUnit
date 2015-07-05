@@ -16,7 +16,7 @@
  ***********************************************************************************************/
 
 #include <boost/test/unit_test.hpp>
-#include <LibMailUnit/Mail/DateTime.h>
+#include <Include/LibMailUnit/Mail.h>
 
 namespace LibMailUnit {
 namespace Test {

@@ -20,7 +20,7 @@
 #include <boost/regex.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/date_time.hpp>
-#include <LibMailUnit/Mail/DateTime.h>
+#include <Include/LibMailUnit/Mail.h>
 
 namespace {
 

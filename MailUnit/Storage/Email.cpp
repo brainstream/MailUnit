@@ -2,7 +2,7 @@
 #include <algorithm>
 #include <MailUnit/OS/FileSystem.h>
 #include <MailUnit/Storage/Email.h>
-#include <LibMailUnit/MailUnit.h>
+#include <Include/LibMailUnit/Mail.h>
 
 using namespace MailUnit::Storage;
 namespace fs = boost::filesystem;

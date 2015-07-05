@@ -16,10 +16,8 @@
  ***********************************************************************************************/
 
 #include <string>
-#include <LibMailUnit/InternalMemory.h>
-#include <LibMailUnit/Mail/MessageId.h>
-
-using namespace LibMailUnit;
+#include <LibMailUnit/Memory.h>
+#include <Include/LibMailUnit/Mail.h>
 
 namespace {
 
@@ -34,15 +32,14 @@ struct MessageId
 
 MU_MSGID MU_CALL muMessageIdParse(const char * _raw_message_id)
 {
-    MU_HANDLE handle = makeObjectHandle<MessageId>();
-    MessageId * message_id = handlePointer<MessageId>(handle);
+    MessageId * message_id = new MessageId();
     message_id->id_string = _raw_message_id;
     size_t at_pos = message_id->id_string.find("@");
     size_t lt_pos = message_id->id_string.find("<");
     size_t gt_pos = message_id->id_string.rfind(">");
     if(std::string::npos == at_pos || std::string::npos == lt_pos || std::string::npos == gt_pos)
     {
-        muFree(handle);
+        delete message_id;
         return MU_INVALID_HANDLE;
     }
     size_t left_pos = lt_pos + 1;
@@ -51,26 +48,26 @@ MU_MSGID MU_CALL muMessageIdParse(const char * _raw_message_id)
     size_t right_len = gt_pos - at_pos - 1;
     message_id->left = message_id->id_string.substr(left_pos, left_len);
     message_id->right = message_id->id_string.substr(right_pos, right_len);
-    return handle;
+    return new MHandle(message_id, true);
 }
 
 const char * MU_CALL muMessageIdString(MU_MSGID _msg_id)
 {
     if(nullptr == _msg_id)
         return nullptr;
-    return handlePointer<MessageId>(_msg_id)->id_string.c_str();
+    return _msg_id->pointer<MessageId>()->id_string.c_str();
 }
 
 const char * MU_CALL muMessageIdLeft(MU_MSGID _msg_id)
 {
     if(nullptr == _msg_id)
         return nullptr;
-    return handlePointer<MessageId>(_msg_id)->left.c_str();
+    return _msg_id->pointer<MessageId>()->left.c_str();
 }
 
 const char * MU_CALL muMessageIdRight(MU_MSGID _msg_id)
 {
     if(nullptr == _msg_id)
         return nullptr;
-    return handlePointer<MessageId>(_msg_id)->right.c_str();
+    return _msg_id->pointer<MessageId>()->right.c_str();
 }

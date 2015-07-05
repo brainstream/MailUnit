@@ -1,0 +1,36 @@
+<P>
+<A HREF="http://tools.ietf.org/html/rfc2045#section-5.1">RFC 2045 5.1</A>:
+<BLOCKQUOTE><PRE>
+content := "Content-Type" ":" type "/" subtype
+           *(";" parameter)
+           ; Matching of media type and subtype
+           ; is ALWAYS case-insensitive.
+type := discrete-type / composite-type
+discrete-type := "text" / "image" / "audio" / "video" /
+                 "application" / extension-token
+composite-type := "message" / "multipart" / extension-token
+extension-token := ietf-token / x-token
+ietf-token := &lt;An extension token defined by a
+               standards-track RFC and registered
+               with IANA.&gt;
+x-token := &lt;The two characters "X-" or "x-" followed, with
+            no intervening white space, by any token>
+subtype := extension-token / iana-token
+iana-token := &lt;A publicly-defined extension token. Tokens
+               of this form must be registered with IANA
+               as specified in RFC 2048.&gt;
+parameter := attribute "=" value
+attribute := token
+             ; Matching of attributes
+             ; is ALWAYS case-insensitive.
+value := token / quoted-string
+token := 1*&lt;any (US-ASCII) CHAR except SPACE, CTLs,
+            or tspecials&gt;
+tspecials :=  "(" / ")" / "&lt;" / "&gt;" / "@" /
+              "," / ";" / ":" / "\" / &lt;"&gt;
+              "/" / "[" / "]" / "?" / "="
+              ; Must be in quoted-string,
+              ; to use within parameter values
+</PRE></BLOCKQUOTE>
+</P>
+

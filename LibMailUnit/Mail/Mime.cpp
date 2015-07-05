@@ -15,17 +15,57 @@
  *                                                                                             *
  ***********************************************************************************************/
 
-/**
- * @file
- * @brief Main include file.
- */
+#include <string>
+#include <sstream>
+#include <boost/iostreams/device/file_descriptor.hpp>
+#include <boost/iostreams/stream.hpp>
+#include <Include/LibMailUnit/Mail.h>
+#include <LibMailUnit/Mail/Mime.h>
+#include <LibMailUnit/Memory.h>
 
-#ifndef __LIBMU_MAILUNIT_H__
-#define __LIBMU_MAILUNIT_H__
+using namespace LibMailUnit::Mail;
 
-#include "Mail/Headers.h"
-#include "Mail/MessageId.h"
-#include "Mail/DateTime.h"
-#include "Mail/Address.h"
+MimeMessagePart::MimeMessagePart(std::istream & _stream)
+{
+    parse(_stream);
+}
 
-#endif /* __LIBMU_MAILUNIT_H__ */
+MimeMessagePart::~MimeMessagePart()
+{
+    for(const MimeMessagePart * part : m_parts)
+        delete part;
+}
+
+void MimeMessagePart::parse(std::istream & _stream)
+{
+    m_headers_ptr = HeaderParser::parse(_stream);
+    Header * content_type_hdr = m_headers_ptr->find(MU_MAILHDR_CONTENTTYPE);
+    if(content_type_hdr)
+    {
+        // TODO: content_type = parseContentType();
+    }
+    else
+    {
+        // TODO: content_type = text/plain
+    }
+    // TODO: parse(_stream, content_type)
+}
+
+MimeMessage::MimeMessage(std::istream & _stream) :
+    MimeMessagePart(_stream)
+{
+    // TODO: subject, to, from, cc = find header
+}
+
+MU_MIME_MESSAGE MU_CALL muMimeMessageParseString(const char * _input)
+{
+    std::stringstream stream(_input);
+    return new MHandle(new MimeMessage(stream), true);
+}
+
+MU_MIME_MESSAGE MU_CALL muMimeMessageParseFile(MU_NATIVE_FILE _input)
+{
+    boost::iostreams::file_descriptor fdesc(_input, boost::iostreams::never_close_handle);
+    boost::iostreams::stream<boost::iostreams::file_descriptor> stream(fdesc);
+    return new MHandle(new MimeMessage(stream), true);
+}
