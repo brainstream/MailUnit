@@ -49,11 +49,9 @@ HeaderParser::HeaderParser(std::istream & _input, HeaderMap & _output) :
 {
 }
 
-std::shared_ptr<HeaderMap> HeaderParser::parse(std::istream & _input)
+void HeaderParser::parse(std::istream & _input, HeaderMap & _output)
 {
-    HeaderMap * map = new HeaderMap();
-    HeaderParser(_input, *map).parse();
-    return std::shared_ptr<HeaderMap>(map);
+    HeaderParser(_input, _output).parse();
 }
 
 void HeaderParser::parse()
@@ -133,9 +131,8 @@ void HeaderParser::cleanUp()
 MU_MAIL_HEADERLIST MU_CALL muMailHeadersParseString(const char * _input)
 {
     std::stringstream stream(_input);
-    std::shared_ptr<HeaderMap> map_sptr = HeaderParser::parse(stream);
-    HeaderMap * map = map_sptr.get();
-    map_sptr.reset();
+    HeaderMap * map = new HeaderMap();
+    HeaderParser::parse(stream, *map);
     return new MHandle(map, true);
 }
 
@@ -143,9 +140,8 @@ MU_MAIL_HEADERLIST MU_CALL muMailHeadersParseFile(MU_NATIVE_FILE _input)
 {
     boost::iostreams::file_descriptor fdesc(_input, boost::iostreams::never_close_handle);
     boost::iostreams::stream<boost::iostreams::file_descriptor> stream(fdesc);
-    std::shared_ptr<HeaderMap> map_sptr = HeaderParser::parse(stream);
-    HeaderMap * map = map_sptr.get();
-    map_sptr.reset();
+    HeaderMap * map = new HeaderMap();
+    HeaderParser::parse(stream, *map);
     return new MHandle(map, true);
 }
 

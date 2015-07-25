@@ -38,7 +38,9 @@ MimeMessagePart::~MimeMessagePart()
 
 void MimeMessagePart::parse(std::istream & _stream)
 {
-    m_headers_ptr = HeaderParser::parse(_stream);
+    HeaderMap * map = new HeaderMap();
+    HeaderParser::parse(_stream, *map);
+    m_headers_ptr.reset(map);
     Header * content_type_hdr = m_headers_ptr->find(MU_MAILHDR_CONTENTTYPE);
     if(content_type_hdr)
     {

@@ -40,7 +40,7 @@ struct Header
 class HeaderMap : public std::vector<Header *>
 {
 public:
-    inline ~HeaderMap();
+    ~HeaderMap();
     Header * find(const std::string & _name) const;
 }; // class HeaderMap
 
@@ -50,7 +50,7 @@ private:
     HeaderParser(std::istream & _input, HeaderMap & _output);
 
 public:
-    static std::shared_ptr<HeaderMap> parse(std::istream & _input);
+    static void parse(std::istream & _input, HeaderMap &_output);
 
 private:
     void parse();
