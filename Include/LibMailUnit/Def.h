@@ -37,6 +37,9 @@
 #endif
 
 #ifdef _WIN32
+#   if !defined(NOMINMAX) && defined(_MU_DISABLE_NOT_STANDARD_CPP_API)
+#       define NOMINMAX
+#   endif
 #   include <windows.h>
 #   ifdef __cplusplus
 #      ifdef _MU_LIB

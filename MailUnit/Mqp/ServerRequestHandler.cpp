@@ -54,7 +54,7 @@ class MqpSession final :
     public std::enable_shared_from_this<MqpSession>,
     public TcpSession
 {
-    typedef typename AsyncSequenceOperation<std::vector<std::unique_ptr<Email>>>::SequenceHolder EmailsHolder;
+    typedef AsyncSequenceOperation<std::vector<std::unique_ptr<Email>>>::SequenceHolder EmailsHolder;
 
 public:
     inline explicit MqpSession(TcpSocket _socket, std::shared_ptr<Repository> _repository);

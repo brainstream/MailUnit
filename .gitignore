@@ -1,5 +1,5 @@
-[Bb]uild
-[Dd]istrib
+[Bb]uild*
+[Dd]istrib*
 Binary
 Doxygen/html/
 CMakeLists.txt.user*

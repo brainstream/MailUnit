@@ -15,9 +15,13 @@
  *                                                                                             *
  ***********************************************************************************************/
 
-#if !defined __cplusplus || __cplusplus < 201300L
-#   error This project requires a C++14 compatible compiler!
-#endif // __cplusplus && __cplusplus >= 201300L
+#ifndef __cplusplus
+#	error The C++ compiler is required!
+#elif defined(_MSC_VER) && (_MSC_VER < 1900)
+#	error Microsoft Visual Studio 2015 or greater is required!
+#elif !defined(_MSC_VER) && __cplusplus < 201300L
+#   error A C++14 compatible compiler is required!
+#endif
 
 #include <thread>
 #include <iostream>
@@ -84,7 +88,7 @@ void start(const std::shared_ptr<Config> _config)
     if(thread_count < MU_MIN_THREAD_COUNT) thread_count = MU_MIN_THREAD_COUNT;
     else if(thread_count > MU_MAX_THREAD_COUNT) thread_count = MU_MAX_THREAD_COUNT;
 
-    std::thread threads[thread_count];
+    std::thread * threads = new std::thread[thread_count];
     for(uint16_t i = 0; i < thread_count; ++i)
     {
         threads[i] = std::thread([&service]() {
@@ -95,6 +99,7 @@ void start(const std::shared_ptr<Config> _config)
     {
         threads[i].join();
     }
+	//delete threads;
 }
 
 } // namespace

@@ -188,7 +188,7 @@ time_t MU_CALL muDateTimeToUnixTime(const MDateTime * _date_time)
     return  duration.total_seconds();
 }
 
-void muUnixTimeToDateTime(time_t _unix_time, MDateTime * _date_time)
+void MU_CALL muUnixTimeToDateTime(time_t _unix_time, MDateTime * _date_time)
 {
     boost::posix_time::ptime ptime(boost::gregorian::date(1970, 1, 1));
     ptime += boost::posix_time::seconds(_unix_time);

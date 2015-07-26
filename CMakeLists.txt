@@ -33,6 +33,7 @@
 cmake_minimum_required(VERSION 3.0)
 
 project(MailUnit)
+cmake_policy(SET CMP0054 OLD)
 set(BINARY_NAME       mailunit)
 set(TARGET_SERVER_LIB mailunit-server-lib)
 set(TARGET_SERVER     mailunit-server)
@@ -47,13 +48,20 @@ endif()
 
 message(STATUS "Compiler: " ${CMAKE_CXX_COMPILER_ID} " " ${CMAKE_CXX_COMPILER_VERSION})
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    set(COMPILER_GNU 1)
     if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "4.9")
         message(FATAL_ERROR "g++ 4.9 or greater is required")
     else()
         list(APPEND CMAKE_CXX_FLAGS "-std=c++14 -Wall")
     endif()
 #elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-#elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
+elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
+    set(COMPILER_MSVC 1)
+    if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "19.0")
+        message(FATAL_ERROR "Microsoft Visual Studio 2015 or greater is required")
+    else()
+        #list(APPEND CMAKE_CXX_FLAGS "-std=c++14 -Wall")
+    endif()
 else()
     message(FATAL_ERROR "Unsupported compiler")
 endif()
@@ -73,10 +81,15 @@ find_package(OpenSSL REQUIRED)
 if(ENABLE_TESTS)
     set(BOOST_TEST unit_test_framework)
 endif(ENABLE_TESTS)
+
 if(WIN32)
-    #set(Boost_USE_STATIC_LIBS ON)
-    set(Boost_USE_STATIC_LIBS OFF)
-    add_definitions(-DBOOST_TEST_DYN_LINK)
+    if(COMPILER_MSVC)
+        set(Boost_USE_STATIC_LIBS ON)
+        add_definitions(-DBOOST_ASIO_DISABLE_BUFFER_DEBUGGING) # TODO: Bug in the boost. Try new version (1.59+)
+    else(COMPILER_MSVC) # TODO: try to build with static boost libraries using MinGW
+        set(Boost_USE_STATIC_LIBS OFF)
+        add_definitions(-DBOOST_TEST_DYN_LINK)
+    endif(COMPILER_MSVC)
 else(WIN32)
     set(Boost_USE_STATIC_LIBS OFF)
     add_definitions(-DBOOST_TEST_DYN_LINK)
@@ -91,6 +104,7 @@ find_package(Boost REQUIRED COMPONENTS
     iostreams
     ${BOOST_TEST}
 )
+link_directories(${Boost_LIBRARY_DIRS})
 ####
 # End the Boost libraries initialization
 ####
@@ -128,6 +142,7 @@ endif(WIN32)
 
 add_definitions(
     -DBOOST_FILESYSTEM_NO_DEPRECATED
+    -D_MU_DISABLE_NOT_STANDARD_CPP_API
     -D_MU_SERVER_BINARY_NAME=${BINARY_NAME}
     -D_MU_GUI_BINARY_NAME=${TARGET_GUI}
     -D_MU_CONFIG_DIRECTORY=${BINARY_NAME}
@@ -431,6 +446,7 @@ if(ENABLE_TESTS)
         ${Boost_LIBRARIES}
         ${TARGET_LIB}
         ${TARGET_SERVER_LIB}
+        ${WINSOCKET_LIBS}
     )
 endif(ENABLE_TESTS)
 
