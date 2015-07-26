@@ -169,13 +169,14 @@ void SmtpSession::startDeadlineTimer()
         boost::posix_time::milliseconds(s_deadline_timeout));
     std::shared_ptr<SmtpSession> self(shared_from_this());
     m_deadline_timer.exchange(timer);
-    timer->async_wait([self](const boost::system::error_code & error) {
+    timer->async_wait([self, timer](const boost::system::error_code & error) {
         if(error)
         {
            return;
            // TODO: error
            // TODO: handle boost::asio::error::operation_aborted
         }
+        delete timer;
         std::stringstream message;
         message << Response(ResponseCode::serviceNotAvailable, "Error: timeout exceeded") << MU_SMTP_ENDLINE;
         self->writeAsync(boost::asio::buffer(message.str()), [self](const boost::system::error_code &, std::size_t) {

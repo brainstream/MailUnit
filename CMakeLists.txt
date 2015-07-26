@@ -33,7 +33,12 @@
 cmake_minimum_required(VERSION 3.0)
 
 project(MailUnit)
-cmake_policy(SET CMP0054 OLD)
+
+if(POLICY CMP0054)
+    cmake_policy(SET CMP0054 OLD)
+endif()
+
+
 set(BINARY_NAME       mailunit)
 set(TARGET_SERVER_LIB mailunit-server-lib)
 set(TARGET_SERVER     mailunit-server)
