@@ -95,11 +95,16 @@ void start(const std::shared_ptr<Config> _config)
             service.run();
         });
     }
+    asio::signal_set sigs(service, SIGINT, SIGTERM);
+    sigs.async_wait([&service](const boost::system::error_code &, int) {
+        LOG_INFO << "Stopping application...";
+        service.stop();
+    });
     for(uint16_t i = 0; i < thread_count; ++i)
     {
         threads[i].join();
     }
-	//delete threads;
+    delete [] threads;
 }
 
 } // namespace
