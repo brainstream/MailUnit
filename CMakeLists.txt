@@ -167,6 +167,8 @@ set(SRC_LIB
     LibMailUnit/Memory.cpp
     LibMailUnit/Mail/Headers.h
     LibMailUnit/Mail/Headers.cpp
+    LibMailUnit/Mail/ContentType.h
+    LibMailUnit/Mail/ContentType.cpp
     LibMailUnit/Mail/MessageId.cpp
     LibMailUnit/Mail/DateTime.cpp
     LibMailUnit/Mail/Mailbox.h
@@ -277,6 +279,7 @@ set(SRC_TESTS
     Tests/LibMailUnit/MessageId.cpp
     Tests/LibMailUnit/DateTime.cpp
     Tests/LibMailUnit/Address.cpp
+    Tests/LibMailUnit/ContentType.cpp
     Tests/MailUnit/DeferredPointer.cpp
     Tests/MailUnit/Edsl.cpp
     Tests/MailUnit/File.cpp

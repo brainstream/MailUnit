@@ -18,6 +18,7 @@
 #ifndef __LIBMU_DEF_H__
 #define __LIBMU_DEF_H__
 
+#include <stddef.h>
 #include <stdlib.h>
 
 /**
@@ -80,6 +81,8 @@ typedef enum
     mfalse = 0, /**< The @a false value */
     mtrue  = 1  /**< The @a true value */
 } MBool;
+
+
 
 /**
  * @brief Type of object to handle and manipulate a memory.

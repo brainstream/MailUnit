@@ -69,6 +69,10 @@
  *
  * @anchor rfc-datetime-id
  * @htmlinclude RFC/DateSpec.html
+ *
+ *
+ * @anchor rfc-content-type-id
+ * @htmlinclude RFC/ContentTypeSpec.html
 */
 
 
@@ -214,10 +218,12 @@
 
 MU_DECLARE_HANDEL(MU_MAIL_HEADER);
 MU_DECLARE_HANDEL(MU_MAIL_HEADERLIST);
+MU_DECLARE_HANDEL(MU_MAIL_HEADER_CONTENT_TYPE);
 MU_DECLARE_HANDEL(MU_MAILBOXGROUP);
 MU_DECLARE_HANDEL(MU_MAILBOX);
 MU_DECLARE_HANDEL(MU_MSGID);
 MU_DECLARE_HANDEL(MU_MIME_MESSAGE);
+
 
 /**
  * @brief Contains values of headers with common name.
@@ -474,6 +480,60 @@ MU_EXPORT MBool MU_CALL muDateTimeParse(const char * _raw_date_time, MDateTime *
  * @sa muUnixTimeToDateTime
  */
 MU_EXPORT time_t MU_CALL muDateTimeToUnixTime(const MDateTime * _date_time);
+
+/**
+ * @brief Parses string described in @ref rfc-content-type-id "RFC"
+ * @param _raw_content_type
+ *     String from a mail header.
+ * @return
+ *     Handle to a parsed ContentType or @a MU_INVALID_HANDLE
+ *     The @a _content_type object will not be modified if parsing failed.
+ * @remarks
+ *     Returned handle must be destroyed by calling the @ref muFree function.
+ */
+MU_EXPORT MU_MAIL_HEADER_CONTENT_TYPE MU_CALL muContentTypeParse(const char * _raw_content_type);
+
+/**
+ * @brief Extracts type and subtype from the parsed ContentType
+ * @param _content_type
+ *     Parsed ContentType handle
+ * @param _type_out
+ *     Pointer to a pointer into which the @a type will be recorded
+ * @param _subtype_out
+ *     Pointer to a pointer into which the @a subtype will be recorded
+ * @return
+ *     @ref MBool::mtrue and @ref MBool::mfalse otherwise.
+ * @sa muContentTypeParse
+ */
+MU_EXPORT MBool MU_CALL muContentType(MU_MAIL_HEADER_CONTENT_TYPE _content_type,
+    const char ** _type_out, const char ** _subtype_out);
+
+/**
+ * @brief Extracts parameters count from the parsed ContentType
+ * @param _content_type
+ *     Parsed ContentType handle
+ * @return
+ *     A count of the ContentType parameters.
+ * @sa muContentTypeParse
+ */
+MU_EXPORT const size_t MU_CALL muContentTypeParamsCount(MU_MAIL_HEADER_CONTENT_TYPE _content_type);
+
+/**
+ * @brief Extracts parameter from the parsed ContentType
+ * @param _content_type
+ *     Parsed ContentType handle
+ * @param _index
+ *     Zero-based index of parameter
+ * @param _name_out
+ *     Pointer to a pointer into which the @a name will be recorded
+ * @param _value_out
+ *     Pointer to a pointer into which the @a value will be recorded
+ * @return
+ *     @ref MBool::mtrue and @ref MBool::mfalse otherwise.
+ * @sa muContentTypeParse
+ */
+MU_EXPORT MBool MU_CALL muContentTypeParam(MU_MAIL_HEADER_CONTENT_TYPE _content_type, size_t _index,
+    const char ** _name_out, const char ** _value_out);
 
 /**
  * @brief Convert UNIX time value to @ref MDateTime
