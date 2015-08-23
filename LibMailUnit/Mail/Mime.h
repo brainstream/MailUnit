@@ -23,6 +23,8 @@
 #include <vector>
 #include <boost/noncopyable.hpp>
 #include <LibMailUnit/Mail/Headers.h>
+#include <LibMailUnit/Mail/ContentType.h>
+#include <LibMailUnit/Mail/Mailbox.h>
 
 namespace LibMailUnit {
 namespace Mail {
@@ -45,9 +47,18 @@ public:
 
 private:
     void parse(std::istream & _stream);
+    void parseText(std::istream & _stream);
+    void parseImage(std::istream & _stream);
+    void parseAudio(std::istream & _stream);
+    void parseVideo(std::istream & _stream);
+    void parseApplication(std::istream & _stream);
+    void parseMultipart(std::istream & _stream);
+    void parseMessage(std::istream & _stream);
 
 private:
     std::shared_ptr<HeaderMap> m_headers_ptr;
+    std::shared_ptr<ContentType> m_content_type_ptr;
+    std::string m_text_content;
     std::vector<const MimeMessagePart *> m_parts;
 }; // class MimeMessagePart
 
@@ -55,14 +66,17 @@ class MimeMessage final : public MimeMessagePart
 {
 public:
     explicit MimeMessage(std::istream & _stream);
-
-    // TODO: subject
-    // TODO: from
-    // TODO: to
-    // TODO: cc
+    ~MimeMessage() override;
 
 private:
+    void parseAddresses(const char * _header_name, std::vector<const MailboxGroup *> & _out);
 
+private:
+    std::string m_subject;
+    std::vector<const MailboxGroup *> m_from_addresses;
+    std::vector<const MailboxGroup *> m_to_addresses;
+    std::vector<const MailboxGroup *> m_cc_addresses;
+    std::vector<const MailboxGroup *> m_bcc_addresses;
 }; // class MimeMessage
 
 } // namespace Mail

@@ -64,14 +64,26 @@ private:
     Rule<ContentType()> m_expression;
 }; // class Grammar
 
+ContentType * __parseContentType(const std::string & _raw_content_type)
+{
+    static Grammar grammar;
+    ContentType * content_type = new ContentType();
+    if(qi::phrase_parse(_raw_content_type.cbegin(), _raw_content_type.cend(), grammar, qi::ascii::space, *content_type))
+        return content_type;
+    return nullptr;
+}
+
 } // namespace
+
+std::shared_ptr<ContentType> LibMailUnit::Mail::parseContentType(const std::string & _raw_content_type)
+{
+    return std::shared_ptr<ContentType>(__parseContentType(_raw_content_type));
+}
 
 MU_MAIL_HEADER_CONTENT_TYPE MU_CALL muContentTypeParse(const char * _raw_content_type)
 {
-    static Grammar grammar;
-    std::string input(_raw_content_type);
-    ContentType * content_type = new ContentType();
-    if(qi::phrase_parse(input.cbegin(), input.cend(), grammar, qi::ascii::space, *content_type))
+    ContentType * content_type =  __parseContentType(_raw_content_type);
+    if(nullptr != content_type)
         return new MHandle(content_type, true);
     return MU_INVALID_HANDLE;
 }

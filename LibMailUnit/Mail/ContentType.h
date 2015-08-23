@@ -38,6 +38,8 @@ struct ContentType
     std::vector<ContentTypeParam> params;
 }; // struct ContentType
 
+std::shared_ptr<ContentType> parseContentType(const std::string & _raw_content_type);
+
 } // namespace Mail
 } // namespace LibMailUnit
 
