@@ -34,6 +34,10 @@ public:
     {
     }
 
+    Mailbox(const Mailbox &) = default;
+
+    Mailbox & operator = (const Mailbox &) = default;
+
     const std::string & name() const
     {
         return m_name;
@@ -44,8 +48,7 @@ public:
         return m_address;
     }
 
-public:
-    static std::shared_ptr<Mailbox> parse(const std::string & _input);
+    static std::unique_ptr<Mailbox> parse(const std::string & _input);
 
 private:
     std::string m_name;
@@ -57,6 +60,16 @@ class MailboxGroup final
 {
 public:
     MailboxGroup(const std::string & _input);
+
+    MailboxGroup(const MailboxGroup & _group);
+
+    MailboxGroup(MailboxGroup && _group);
+
+    ~MailboxGroup();
+
+    MailboxGroup & operator = (const MailboxGroup & _group);
+
+    MailboxGroup & operator = (MailboxGroup && _group);
 
     const std::string & name() const
     {
@@ -75,12 +88,15 @@ public:
 
     Mailbox & operator [](size_t _index)
     {
-        return *m_mailboxes[_index].get();
+        return *m_mailboxes[_index];
     }
 
 private:
+    void release();
+
+private:
     std::string m_name;
-    std::vector<std::shared_ptr<Mailbox>> m_mailboxes;
+    std::vector<Mailbox *> m_mailboxes;
 }; // class MailboxGroup
 
 } // namespace Mail

@@ -18,11 +18,8 @@
 #include <string>
 #include <sstream>
 #include <boost/algorithm/string.hpp>
-#include <boost/iostreams/device/file_descriptor.hpp>
-#include <boost/iostreams/stream.hpp>
-#include <Include/LibMailUnit/Message/Mime.h>
-#include <LibMailUnit/Memory.h>
 #include <LibMailUnit/Mail/Mime.h>
+#include <Include/LibMailUnit/Message/MailHeader.h>
 
 using namespace LibMailUnit::Mail;
 
@@ -188,17 +185,4 @@ void MimeMessage::parseAddresses(const char * _header_name, std::vector<const Ma
         return;
     for(const std::string & header_value : header->values)
         _out.push_back(new MailboxGroup(header_value));
-}
-
-MU_MIME_MESSAGE MU_CALL muMimeMessageParseString(const char * _input)
-{
-    std::stringstream stream(_input);
-    return new MHandle(new MimeMessage(stream), true);
-}
-
-MU_MIME_MESSAGE MU_CALL muMimeMessageParseFile(MU_NATIVE_FILE _input)
-{
-    boost::iostreams::file_descriptor fdesc(_input, boost::iostreams::never_close_handle);
-    boost::iostreams::stream<boost::iostreams::file_descriptor> stream(fdesc);
-    return new MHandle(new MimeMessage(stream), true);
 }

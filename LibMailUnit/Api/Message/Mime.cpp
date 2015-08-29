@@ -15,32 +15,24 @@
  *                                                                                             *
  ***********************************************************************************************/
 
-#ifndef __LIBMU_MAIL_CONTENTTYPE_H__
-#define __LIBMU_MAIL_CONTENTTYPE_H__
+#include <sstream>
+#include <boost/iostreams/stream.hpp>
+#include <boost/iostreams/device/file_descriptor.hpp>
+#include <LibMailUnit/Memory.h>
+#include <LibMailUnit/Mail/Mime.h>
+#include <Include/LibMailUnit/Message/Mime.h>
 
-#include <memory>
-#include <string>
-#include <vector>
+using namespace LibMailUnit::Mail;
 
-namespace LibMailUnit {
-namespace Mail {
-
-struct ContentTypeParam
+MU_MIME_MESSAGE MU_CALL muMimeMessageParseString(const char * _input)
 {
-    std::string name;
-    std::string value;
-}; // struct ContentTypeParam
+    std::stringstream stream(_input);
+    return new MHandle(new MimeMessage(stream), true);
+}
 
-struct ContentType
+MU_MIME_MESSAGE MU_CALL muMimeMessageParseFile(MU_NATIVE_FILE _input)
 {
-    std::string type;
-    std::string subtype;
-    std::vector<ContentTypeParam> params;
-}; // struct ContentType
-
-std::unique_ptr<ContentType> parseContentType(const std::string & _raw_content_type);
-
-} // namespace Mail
-} // namespace LibMailUnit
-
-#endif // __LIBMU_MAIL_CONTENTTYPE_H__
+    boost::iostreams::file_descriptor fdesc(_input, boost::iostreams::never_close_handle);
+    boost::iostreams::stream<boost::iostreams::file_descriptor> stream(fdesc);
+    return new MHandle(new MimeMessage(stream), true);
+}
