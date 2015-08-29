@@ -1,0 +1,30 @@
+<P>
+<A HREF="http://tools.ietf.org/html/rfc5322#section-2.1">RFC 5322 2.1</A>:
+<BLOCKQUOTE>
+A message consists of header fields (collectively called "the header
+section of the message") followed, optionally, by a body.  The header
+section is a sequence of lines of characters with special syntax as
+defined in this specification.  The body is simply a sequence of
+characters that follows the header section and is separated from the
+header section by an empty line (i.e., a line with nothing preceding
+the CRLF).
+</BLOCKQUOTE>
+
+<A HREF="http://tools.ietf.org/html/rfc5322#section-2.2">RFC 5322 2.2</A>:
+<BLOCKQUOTE>
+header field.s are lines beginning with a field name, followed by a
+colon (":"), followed by a field body, and terminated by CRLF.
+</BLOCKQUOTE>
+
+<A HREF="http://tools.ietf.org/html/rfc5322#section-2.2.3">RFC 5322 2.2.3</A>:
+<BLOCKQUOTE>
+<P>... the field body portion of a header field. can be split into a
+multiple-line representation; this is called "folding".  The general
+rule is that wherever this specification allows for folding white
+space (not simply WSP characters), a CRLF may be inserted before any WSP.</P>
+<P>... The process of moving from this folded multiple-line representation
+of a header field. to its single line representation is called
+"unfolding".  Unfolding is accomplished by simply removing any CRLF
+that is immediately followed by WSP.</P>
+</BLOCKQUOTE>
+</P>

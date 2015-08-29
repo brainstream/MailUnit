@@ -16,7 +16,7 @@
  ***********************************************************************************************/
 
 #include <boost/test/unit_test.hpp>
-#include <Include/LibMailUnit/Mail.h>
+#include <Include/LibMailUnit/Message/ContentType.h>
 
 namespace LibMailUnit {
 namespace Test {

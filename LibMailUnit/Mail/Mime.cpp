@@ -20,7 +20,7 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/iostreams/device/file_descriptor.hpp>
 #include <boost/iostreams/stream.hpp>
-#include <Include/LibMailUnit/Mail.h>
+#include <Include/LibMailUnit/Message/Mime.h>
 #include <LibMailUnit/Memory.h>
 #include <LibMailUnit/Mail/Mime.h>
 

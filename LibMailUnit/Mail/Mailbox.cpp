@@ -16,7 +16,7 @@
  ***********************************************************************************************/
 
 #include <boost/algorithm/string.hpp>
-#include <Include/LibMailUnit/Mail.h>
+#include <Include/LibMailUnit/Message/Mailbox.h>
 #include <LibMailUnit/Memory.h>
 #include <LibMailUnit/Mail/Mailbox.h>
 

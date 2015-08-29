@@ -15,32 +15,19 @@
  *                                                                                             *
  ***********************************************************************************************/
 
-#include <boost/test/unit_test.hpp>
-#include <Include/LibMailUnit/Message/MessageId.h>
+/**
+ * @file
+ * @brief API for working with e-mail messages.
+*/
 
-namespace LibMailUnit {
-namespace Test {
+#ifndef __LIBMU_MESSAGE_H__
+#define __LIBMU_MESSAGE_H__
 
-BOOST_AUTO_TEST_SUITE(MessageId)
+#include "Message/Mime.h"
+#include "Message/MailHeader.h"
+#include "Message/MessageId.h"
+#include "Message/Mailbox.h"
+#include "Message/DateTime.h"
+#include "Message/ContentType.h"
 
-BOOST_AUTO_TEST_CASE(ParseTest)
-{
-    const char valid_id[]     = "<539DD070.1070602@127.0.0.1>";
-    const char invalid_id_1[] = "_539DD070.1070602@127.0.0.1>";
-    const char invalid_id_2[] = "<539DD070.1070602@127.0.0.1_";
-    const char invalid_id_3[] = "<539DD070.1070602_127.0.0.1>";
-    MU_MSGID msg_id = muMessageIdParse(valid_id);
-    BOOST_CHECK_NE(MU_INVALID_HANDLE, msg_id);
-    BOOST_CHECK_EQUAL(valid_id, muMessageIdString(msg_id));
-    BOOST_CHECK_EQUAL("539DD070.1070602", muMessageIdLeft(msg_id));
-    BOOST_CHECK_EQUAL("127.0.0.1", muMessageIdRight(msg_id));
-    muFree(msg_id);
-    BOOST_CHECK_EQUAL(MU_INVALID_HANDLE, muMessageIdParse(invalid_id_1));
-    BOOST_CHECK_EQUAL(MU_INVALID_HANDLE, muMessageIdParse(invalid_id_2));
-    BOOST_CHECK_EQUAL(MU_INVALID_HANDLE, muMessageIdParse(invalid_id_3));
-}
-
-BOOST_AUTO_TEST_SUITE_END()
-
-} // namespace Test
-} // namespace LibMailUnit
+#endif // __LIBMU_MESSAGE_H__

@@ -8,6 +8,7 @@
 @li <A HREF="http://tools.ietf.org/html/rfc6854">RFC 6854</A> - Update to Internet Message Format to Allow Group Syntax in the "From:" and "Sender:" Header Fields
 @li <A HREF="http://tools.ietf.org/html/rfc2045">RFC 2045</A> - Multipurpose Internet Mail Extensions (MIME) Part One: Format of Internet Message Bodies
 @li <A HREF="http://tools.ietf.org/html/rfc2231">RFC 2231</A> - MIME Parameter Value and Encoded Word Extensions: Character Sets, Languages, and Continuations
+@li <A HREF="http://tools.ietf.org/html/rfc2387">RFC 2382</A> - The MIME Multipart/Related Content-type
 @li <A HREF="http://tools.ietf.org/html/rfc6532">RFC 6532</A> - Internationalized Email Headers
 @li <A HREF="http://tools.ietf.org/html/rfc2046">RFC 2046</A> - Multipurpose Internet Mail Extensions (MIME) Part Two: Media Types
 @li <A HREF="http://tools.ietf.org/html/rfc3676">RFC 3676</A> - The Text/Plain Format and DelSp Parameters

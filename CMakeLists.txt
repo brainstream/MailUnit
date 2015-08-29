@@ -161,8 +161,14 @@ add_definitions(
 #######################################################
 
 set(SRC_LIB
-    Include/LibMailUnit/Mail.h
     Include/LibMailUnit/Def.h
+    Include/LibMailUnit/Message.h
+    Include/LibMailUnit/Message/Mime.h
+    Include/LibMailUnit/Message/MailHeader.h
+    Include/LibMailUnit/Message/Mailbox.h
+    Include/LibMailUnit/Message/DateTime.h
+    Include/LibMailUnit/Message/MessageId.h
+    Include/LibMailUnit/Message/ContentType.h
     LibMailUnit/Memory.h
     LibMailUnit/Memory.cpp
     LibMailUnit/Mail/Headers.h
@@ -294,6 +300,7 @@ set(OTHER_FILES
     Cert/password.txt
     Doxygen/Doxyfile
     Doxygen/Pages/Main.dox
+    Doxygen/Snippets/RFC/HeaderSpec.html
     Doxygen/Snippets/RFC/DateSpec.html
     Doxygen/Snippets/RFC/AddressSpec.html
     Doxygen/Snippets/RFC/IdentificationFieldsSpec.html

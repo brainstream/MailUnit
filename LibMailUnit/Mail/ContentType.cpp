@@ -17,7 +17,7 @@
 
 #include <boost/spirit/include/qi.hpp>
 #include <boost/fusion/adapted/struct.hpp>
-#include <Include/LibMailUnit/Mail.h>
+#include <Include/LibMailUnit/Message/ContentType.h>
 #include <LibMailUnit/Memory.h>
 #include <LibMailUnit/Mail/ContentType.h>
 

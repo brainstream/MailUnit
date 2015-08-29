@@ -15,32 +15,54 @@
  *                                                                                             *
  ***********************************************************************************************/
 
-#include <boost/test/unit_test.hpp>
-#include <Include/LibMailUnit/Message/MessageId.h>
+/**
+ * @file
+ * @brief API for working with MIME.
+*/
 
-namespace LibMailUnit {
-namespace Test {
 
-BOOST_AUTO_TEST_SUITE(MessageId)
+#ifndef __LIBMU_MIME_H__
+#define __LIBMU_MIME_H__
 
-BOOST_AUTO_TEST_CASE(ParseTest)
+#include "../Def.h"
+#include "MailHeader.h"
+#include "Mailbox.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+MU_DECLARE_HANDEL(MU_MIME_MESSAGE);
+MU_DECLARE_HANDEL(MU_MIME_PART);
+
+MU_API MU_MIME_MESSAGE MU_CALL muMimeParseString(const char * _input);
+
+MU_API MU_MIME_MESSAGE MU_CALL muMimeParseFile(MU_NATIVE_FILE _input);
+
+MU_API size_t MU_CALL muMimePartCount(MU_MIME_MESSAGE _message);
+
+MU_API MU_MIME_PART MU_CALL muMimePart(MU_MIME_MESSAGE _message, size_t _index);
+
+MU_API MU_MAIL_HEADERLIST MU_CALL muMimeHeaders(MU_MIME_MESSAGE _message);
+
+MU_API MU_MAIL_HEADERLIST MU_CALL muMimePartHeaders(MU_MIME_PART _message);
+
+MU_API const char * MU_CALL muMimeSubject(MU_MIME_MESSAGE);
+
+typedef enum
 {
-    const char valid_id[]     = "<539DD070.1070602@127.0.0.1>";
-    const char invalid_id_1[] = "_539DD070.1070602@127.0.0.1>";
-    const char invalid_id_2[] = "<539DD070.1070602@127.0.0.1_";
-    const char invalid_id_3[] = "<539DD070.1070602_127.0.0.1>";
-    MU_MSGID msg_id = muMessageIdParse(valid_id);
-    BOOST_CHECK_NE(MU_INVALID_HANDLE, msg_id);
-    BOOST_CHECK_EQUAL(valid_id, muMessageIdString(msg_id));
-    BOOST_CHECK_EQUAL("539DD070.1070602", muMessageIdLeft(msg_id));
-    BOOST_CHECK_EQUAL("127.0.0.1", muMessageIdRight(msg_id));
-    muFree(msg_id);
-    BOOST_CHECK_EQUAL(MU_INVALID_HANDLE, muMessageIdParse(invalid_id_1));
-    BOOST_CHECK_EQUAL(MU_INVALID_HANDLE, muMessageIdParse(invalid_id_2));
-    BOOST_CHECK_EQUAL(MU_INVALID_HANDLE, muMessageIdParse(invalid_id_3));
-}
+    mb_from,
+    mb_to,
+    mb_cc,
+    mb_bcc
+} MMailboxType;
 
-BOOST_AUTO_TEST_SUITE_END()
+MU_API size_t MU_CALL muMimeMailboxGroupCount(MU_MIME_MESSAGE _message, MMailboxType _mailbox_type);
 
-} // namespace Test
-} // namespace LibMailUnit
+MU_API MU_MAILBOXGROUP MU_CALL muMimeMailboxGroup(MU_MIME_MESSAGE, MMailboxType _mailobx_type, size_t _index);
+
+#ifdef __cplusplus
+} // extern "C"
+#endif
+
+#endif // __LIBMU_MIME_H__

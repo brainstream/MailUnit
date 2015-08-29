@@ -17,7 +17,7 @@
 
 #include <string>
 #include <LibMailUnit/Memory.h>
-#include <Include/LibMailUnit/Mail.h>
+#include <Include/LibMailUnit/Message/MessageId.h>
 
 namespace {
 

@@ -15,6 +15,10 @@
  *                                                                                             *
  ***********************************************************************************************/
 
+/**
+ * @file Main and auxiliary definitions
+ */
+
 #ifndef __LIBMU_DEF_H__
 #define __LIBMU_DEF_H__
 
@@ -42,27 +46,15 @@
 #       define NOMINMAX
 #   endif
 #   include <windows.h>
-#   ifdef __cplusplus
-#      ifdef _MU_LIB
-#           define MU_EXPORT extern "C" __declspec(dllexport)
-#       else
-#           define MU_EXPORT extern "C" __declspec(dllimport)
-#       endif
+#   ifdef _MU_LIB
+#       define MU_API __declspec(dllexport)
 #   else
-#      ifdef _MU_LIB
-#           define MU_EXPORT __declspec(dllexport)
-#       else
-#           define MU_EXPORT __declspec(dllimport)
-#       endif
+#       define MU_API __declspec(dllimport)
 #   endif
 #   define MU_NATIVE_FILE HANDLE
 #   define MU_INVALID_NATIVE_FILE INVALID_HANDLE_VALUE
 #else
-#   ifdef __cplusplus
-#       define MU_EXPORT extern "C"
-#   else
-#       define MU_EXPORT
-#   endif
+#   define MU_API
 #   define MU_NATIVE_FILE int
 #   define MU_INVALID_NATIVE_FILE -1
 #endif
@@ -82,8 +74,6 @@ typedef enum
     mtrue  = 1  /**< The @a true value */
 } MBool;
 
-
-
 /**
  * @brief Type of object to handle and manipulate a memory.
  * @sa muFree
@@ -95,11 +85,11 @@ typedef struct MHandle * MU_HANDLE;
 /**
  * @brief Invalid handle value.
  */
-#define MU_INVALID_HANDLE (MU_HANDLE)-1
+#define MU_INVALID_HANDLE ((MU_HANDLE)-1)
 
 /**
  * @brief Releases an allocated memory.
  */
-MU_EXPORT void MU_CALL muFree(MU_HANDLE _handle);
+MU_API void MU_CALL muFree(MU_HANDLE _handle);
 
 #endif // __LIBMU_DEF_H__
