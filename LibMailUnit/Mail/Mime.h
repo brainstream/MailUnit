@@ -40,7 +40,7 @@ public:
         return *m_headers_ptr;
     }
 
-    const std::vector<const MimeMessagePart *> parts() const
+    const std::vector<const MimeMessagePart *> & parts() const
     {
         return m_parts;
     }

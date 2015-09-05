@@ -68,7 +68,7 @@ void MimeMessagePart::parse(std::istream & _stream)
     HeaderParser::parse(_stream, *map);
     m_headers_ptr.reset(map);
     Header * content_type_hdr = m_headers_ptr->find(MU_MAILHDR_CONTENTTYPE);
-    if(!content_type_hdr || content_type_hdr->values.empty())
+    if(content_type_hdr && !content_type_hdr->values.empty())
         m_content_type_ptr = parseContentType(content_type_hdr->values[0]);
     if(!m_content_type_ptr)
         m_content_type_ptr.reset(new ContentType { CT_TEXT, CST_TEXT_PLAIN });
@@ -131,22 +131,31 @@ void MimeMessagePart::parseMultipart(std::istream & _stream)
     const std::string boundary_end = boundary_start + "--";
     std::stringstream body;
     std::string line;
+    bool body_open = false;
     while(std::getline(_stream, line))
     {
-        if(boundary_start == line)
+        if(boost::starts_with(line, boundary_end))
         {
-            m_parts.push_back(new MimeMessagePart(body));
-            body.str(std::string());
-        }
-        else if(boundary_end == line)
-        {
-            m_parts.push_back(new MimeMessagePart(body));
-            body.str(std::string());
+            if(body_open)
+            {
+                m_parts.push_back(new MimeMessagePart(body));
+                body.str(std::string());
+            }
             break;
         }
-        else
+        else if(boost::starts_with(line, boundary_start))
         {
-            body << line << "\r\n";
+            if(body_open)
+            {
+                m_parts.push_back(new MimeMessagePart(body));
+                body.str(std::string());
+            }
+            body_open = true;
+            body.str(std::string());
+        }
+        else if(body_open)
+        {
+            body << line << "\n";
         }
     }
 }
@@ -181,7 +190,7 @@ MimeMessage::~MimeMessage()
 void MimeMessage::parseAddresses(const char * _header_name, std::vector<const MailboxGroup *> & _out)
 {
     const Header * header = headers().find(_header_name);
-    if(!header && !header->values.empty())
+    if(!header || !header->values.empty())
         return;
     for(const std::string & header_value : header->values)
         _out.push_back(new MailboxGroup(header_value));

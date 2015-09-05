@@ -290,6 +290,7 @@ set(SRC_TESTS
     Tests/LibMailUnit/DateTime.cpp
     Tests/LibMailUnit/Address.cpp
     Tests/LibMailUnit/ContentType.cpp
+    Tests/LibMailUnit/Mime.cpp
     Tests/MailUnit/DeferredPointer.cpp
     Tests/MailUnit/Edsl.cpp
     Tests/MailUnit/File.cpp

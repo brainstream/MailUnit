@@ -15,44 +15,53 @@
  *                                                                                             *
  ***********************************************************************************************/
 
-#include <sstream>
-#include <boost/iostreams/stream.hpp>
-#include <boost/iostreams/device/file_descriptor.hpp>
-#include <LibMailUnit/Memory.h>
-#include <LibMailUnit/Mail/Mime.h>
+#include <boost/test/unit_test.hpp>
 #include <Include/LibMailUnit/Message/Mime.h>
 
-using namespace LibMailUnit::Mail;
+namespace LibMailUnit {
+namespace Test {
 
-MU_MIME_MESSAGE MU_CALL muMimeParseString(const char * _input)
+BOOST_AUTO_TEST_SUITE(Mime)
+
+namespace {
+
+static const char valid_message_src[] =
+    "From: from@test.com\r\n"
+    "To: to@test.com\r\n"
+    "Subject: Test\r\n"
+    "Content-Type: multipart/alternative; boundary=123456789\r\n"
+    "\r\n"
+    "This is a multi-part message in MIME format.\r\n"
+    "\r\n"
+    "--123456789\r\n"
+    "Content-Type: text/plain\r\n"
+    "\r\n"
+    "The plain text format\r\n"
+    "\r\n"
+    "--123456789\r\n"
+    "Content-Type: text/html\r\n"
+    "\r\n"
+    "<html>\r\n"
+    "<head>\r\n"
+    "<title>Test</title>\r\n"
+    "</head>\r\n"
+    "<body>\r\n"
+    "<p>The html format</p>\r\n"
+    "</body>\r\n"
+    "--123456789--";
+
+} // namespace
+
+BOOST_AUTO_TEST_CASE(parseMimeStringTest)
 {
-    std::stringstream stream(_input);
-    return new MHandle(new MimeMessage(stream), true);
+    MU_MIME_MESSAGE message = muMimeParseString(valid_message_src);
+    BOOST_CHECK_NE(MU_INVALID_HANDLE, message);
+    size_t part_count = muMimePartCount(message);
+    BOOST_CHECK_EQUAL(2, part_count);
 }
 
-MU_MIME_MESSAGE MU_CALL muMimeParseFile(MU_NATIVE_FILE _input)
-{
-    boost::iostreams::file_descriptor fdesc(_input, boost::iostreams::never_close_handle);
-    boost::iostreams::stream<boost::iostreams::file_descriptor> stream(fdesc);
-    return new MHandle(new MimeMessage(stream), true);
-}
 
-size_t MU_CALL muMimePartCount(MU_MIME_MESSAGE _message)
-{
-    if(nullptr == _message || MU_INVALID_HANDLE == _message)
-        return 0;
-    MimeMessage * mime = _message->pointer<MimeMessage>();
-    return mime->parts().size();
-}
+BOOST_AUTO_TEST_SUITE_END()
 
-MU_MIME_PART MU_CALL muMimePart(MU_MIME_MESSAGE _message, size_t _index)
-{
-    if(nullptr == _message || MU_INVALID_HANDLE == _message)
-        return 0;
-    MimeMessage * mime = _message->pointer<MimeMessage>();
-    size_t count = mime->parts().size();
-    if(count < _index)
-        return new MHandle(mime->parts()[_index], false);
-    return MU_INVALID_HANDLE;
-}
-
+} // namespace LibMailUnit
+} // namespace Test

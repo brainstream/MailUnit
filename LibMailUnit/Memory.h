@@ -18,35 +18,31 @@
 #ifndef __LIBMUIMPL_MEMORY_H__
 #define __LIBMUIMPL_MEMORY_H__
 
-#include <typeinfo>
 #include <stdexcept>
 #include <functional>
+#include <boost/any.hpp>
 #include <boost/noncopyable.hpp>
 #include <Include/LibMailUnit/Def.h>
 
 struct MHandle : private boost::noncopyable
 {
-private:
-    template<typename Type>
-    class Object { virtual ~Object() { } };
-
 public:
     template<typename Type>
-    MHandle(Type * _object, bool _destructible) :
-        m_handle_object_type(typeid(MHandle::Object<Type>)),
-        mp_object(_object)
+    MHandle(Type * _object, bool _destructible)
     {
+        if(nullptr != _object)
+            m_object = _object;
         if(_destructible)
         {
             m_destruct_funct = [this]() {
-                delete static_cast<Type *>(mp_object);
+                delete boost::any_cast<Type *>(m_object);
             };
         }
     }
 
     ~MHandle()
     {
-        if(m_destruct_funct)
+        if(m_destruct_funct && !m_object.empty())
         {
            m_destruct_funct();
         }
@@ -55,17 +51,16 @@ public:
     template<typename Type>
     Type * pointer() const
     {
-        const std::type_info & typeinfo = typeid(MHandle::Object<Type>);
-        if(m_handle_object_type != typeinfo)
-        {
+        if(m_object.empty())
+            return nullptr;
+        Type * ptr = boost::any_cast<Type *>(m_object);
+        if(nullptr == ptr)
             throw std::runtime_error("Unable to cast a handle pointer to a requested type");
-        }
-        return static_cast<Type *>(mp_object);
+        return ptr;
     }
 
 private:
-    const std::type_info & m_handle_object_type;
-    void * mp_object;
+    boost::any m_object;
     std::function<void()> m_destruct_funct;
 }; // struct MHandle
 
