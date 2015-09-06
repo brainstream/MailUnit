@@ -56,8 +56,66 @@ BOOST_AUTO_TEST_CASE(parseMimeStringTest)
 {
     MU_MIME_MESSAGE message = muMimeParseString(valid_message_src);
     BOOST_CHECK_NE(MU_INVALID_HANDLE, message);
+    BOOST_CHECK_EQUAL("Test", muMimeSubject(message));
     size_t part_count = muMimePartCount(message);
     BOOST_CHECK_EQUAL(2, part_count);
+    MU_MAIL_HEADERLIST headers = muMimeHeaders(message);
+    BOOST_CHECK_NE(MU_INVALID_HANDLE, headers);
+    BOOST_CHECK_EQUAL(4, muMailHeadersCount(headers));
+    MU_MAIL_HEADER header = muMailHeaderByIndex(headers, 0);
+    BOOST_CHECK_NE(MU_INVALID_HANDLE, header);
+    BOOST_CHECK_EQUAL("From", muMailHeaderName(header));
+    BOOST_CHECK_EQUAL(1, muMailHeaderValueCount(header));
+    BOOST_CHECK_EQUAL("from@test.com", muMailHeaderValue(header, 0));
+    muFree(header);
+    header = muMailHeaderByIndex(headers, 1);
+    BOOST_CHECK_NE(MU_INVALID_HANDLE, header);
+    BOOST_CHECK_EQUAL("To", muMailHeaderName(header));
+    BOOST_CHECK_EQUAL(1, muMailHeaderValueCount(header));
+    BOOST_CHECK_EQUAL("to@test.com", muMailHeaderValue(header, 0));
+    muFree(header);
+    header = muMailHeaderByIndex(headers, 2);
+    BOOST_CHECK_NE(MU_INVALID_HANDLE, header);
+    BOOST_CHECK_EQUAL("Subject", muMailHeaderName(header));
+    BOOST_CHECK_EQUAL(1, muMailHeaderValueCount(header));
+    BOOST_CHECK_EQUAL("Test", muMailHeaderValue(header, 0));
+    muFree(header);
+    header = muMailHeaderByIndex(headers, 3);
+    BOOST_CHECK_EQUAL("Content-Type", muMailHeaderName(header));
+    BOOST_CHECK_EQUAL(1, muMailHeaderValueCount(header));
+    BOOST_CHECK_EQUAL("multipart/alternative; boundary=123456789", muMailHeaderValue(header, 0));
+    muFree(header);
+    muFree(headers);
+
+    MU_MIME_PART part = muMimePart(message, 0);
+    BOOST_CHECK_NE(MU_INVALID_HANDLE, part);
+    headers = muMimePartHeaders(part);
+    BOOST_CHECK_NE(MU_INVALID_HANDLE, headers);
+    BOOST_CHECK_EQUAL(1, muMailHeadersCount(headers));
+    header = muMailHeaderByIndex(headers, 0);
+    BOOST_CHECK_NE(MU_INVALID_HANDLE, header);
+    BOOST_CHECK_EQUAL(1, muMailHeaderValueCount(header));
+    BOOST_CHECK_EQUAL("Content-Type", muMailHeaderName(header));
+    BOOST_CHECK_EQUAL("text/plain", muMailHeaderValue(header, 0));
+    muFree(header);
+    muFree(headers);
+    muFree(part);
+
+    part = muMimePart(message, 1);
+    BOOST_CHECK_NE(MU_INVALID_HANDLE, part);
+    headers = muMimePartHeaders(part);
+    BOOST_CHECK_NE(MU_INVALID_HANDLE, headers);
+    BOOST_CHECK_EQUAL(1, muMailHeadersCount(headers));
+    header = muMailHeaderByIndex(headers, 0);
+    BOOST_CHECK_NE(MU_INVALID_HANDLE, header);
+    BOOST_CHECK_EQUAL(1, muMailHeaderValueCount(header));
+    BOOST_CHECK_EQUAL("Content-Type", muMailHeaderName(header));
+    BOOST_CHECK_EQUAL("text/html", muMailHeaderValue(header, 0));
+    muFree(header);
+    muFree(headers);
+    muFree(part);
+
+    muFree(message);
 }
 
 

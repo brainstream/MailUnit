@@ -29,7 +29,7 @@ MU_MAIL_HEADERLIST MU_CALL muMailHeadersParseString(const char * _input)
     std::stringstream stream(_input);
     HeaderMap * map = new HeaderMap();
     HeaderParser::parse(stream, *map);
-    return new MHandle(map, true);
+    return new MHandle(const_cast<const HeaderMap *>(map), true);
 }
 
 MU_MAIL_HEADERLIST MU_CALL muMailHeadersParseFile(MU_NATIVE_FILE _input)
@@ -38,41 +38,49 @@ MU_MAIL_HEADERLIST MU_CALL muMailHeadersParseFile(MU_NATIVE_FILE _input)
     boost::iostreams::stream<boost::iostreams::file_descriptor> stream(fdesc);
     HeaderMap * map = new HeaderMap();
     HeaderParser::parse(stream, *map);
-    return new MHandle(map, true);
+    return new MHandle(const_cast<const HeaderMap *>(map), true);
 }
 
 size_t MU_CALL muMailHeadersCount(MU_MAIL_HEADERLIST _headers)
 {
-    HeaderMap * map = _headers->pointer<HeaderMap>();
+    const HeaderMap * map = _headers->pointer<const HeaderMap>();
     return nullptr == map ? 0 : map->size();
 }
 
 MU_MAIL_HEADER MU_CALL muMailHeaderByIndex(MU_MAIL_HEADERLIST _headers, size_t _index)
 {
-    HeaderMap * map = _headers->pointer<HeaderMap>();
+    const HeaderMap * map = _headers->pointer<const HeaderMap>();
     if(nullptr == map || map->size() <= _index)
         return MU_INVALID_HANDLE;
-    return new MHandle((*map)[_index], false);
+    return new MHandle(const_cast<const Header *>((*map)[_index]), false);
+}
+
+const char * MU_CALL muMailHeaderName(MU_MAIL_HEADER _header)
+{
+    if(nullptr == _header || MU_INVALID_HANDLE == _header)
+        return nullptr;
+    const Header * header = _header->pointer<const Header>();
+    return header->name.c_str();
 }
 
 MU_MAIL_HEADER MU_CALL muMailHeaderByName(MU_MAIL_HEADERLIST _headers, const char * _name)
 {
-    HeaderMap * map = _headers->pointer<HeaderMap>();
+    const HeaderMap * map = _headers->pointer<const HeaderMap>();
     if(nullptr == map)
         return MU_INVALID_HANDLE;
-    Header * header = map->find(_name);
+    const Header * header = map->find(_name);
     return nullptr == header ? MU_INVALID_HANDLE : new MHandle(header, false);
 }
 
 size_t MU_CALL muMailHeaderValueCount(MU_MAIL_HEADER _header)
 {
-    Header * header = _header->pointer<Header>();
+    const Header * header = _header->pointer<const Header>();
     return nullptr == header ? 0 : header->values.size();
 }
 
 const char * MU_CALL muMailHeaderValue(MU_MAIL_HEADER _header, size_t _index)
 {
-    Header * header = _header->pointer<Header>();
+    const Header * header = _header->pointer<const Header>();
     return nullptr == header || header->values.size() <= _index ? nullptr :
         header->values[_index].c_str();
 }

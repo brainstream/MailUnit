@@ -139,7 +139,7 @@ void MimeMessagePart::parseMultipart(std::istream & _stream)
             if(body_open)
             {
                 m_parts.push_back(new MimeMessagePart(body));
-                body.str(std::string());
+                body_open = false;
             }
             break;
         }
@@ -148,7 +148,7 @@ void MimeMessagePart::parseMultipart(std::istream & _stream)
             if(body_open)
             {
                 m_parts.push_back(new MimeMessagePart(body));
-                body.str(std::string());
+                body = std::stringstream();
             }
             body_open = true;
             body.str(std::string());
@@ -157,6 +157,10 @@ void MimeMessagePart::parseMultipart(std::istream & _stream)
         {
             body << line << "\n";
         }
+    }
+    if(body_open)
+    {
+        m_parts.push_back(new MimeMessagePart(body));
     }
 }
 

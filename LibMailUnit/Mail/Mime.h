@@ -68,6 +68,11 @@ public:
     explicit MimeMessage(std::istream & _stream);
     ~MimeMessage() override;
 
+    const std::string & subject() const
+    {
+        return m_subject;
+    }
+
 private:
     void parseAddresses(const char * _header_name, std::vector<const MailboxGroup *> & _out);
 

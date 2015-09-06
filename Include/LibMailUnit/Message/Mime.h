@@ -45,9 +45,11 @@ MU_API MU_MIME_PART MU_CALL muMimePart(MU_MIME_MESSAGE _message, size_t _index);
 
 MU_API MU_MAIL_HEADERLIST MU_CALL muMimeHeaders(MU_MIME_MESSAGE _message);
 
-MU_API MU_MAIL_HEADERLIST MU_CALL muMimePartHeaders(MU_MIME_PART _message);
+MU_API MU_MAIL_HEADERLIST MU_CALL muMimePartHeaders(MU_MIME_PART _message_part);
 
-MU_API const char * MU_CALL muMimeSubject(MU_MIME_MESSAGE);
+MU_API const char * MU_CALL muMimeSubject(MU_MIME_MESSAGE _message);
+
+// ---
 
 typedef enum
 {

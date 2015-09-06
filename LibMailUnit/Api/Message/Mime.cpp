@@ -48,11 +48,36 @@ size_t MU_CALL muMimePartCount(MU_MIME_MESSAGE _message)
 MU_MIME_PART MU_CALL muMimePart(MU_MIME_MESSAGE _message, size_t _index)
 {
     if(nullptr == _message || MU_INVALID_HANDLE == _message)
-        return 0;
+        return MU_INVALID_HANDLE;
     MimeMessage * mime = _message->pointer<MimeMessage>();
     size_t count = mime->parts().size();
-    if(count < _index)
-        return new MHandle(mime->parts()[_index], false);
-    return MU_INVALID_HANDLE;
+    if(_index >= count)
+        return MU_INVALID_HANDLE;
+    return new MHandle(mime->parts()[_index], false);
+
+}
+
+MU_MAIL_HEADERLIST MU_CALL muMimeHeaders(MU_MIME_MESSAGE _message)
+{
+    if(nullptr == _message || MU_INVALID_HANDLE == _message)
+        return MU_INVALID_HANDLE;
+    MimeMessage * mime = _message->pointer<MimeMessage>();
+    return new MHandle(&mime->headers(), false);
+}
+
+MU_MAIL_HEADERLIST MU_CALL muMimePartHeaders(MU_MIME_PART _message_part)
+{
+    if(nullptr == _message_part || MU_INVALID_HANDLE == _message_part)
+        return MU_INVALID_HANDLE;
+    const MimeMessagePart * part = _message_part->pointer<const MimeMessagePart>();
+    return new MHandle(&part->headers(), false);
+}
+
+const char * MU_CALL muMimeSubject(MU_MIME_MESSAGE _message)
+{
+    if(nullptr == _message || MU_INVALID_HANDLE == _message)
+        return nullptr;
+    MimeMessage * message = _message->pointer<MimeMessage>();
+    return message->subject().c_str();
 }
 

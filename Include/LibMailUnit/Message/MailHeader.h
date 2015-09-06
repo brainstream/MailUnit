@@ -251,6 +251,12 @@ MU_API MU_MAIL_HEADER MU_CALL muMailHeaderByIndex(MU_MAIL_HEADERLIST _headers, s
 MU_API MU_MAIL_HEADER MU_CALL muMailHeaderByName(MU_MAIL_HEADERLIST _headers, const char * _name);
 
 /**
+ * @brief Returns a name of @a _header or @a NULL.
+ * @sa muMailHeaderByIndex
+*/
+MU_API const char * MU_CALL muMailHeaderName(MU_MAIL_HEADER _header);
+
+/**
  * @brief Returns a count of values in the @a _header.
  *
  * According with the table in
