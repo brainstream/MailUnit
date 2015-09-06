@@ -194,7 +194,7 @@ MimeMessage::~MimeMessage()
 void MimeMessage::parseAddresses(const char * _header_name, std::vector<const MailboxGroup *> & _out)
 {
     const Header * header = headers().find(_header_name);
-    if(!header || !header->values.empty())
+    if(!header || header->values.empty())
         return;
     for(const std::string & header_value : header->values)
         _out.push_back(new MailboxGroup(header_value));

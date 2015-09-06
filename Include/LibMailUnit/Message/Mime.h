@@ -35,6 +35,14 @@ extern "C" {
 MU_DECLARE_HANDEL(MU_MIME_MESSAGE);
 MU_DECLARE_HANDEL(MU_MIME_PART);
 
+typedef enum
+{
+    mb_from,
+    mb_to,
+    mb_cc,
+    mb_bcc
+} MMailboxType;
+
 MU_API MU_MIME_MESSAGE MU_CALL muMimeParseString(const char * _input);
 
 MU_API MU_MIME_MESSAGE MU_CALL muMimeParseFile(MU_NATIVE_FILE _input);
@@ -49,19 +57,9 @@ MU_API MU_MAIL_HEADERLIST MU_CALL muMimePartHeaders(MU_MIME_PART _message_part);
 
 MU_API const char * MU_CALL muMimeSubject(MU_MIME_MESSAGE _message);
 
-// ---
-
-typedef enum
-{
-    mb_from,
-    mb_to,
-    mb_cc,
-    mb_bcc
-} MMailboxType;
-
 MU_API size_t MU_CALL muMimeMailboxGroupCount(MU_MIME_MESSAGE _message, MMailboxType _mailbox_type);
 
-MU_API MU_MAILBOXGROUP MU_CALL muMimeMailboxGroup(MU_MIME_MESSAGE, MMailboxType _mailobx_type, size_t _index);
+MU_API MU_MAILBOXGROUP MU_CALL muMimeMailboxGroup(MU_MIME_MESSAGE _message, MMailboxType _mailbox_type, size_t _index);
 
 #ifdef __cplusplus
 } // extern "C"

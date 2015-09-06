@@ -73,6 +73,26 @@ public:
         return m_subject;
     }
 
+    const std::vector<const MailboxGroup *> & from() const
+    {
+        return m_from_addresses;
+    }
+
+    const std::vector<const MailboxGroup *> & to() const
+    {
+        return m_to_addresses;
+    }
+
+    const std::vector<const MailboxGroup *> & cc() const
+    {
+        return m_cc_addresses;
+    }
+
+    const std::vector<const MailboxGroup *> & bcc() const
+    {
+        return m_bcc_addresses;
+    }
+
 private:
     void parseAddresses(const char * _header_name, std::vector<const MailboxGroup *> & _out);
 

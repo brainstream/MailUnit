@@ -86,7 +86,7 @@ public:
         return m_mailboxes.empty();
     }
 
-    Mailbox & operator [](size_t _index)
+    const Mailbox & operator [](size_t _index) const
     {
         return *m_mailboxes[_index];
     }

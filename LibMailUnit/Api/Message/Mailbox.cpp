@@ -27,7 +27,7 @@ MU_MAILBOXGROUP MU_CALL muMailboxGroupParse(const char * _raw_address_group)
     {
         return MU_INVALID_HANDLE;
     }
-    MailboxGroup * group = new MailboxGroup(_raw_address_group);
+    const MailboxGroup * group = new MailboxGroup(_raw_address_group);
     if(group->empty())
     {
         delete group;
@@ -40,22 +40,23 @@ size_t MU_CALL muMailboxCount(MU_MAILBOXGROUP _mailbox_group)
 {
     if(nullptr == _mailbox_group)
         return 0;
-    return _mailbox_group->pointer<MailboxGroup>()->mailboxCount();
+    return _mailbox_group->pointer<const MailboxGroup>()->mailboxCount();
 }
 
 MU_MAILBOX MU_CALL muMailbox(MU_MAILBOXGROUP _mailbox_group, size_t _index)
 {
     if(nullptr == _mailbox_group)
         return MU_INVALID_HANDLE;
-    MailboxGroup & group = *_mailbox_group->pointer<MailboxGroup>();
-    return _index >= group.mailboxCount() ? MU_INVALID_HANDLE : new MHandle(&group[_index], false);
+    const MailboxGroup & group = *_mailbox_group->pointer<const MailboxGroup>();
+    const Mailbox * mailbox = &group[_index];
+    return _index >= group.mailboxCount() ? MU_INVALID_HANDLE : new MHandle(mailbox, false);
 }
 
 const char * MU_CALL muMailboxGroupName(MU_MAILBOXGROUP _mailbox_group)
 {
     if(nullptr == _mailbox_group)
         return nullptr;
-    MailboxGroup * group = _mailbox_group->pointer<MailboxGroup>();
+    const MailboxGroup * group = _mailbox_group->pointer<const MailboxGroup>();
     return group->name().empty() ? nullptr : group->name().c_str();
 }
 
@@ -63,7 +64,7 @@ const char * MU_CALL muMailboxName(MU_MAILBOX _mailbox)
 {
     if(nullptr == _mailbox)
         return nullptr;
-    Mailbox * mailbox = _mailbox->pointer<Mailbox>();
+    const Mailbox * mailbox = _mailbox->pointer<const Mailbox>();
     return mailbox->name().empty() ? nullptr : mailbox->name().c_str();
 }
 
@@ -71,6 +72,6 @@ const char * MU_CALL muMailboxAddress(MU_MAILBOX _mailbox)
 {
     if(nullptr == _mailbox)
         return nullptr;
-    Mailbox * mailbox = _mailbox->pointer<Mailbox>();
+    const Mailbox * mailbox = _mailbox->pointer<const Mailbox>();
     return mailbox->address().empty() ? nullptr : mailbox->address().c_str();
 }

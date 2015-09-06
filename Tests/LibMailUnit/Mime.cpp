@@ -17,6 +17,9 @@
 
 #include <boost/test/unit_test.hpp>
 #include <Include/LibMailUnit/Message/Mime.h>
+#include <MailUnit/OS/FileSystem.h>
+
+using namespace MailUnit::OS;
 
 namespace LibMailUnit {
 namespace Test {
@@ -25,9 +28,11 @@ BOOST_AUTO_TEST_SUITE(Mime)
 
 namespace {
 
-static const char valid_message_src[] =
-    "From: from@test.com\r\n"
-    "To: to@test.com\r\n"
+static const char message_src[] =
+    "From: From Person<from@example.com>,From2 Person<from2@example.com>\r\n"
+    "To: To Team: To Person<to@example.com>,To2 Person<to2@example.com>\r\n"
+    "CC: CC Person<cc@example.com>,CC2 Person<cc2@example.com>\r\n"
+    "BCC: BCC Person<bcc@example.com>,BCC2 Person<bcc2@example.com>\r\n"
     "Subject: Test\r\n"
     "Content-Type: multipart/alternative; boundary=123456789\r\n"
     "\r\n"
@@ -48,51 +53,136 @@ static const char valid_message_src[] =
     "<body>\r\n"
     "<p>The html format</p>\r\n"
     "</body>\r\n"
-    "--123456789--";
+    "--123456789--\r\n";
 
-} // namespace
+void testHeaders(MU_MIME_MESSAGE _message);
+void testMailboxes(MU_MIME_MESSAGE _message);
+void testParts(MU_MIME_MESSAGE _message);
+void testMessage(MU_MIME_MESSAGE _message);
 
-BOOST_AUTO_TEST_CASE(parseMimeStringTest)
+void testMessage(MU_MIME_MESSAGE _message)
 {
-    MU_MIME_MESSAGE message = muMimeParseString(valid_message_src);
-    BOOST_CHECK_NE(MU_INVALID_HANDLE, message);
-    BOOST_CHECK_EQUAL("Test", muMimeSubject(message));
-    size_t part_count = muMimePartCount(message);
-    BOOST_CHECK_EQUAL(2, part_count);
-    MU_MAIL_HEADERLIST headers = muMimeHeaders(message);
+    BOOST_CHECK_NE(MU_INVALID_HANDLE, _message);
+    BOOST_CHECK_EQUAL("Test", muMimeSubject(_message));
+    testHeaders(_message);
+    testMailboxes(_message);
+    testParts(_message);
+}
+
+void testHeaders(MU_MIME_MESSAGE _message)
+{
+    MU_MAIL_HEADERLIST headers = muMimeHeaders(_message);
     BOOST_CHECK_NE(MU_INVALID_HANDLE, headers);
-    BOOST_CHECK_EQUAL(4, muMailHeadersCount(headers));
+    BOOST_CHECK_EQUAL(6, muMailHeadersCount(headers));
     MU_MAIL_HEADER header = muMailHeaderByIndex(headers, 0);
     BOOST_CHECK_NE(MU_INVALID_HANDLE, header);
     BOOST_CHECK_EQUAL("From", muMailHeaderName(header));
     BOOST_CHECK_EQUAL(1, muMailHeaderValueCount(header));
-    BOOST_CHECK_EQUAL("from@test.com", muMailHeaderValue(header, 0));
+    BOOST_CHECK_EQUAL("From Person<from@example.com>,From2 Person<from2@example.com>", muMailHeaderValue(header, 0));
     muFree(header);
     header = muMailHeaderByIndex(headers, 1);
     BOOST_CHECK_NE(MU_INVALID_HANDLE, header);
     BOOST_CHECK_EQUAL("To", muMailHeaderName(header));
     BOOST_CHECK_EQUAL(1, muMailHeaderValueCount(header));
-    BOOST_CHECK_EQUAL("to@test.com", muMailHeaderValue(header, 0));
+    BOOST_CHECK_EQUAL("To Team: To Person<to@example.com>,To2 Person<to2@example.com>", muMailHeaderValue(header, 0));
     muFree(header);
     header = muMailHeaderByIndex(headers, 2);
+    BOOST_CHECK_NE(MU_INVALID_HANDLE, header);
+    BOOST_CHECK_EQUAL("CC", muMailHeaderName(header));
+    BOOST_CHECK_EQUAL(1, muMailHeaderValueCount(header));
+    BOOST_CHECK_EQUAL("CC Person<cc@example.com>,CC2 Person<cc2@example.com>", muMailHeaderValue(header, 0));
+    muFree(header);
+    header = muMailHeaderByIndex(headers, 3);
+    BOOST_CHECK_NE(MU_INVALID_HANDLE, header);
+    BOOST_CHECK_EQUAL("BCC", muMailHeaderName(header));
+    BOOST_CHECK_EQUAL(1, muMailHeaderValueCount(header));
+    BOOST_CHECK_EQUAL("BCC Person<bcc@example.com>,BCC2 Person<bcc2@example.com>", muMailHeaderValue(header, 0));
+    muFree(header);
+    header = muMailHeaderByIndex(headers, 4);
     BOOST_CHECK_NE(MU_INVALID_HANDLE, header);
     BOOST_CHECK_EQUAL("Subject", muMailHeaderName(header));
     BOOST_CHECK_EQUAL(1, muMailHeaderValueCount(header));
     BOOST_CHECK_EQUAL("Test", muMailHeaderValue(header, 0));
     muFree(header);
-    header = muMailHeaderByIndex(headers, 3);
+    header = muMailHeaderByIndex(headers, 5);
     BOOST_CHECK_EQUAL("Content-Type", muMailHeaderName(header));
     BOOST_CHECK_EQUAL(1, muMailHeaderValueCount(header));
     BOOST_CHECK_EQUAL("multipart/alternative; boundary=123456789", muMailHeaderValue(header, 0));
-    muFree(header);
     muFree(headers);
+}
 
-    MU_MIME_PART part = muMimePart(message, 0);
+void testMailboxes(MU_MIME_MESSAGE _message)
+{
+    BOOST_CHECK_EQUAL(1, muMimeMailboxGroupCount(_message, mb_from));
+    MU_MAILBOXGROUP mb_group = muMimeMailboxGroup(_message, mb_from, 0);
+    BOOST_CHECK_NE(MU_INVALID_HANDLE, mb_group);
+    BOOST_CHECK(nullptr == muMailboxGroupName(mb_group));
+    BOOST_CHECK_EQUAL(2, muMailboxCount(mb_group));
+    MU_MAILBOX mbox = muMailbox(mb_group, 0);
+    BOOST_CHECK_EQUAL("From Person", muMailboxName(mbox));
+    BOOST_CHECK_EQUAL("from@example.com", muMailboxAddress(mbox));
+    muFree(mbox);
+    mbox = muMailbox(mb_group, 1);
+    BOOST_CHECK_EQUAL("From2 Person", muMailboxName(mbox));
+    BOOST_CHECK_EQUAL("from2@example.com", muMailboxAddress(mbox));
+    muFree(mbox);
+    muFree(mb_group);
+
+    BOOST_CHECK_EQUAL(1, muMimeMailboxGroupCount(_message, mb_to));
+    mb_group = muMimeMailboxGroup(_message, mb_to, 0);
+    BOOST_CHECK_NE(MU_INVALID_HANDLE, mb_group);
+    BOOST_CHECK_EQUAL("To Team", muMailboxGroupName(mb_group));
+    BOOST_CHECK_EQUAL(2, muMailboxCount(mb_group));
+    mbox = muMailbox(mb_group, 0);
+    BOOST_CHECK_EQUAL("To Person", muMailboxName(mbox));
+    BOOST_CHECK_EQUAL("to@example.com", muMailboxAddress(mbox));
+    muFree(mbox);
+    mbox = muMailbox(mb_group, 1);
+    BOOST_CHECK_EQUAL("To2 Person", muMailboxName(mbox));
+    BOOST_CHECK_EQUAL("to2@example.com", muMailboxAddress(mbox));
+    muFree(mbox);
+    muFree(mb_group);
+
+    BOOST_CHECK_EQUAL(1, muMimeMailboxGroupCount(_message, mb_cc));
+    mb_group = muMimeMailboxGroup(_message, mb_cc, 0);
+    BOOST_CHECK_NE(MU_INVALID_HANDLE, mb_group);
+    BOOST_CHECK(nullptr == muMailboxGroupName(mb_group));
+    BOOST_CHECK_EQUAL(2, muMailboxCount(mb_group));
+    mbox = muMailbox(mb_group, 0);
+    BOOST_CHECK_EQUAL("CC Person", muMailboxName(mbox));
+    BOOST_CHECK_EQUAL("cc@example.com", muMailboxAddress(mbox));
+    muFree(mbox);
+    mbox = muMailbox(mb_group, 1);
+    BOOST_CHECK_EQUAL("CC2 Person", muMailboxName(mbox));
+    BOOST_CHECK_EQUAL("cc2@example.com", muMailboxAddress(mbox));
+    muFree(mbox);
+    muFree(mb_group);
+
+    BOOST_CHECK_EQUAL(1, muMimeMailboxGroupCount(_message, mb_bcc));
+    mb_group = muMimeMailboxGroup(_message, mb_bcc, 0);
+    BOOST_CHECK_NE(MU_INVALID_HANDLE, mb_group);
+    BOOST_CHECK(nullptr == muMailboxGroupName(mb_group));
+    BOOST_CHECK_EQUAL(2, muMailboxCount(mb_group));
+    mbox = muMailbox(mb_group, 0);
+    BOOST_CHECK_EQUAL("BCC Person", muMailboxName(mbox));
+    BOOST_CHECK_EQUAL("bcc@example.com", muMailboxAddress(mbox));
+    muFree(mbox);
+    mbox = muMailbox(mb_group, 1);
+    BOOST_CHECK_EQUAL("BCC2 Person", muMailboxName(mbox));
+    BOOST_CHECK_EQUAL("bcc2@example.com", muMailboxAddress(mbox));
+    muFree(mbox);
+    muFree(mb_group);
+}
+
+void testParts(MU_MIME_MESSAGE _message)
+{
+    BOOST_CHECK_EQUAL(2, muMimePartCount(_message));
+    MU_MIME_PART part = muMimePart(_message, 0);
     BOOST_CHECK_NE(MU_INVALID_HANDLE, part);
-    headers = muMimePartHeaders(part);
+    MU_MAIL_HEADERLIST headers = muMimePartHeaders(part);
     BOOST_CHECK_NE(MU_INVALID_HANDLE, headers);
     BOOST_CHECK_EQUAL(1, muMailHeadersCount(headers));
-    header = muMailHeaderByIndex(headers, 0);
+    MU_MAIL_HEADER header = muMailHeaderByIndex(headers, 0);
     BOOST_CHECK_NE(MU_INVALID_HANDLE, header);
     BOOST_CHECK_EQUAL(1, muMailHeaderValueCount(header));
     BOOST_CHECK_EQUAL("Content-Type", muMailHeaderName(header));
@@ -101,7 +191,7 @@ BOOST_AUTO_TEST_CASE(parseMimeStringTest)
     muFree(headers);
     muFree(part);
 
-    part = muMimePart(message, 1);
+    part = muMimePart(_message, 1);
     BOOST_CHECK_NE(MU_INVALID_HANDLE, part);
     headers = muMimePartHeaders(part);
     BOOST_CHECK_NE(MU_INVALID_HANDLE, headers);
@@ -114,10 +204,26 @@ BOOST_AUTO_TEST_CASE(parseMimeStringTest)
     muFree(header);
     muFree(headers);
     muFree(part);
+}
 
+} // namespace
+
+BOOST_AUTO_TEST_CASE(parseMimeStringTest)
+{
+    MU_MIME_MESSAGE message = muMimeParseString(message_src);
+    testMessage(message);
     muFree(message);
 }
 
+BOOST_AUTO_TEST_CASE(parseMimeFileTest)
+{
+    TempFile temp_file;
+    temp_file.write(message_src);
+    temp_file.seek(0, std::ios_base::beg);
+    MU_MIME_MESSAGE message = muMimeParseFile(temp_file);
+    testMessage(message);
+    muFree(message);
+}
 
 BOOST_AUTO_TEST_SUITE_END()
 

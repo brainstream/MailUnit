@@ -81,3 +81,49 @@ const char * MU_CALL muMimeSubject(MU_MIME_MESSAGE _message)
     return message->subject().c_str();
 }
 
+size_t MU_CALL muMimeMailboxGroupCount(MU_MIME_MESSAGE _message, MMailboxType _mailbox_type)
+{
+    if(nullptr == _message || MU_INVALID_HANDLE == _message)
+        return 0;
+    MimeMessage * message = _message->pointer<MimeMessage>();
+    switch(_mailbox_type)
+    {
+    case mb_from:
+        return message->from().size();
+    case mb_to:
+        return message->to().size();
+    case mb_cc:
+        return message->cc().size();
+    case mb_bcc:
+        return message->bcc().size();
+    default:
+        return 0;
+    }
+}
+
+MU_MAILBOXGROUP MU_CALL muMimeMailboxGroup(MU_MIME_MESSAGE _message, MMailboxType _mailbox_type, size_t _index)
+{
+    if(nullptr == _message || MU_INVALID_HANDLE == _message)
+        return MU_INVALID_HANDLE;
+    MimeMessage * message = _message->pointer<MimeMessage>();
+    const std::vector<const MailboxGroup *> * groups = nullptr;
+    switch(_mailbox_type)
+    {
+    case mb_from:
+        groups = &message->from();
+        break;
+    case mb_to:
+        groups = &message->to();
+        break;
+    case mb_cc:
+        groups = &message->cc();
+        break;
+    case mb_bcc:
+        groups = &message->bcc();
+        break;
+    }
+    if(nullptr == groups || _index >= groups->size())
+        return MU_INVALID_HANDLE;
+    return new MHandle((*groups)[_index], false);
+}
+
