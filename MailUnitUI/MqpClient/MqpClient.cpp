@@ -32,7 +32,7 @@ void MqpClient::executeRequest(const QString & _request)
     QString request = _request.trimmed();
     if(!request.endsWith(';'))
         request += ';';
-    QTcpSocket * socket = new QTcpSocket(this);
+    QTcpSocket * socket = new QTcpSocket();
     connect(socket, &QTcpSocket::connected, [socket, request]() {
         socket->write(request.toUtf8());
     });
