@@ -15,30 +15,64 @@
  *                                                                                             *
  ***********************************************************************************************/
 
-#include <QList>
-#include <QListView>
-#include <MailUnitUI/MqpClient/Message.h>
+#ifndef __MUGUI_MQPCLIENT_MIMEMESSAGE_H__
+#define __MUGUI_MQPCLIENT_MIMEMESSAGE_H__
+
+#include <memory>
+#include <vector>
+#include <QObject>
+#include <QString>
+#include <Include/LibMailUnit/Message.h>
 
 namespace MailUnit {
 namespace Gui {
 
-class MessageListView : public QListView
+class MimeMessagePartPrivate;
+
+class MimeMessagePart
 {
-    Q_OBJECT
+protected:
+    MimeMessagePart();
 
 public:
-    explicit MessageListView(const QList<const Message *> & _messages, QWidget * _parent = nullptr);
-    void sync();
+    explicit MimeMessagePart(const MimeMessagePartPrivate * _private);
+    MimeMessagePart(const MimeMessagePart & _part);
+    MimeMessagePart(MimeMessagePart && _part);
+    virtual ~MimeMessagePart();
+    MimeMessagePart & operator = (const MimeMessagePart & _part);
+    MimeMessagePart & operator = (MimeMessagePart && _part);
+    const QByteArray & content() const;
+    const std::vector<std::unique_ptr<const MimeMessagePart>> & parts() const;
+    const QString & contentType() const;
+    const QString & contentSubtype() const;
 
-protected slots:
-    void currentChanged(const QModelIndex & _current, const QModelIndex & _previous) override;
-
-signals:
-    void messageSelected(const Message * _message);
+protected:
+    void setup(const MimeMessagePartPrivate * _private);
 
 private:
-    const QList<const Message *> & mr_messages;
-}; // class MessageListView
+    const MimeMessagePartPrivate * mp_private;
+}; // class MimeMessagePart
+
+class MimeMessage : public MimeMessagePart
+{
+public:
+    explicit MimeMessage(const QByteArray & _raw_data);
+    MimeMessage(const MimeMessage &) = default;
+    MimeMessage(MimeMessage &&) = default;
+    ~MimeMessage() = default;
+    MimeMessage & operator = (const MimeMessage &) = default;
+    MimeMessage & operator = (MimeMessage &&) = default;
+
+    const QString & subject() const
+    {
+        return m_subject;
+    }
+
+private:
+    QString m_subject;
+}; // class MimeMessage
 
 } // namespace Gui
 } // namespace MailUnit
+
+#endif // __MUGUI_MQPCLIENT_MIMEMESSAGE_H__

@@ -132,6 +132,7 @@ if(ENABLE_GUI)
     find_package(Qt5Widgets REQUIRED)
     find_package(Qt5Network REQUIRED)
     find_package(Qt5Xml REQUIRED)
+    find_package(Qt5WebKitWidgets REQUIRED)
 endif(ENABLE_GUI)
 ####
 # End Qt libraries initialization
@@ -160,15 +161,17 @@ add_definitions(
 #                                                     #
 #######################################################
 
+set(LIB_PUBIC_INCLUDE_DIR ${CMAKE_CURRENT_LIST_DIR}/Include)
+
 set(SRC_LIB
-    Include/LibMailUnit/Def.h
-    Include/LibMailUnit/Message.h
-    Include/LibMailUnit/Message/Mime.h
-    Include/LibMailUnit/Message/MailHeader.h
-    Include/LibMailUnit/Message/Mailbox.h
-    Include/LibMailUnit/Message/DateTime.h
-    Include/LibMailUnit/Message/MessageId.h
-    Include/LibMailUnit/Message/ContentType.h
+    ${LIB_PUBIC_INCLUDE_DIR}/LibMailUnit/Def.h
+    ${LIB_PUBIC_INCLUDE_DIR}/LibMailUnit/Message.h
+    ${LIB_PUBIC_INCLUDE_DIR}/LibMailUnit/Message/Mime.h
+    ${LIB_PUBIC_INCLUDE_DIR}/LibMailUnit/Message/MailHeader.h
+    ${LIB_PUBIC_INCLUDE_DIR}/LibMailUnit/Message/Mailbox.h
+    ${LIB_PUBIC_INCLUDE_DIR}/LibMailUnit/Message/DateTime.h
+    ${LIB_PUBIC_INCLUDE_DIR}/LibMailUnit/Message/MessageId.h
+    ${LIB_PUBIC_INCLUDE_DIR}/LibMailUnit/Message/ContentType.h
     LibMailUnit/Api/Message/Mime.cpp
     LibMailUnit/Api/Message/MailHeader.cpp
     LibMailUnit/Api/Message/Mailbox.cpp
@@ -237,13 +240,15 @@ set(SRC_SERVER
 )
 
 set(SRC_GUI_MOC
-    MailUnitUI/ServerConfig.h
-    MailUnitUI/MqpClient.h
+    MailUnitUI/MqpClient/ServerConfig.h
+    MailUnitUI/MqpClient/MqpClient.h
+    MailUnitUI/MqpClient/MqpMessageRepository.h
     MailUnitUI/Gui/MainWindow.h
     MailUnitUI/Gui/ServerDialog.h
     MailUnitUI/Gui/AboutDialog.h
     MailUnitUI/Gui/QueryWidget.h
     MailUnitUI/Gui/MessageListView.h
+    MailUnitUI/Gui/HtmlView.h
 )
 
 set(SRC_GUI_UI
@@ -266,14 +271,19 @@ set(SRC_GUI
     ${SRC_GUI_UI}
     MailUnit/OS/FileSystem.cpp
     MailUnitUI/Main.cpp
-    MailUnitUI/Message.h
     MailUnitUI/Config.h
     MailUnitUI/Config.cpp
-    MailUnitUI/ServerConfig.cpp
-    MailUnitUI/MqpClient.cpp
+    MailUnitUI/MqpClient/ServerConfig.cpp
+    MailUnitUI/MqpClient/MqpClient.cpp
+    MailUnitUI/MqpClient/Message.h
+    MailUnitUI/MqpClient/MimeMessage.h
+    MailUnitUI/MqpClient/MimeMessage.cpp
+    MailUnitUI/MqpClient/MqpMessage.h
+    MailUnitUI/MqpClient/MqpMessage.cpp
     MailUnitUI/Gui/MainWindow.cpp
     MailUnitUI/Gui/QueryWidget.cpp
     MailUnitUI/Gui/MessageListView.cpp
+    MailUnitUI/Gui/HtmlView.cpp
 )
 
 set(SQLITE_SRC
@@ -426,22 +436,21 @@ if(ENABLE_GUI)
         Widgets
         Network
         Xml
+        WebKitWidgets
     )
     add_dependencies(${TARGET_GUI}
         ${TARGET_LIB}
-        ${TARGET_SQLITE}
     )
     target_include_directories(${TARGET_GUI} PRIVATE
         ${COMMON_INCLUDE_DIRS}
         ${CMAKE_BINARY_DIR}
+        ${LIB_PUBIC_INCLUDE_DIR}
     )
     target_compile_definitions(${TARGET_GUI} PRIVATE
         -D_MU_GUI
     )
     target_link_libraries(${TARGET_GUI}
-        ${TARGET_SQLITE}
         ${TARGET_LIB}
-        ${Boost_LIBRARIES}
     )
 endif(ENABLE_GUI)
 

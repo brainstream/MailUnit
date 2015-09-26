@@ -15,30 +15,40 @@
  *                                                                                             *
  ***********************************************************************************************/
 
-#include <QList>
-#include <QListView>
-#include <MailUnitUI/MqpClient/Message.h>
+#include <MailUnitUI/MqpClient/ServerConfig.h>
 
-namespace MailUnit {
-namespace Gui {
+using namespace MailUnit::Gui;
 
-class MessageListView : public QListView
+ServerConfigList::~ServerConfigList()
 {
-    Q_OBJECT
+    for(ServerConfig * server : m_servers)
+        delete server;
+}
 
-public:
-    explicit MessageListView(const QList<const Message *> & _messages, QWidget * _parent = nullptr);
-    void sync();
+void ServerConfigList::add(const ServerConfig & _server)
+{
+    ServerConfig * server = new ServerConfig(_server);
+    m_servers.append(server);
+    emit added(*server);
+}
 
-protected slots:
-    void currentChanged(const QModelIndex & _current, const QModelIndex & _previous) override;
+bool ServerConfigList::remove(int _index)
+{
+    if(_index < 0 || _index >= m_servers.size())
+        return false;
+    ServerConfig * server = m_servers.at(_index);
+    m_servers.remove(_index);
+    emit removed(*server);
+    delete server;
+    return true;
+}
 
-signals:
-    void messageSelected(const Message * _message);
-
-private:
-    const QList<const Message *> & mr_messages;
-}; // class MessageListView
-
-} // namespace Gui
-} // namespace MailUnit
+bool ServerConfigList::update(int _index, const ServerConfig & _server)
+{
+    if(_index < 0 || _index >= m_servers.size())
+        return false;
+    ServerConfig * server = m_servers.at(_index);
+    *server = _server;
+    emit updated(*server);
+    return true;
+}

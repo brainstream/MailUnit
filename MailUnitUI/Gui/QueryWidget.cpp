@@ -15,31 +15,104 @@
  *                                                                                             *
  ***********************************************************************************************/
 
+#include <QNetworkReply>
 #include <MailUnitUI/Gui/QueryWidget.h>
+#include <LibMailUnit/Message/Mime.h>
 
 using namespace MailUnit::Gui;
 
+namespace {
+
+class MimeContent : public QNetworkReply
+{
+public:
+    explicit MimeContent(QObject * _parent = nullptr);
+    bool isSequential() const;
+    qint64 bytesAvailable() const;
+
+protected:
+    qint64 readData(char * _data, qint64 _maxlen);
+
+public slots:
+    void abort();
+}; // class MimeContent
+
+class NetworkAccessManager : public QNetworkAccessManager
+{
+public:
+    NetworkAccessManager(QNetworkAccessManager & _default_manager, QObject * _parent = nullptr);
+
+protected:
+    QNetworkReply * createRequest(Operation _op, const QNetworkRequest & _request, QIODevice * _outgoing_data);
+
+private:
+    QNetworkAccessManager & mr_default;
+}; // class NetworkAccessManager
+
+} // namespace
+
+MimeContent::MimeContent(QObject * _parent /*= nullptr*/) :
+    QNetworkReply(_parent)
+{
+}
+
+bool MimeContent::isSequential() const
+{
+    return false;
+}
+
+qint64 MimeContent::bytesAvailable() const
+{
+    return 0;
+}
+
+qint64 MimeContent::readData(char * _data, qint64 _maxlen)
+{
+    return 0;
+}
+
+void MimeContent::abort()
+{
+}
+
+NetworkAccessManager::NetworkAccessManager(QNetworkAccessManager & _default_manager, QObject * _parent /*= nullptr*/) :
+    QNetworkAccessManager(_parent),
+    mr_default(_default_manager)
+{
+    // TODO: accept a MU_MIME_PART
+}
+
+QNetworkReply * NetworkAccessManager::createRequest(Operation _op, const QNetworkRequest & _request, QIODevice * _outgoing_data)
+{
+    if(_request.url().scheme().compare("cit", Qt::CaseInsensitive) != 0)
+        return QNetworkAccessManager::createRequest(_op, _request, _outgoing_data);
+    return new MimeContent(this);
+}
+
 QueryWidget::QueryWidget(const ServerConfig & _server, QWidget * _parent /*= nullptr*/) :
     QWidget(_parent),
+    mp_client(nullptr),
     m_server(_server),
-    mp_notifier(nullptr),
     mp_state(nullptr),
-    mp_messages(new QList<const Message *>)
+    mp_messages(new QList<const Message *>),
+    mp_html_view(nullptr)
 {
     setupUi(this);
+    mp_client = new MqpClient(m_server, this);
     mp_listview_result = new MessageListView(*mp_messages, this);
     mp_layout_result->insertWidget(0, mp_listview_result);
-
     mp_label_server->setText(QString("%1 [%2:%3]")
         .arg(_server.name())
         .arg(_server.host())
         .arg(_server.port()));
     mp_label_status->setText(tr("Ready"));
     mp_progress_bar->setVisible(false);
-    mp_notifier = new MqpClientNotifier(this);
-    connect(mp_notifier, SIGNAL(headerReceived(MqpResponseHeader)), this, SLOT(onHeaderReceived(MqpResponseHeader)));
-    connect(mp_notifier, SIGNAL(messageReceived(Message)), this, SLOT(onMessageReceived(Message)));
-    connect(mp_notifier, SIGNAL(finished()), this, SLOT(onRequestFinished()));
+    mp_html_view = new HtmlView(this);
+    mp_layout_result->addWidget(mp_html_view);
+    connect(mp_client, SIGNAL(connected(MqpResponseHeader)), this, SLOT(onClientConnected(MqpResponseHeader)));
+    connect(mp_client, SIGNAL(finished()), this, SLOT(onRequestFinished()));
+    //connect(mp_client, SIGNAL(messageReceived(MqpRawMessage)), this, SLOT(onMessageReceived(Message)));
+    connect(mp_client, SIGNAL(messageReceived(Message)), this, SLOT(onMessageReceived(Message)));
     connect(mp_listview_result, SIGNAL(messageSelected(const Message*)), this, SLOT(onMessageSelected(const Message*)));
 }
 
@@ -61,10 +134,10 @@ void QueryWidget::execute()
     mp_progress_bar->setRange(0, 0);
     mp_label_status->setVisible(false);
     mp_progress_bar->setVisible(true);
-    sendMqpRequestAsync(m_server, mp_edit_query->toPlainText(), mp_notifier);
+    mp_client->executeRequest(mp_edit_query->toPlainText());
 }
 
-void QueryWidget::onHeaderReceived(const MqpResponseHeader & _header)
+void QueryWidget::onClientConnected(const MqpResponseHeader & _header)
 {
     mp_state->header = _header;
     mp_state->loaded_count = 0;
@@ -103,6 +176,12 @@ void QueryWidget::onRequestFinished()
 void QueryWidget::onMessageSelected(const Message * _message)
 {
     mp_edit_msg_body->clear();
-    if(nullptr != _message)
-        mp_edit_msg_body->setPlainText(_message->body);
+    //mp_html_view->setHtml(QString());
+    if(nullptr == _message)
+        return;
+    mp_edit_msg_body->setPlainText(_message->body);
+
+
+
+    //mp_html_view->setSource();
 }

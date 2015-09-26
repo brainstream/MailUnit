@@ -15,30 +15,70 @@
  *                                                                                             *
  ***********************************************************************************************/
 
-#include <QList>
-#include <QListView>
+#ifndef _MUGUI_MQPCLIENT_MQPCLIENT_H__
+#define _MUGUI_MQPCLIENT_MQPCLIENT_H__
+
+#include <QTcpSocket>
+#include <MailUnitUI/MqpClient/ServerConfig.h>
 #include <MailUnitUI/MqpClient/Message.h>
+#include <MailUnitUI/MqpClient/MqpMessageRepository.h>
 
 namespace MailUnit {
 namespace Gui {
 
-class MessageListView : public QListView
+enum class MqpResponseType
+{
+    matched,
+    deleted,
+    error
+}; // enum class MqpResponseType
+
+struct MqpResponseHeader
+{
+    MqpResponseHeader()
+    {
+        static bool registered = false;
+        if(!registered)
+        {
+            registered = true;
+            qRegisterMetaType<MqpResponseHeader>("MqpResponseHeader");
+        }
+    }
+
+    MqpResponseType response_type;
+    quint32 status_code;
+    quint32 affected_count;
+}; // struct MqpResponseHeader
+
+class MqpClient : public QObject
 {
     Q_OBJECT
 
 public:
-    explicit MessageListView(const QList<const Message *> & _messages, QWidget * _parent = nullptr);
-    void sync();
+    explicit MqpClient(const ServerConfig & _server, QObject * _parent = nullptr);
+    void executeRequest(const QString & _request);
 
-protected slots:
-    void currentChanged(const QModelIndex & _current, const QModelIndex & _previous) override;
+    const MqpMessageRepository & messages() const
+    {
+        return *mp_messages;
+    }
 
 signals:
-    void messageSelected(const Message * _message);
+    void connected(const MqpResponseHeader & _header);
+    //void messageReceived(const MqpRawMessage & _message);
+    void messageReceived(const Message & _message);
+    void finished();
 
 private:
-    const QList<const Message *> & mr_messages;
-}; // class MessageListView
+    quint32 readHeader(QTcpSocket &_socket);
+    void readMessage(QTcpSocket &_socket);
+
+private:
+    MqpMessageRepository * mp_messages;
+    ServerConfig m_server;
+}; // class MqpClient
 
 } // namespace Gui
 } // namespace MailUnit
+
+#endif // _MUGUI_MQPCLIENT_MQPCLIENT_H__

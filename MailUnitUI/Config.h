@@ -21,7 +21,7 @@
 #include <QFile>
 #include <QPoint>
 #include <QSize>
-#include <MailUnitUI/ServerConfig.h>
+#include <MailUnitUI/MqpClient/ServerConfig.h>
 
 namespace MailUnit {
 namespace Gui {

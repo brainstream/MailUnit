@@ -15,38 +15,52 @@
  *                                                                                             *
  ***********************************************************************************************/
 
-#ifndef __MUGUI_MESSAGE_H__
-#define __MUGUI_MESSAGE_H__
+#ifndef __MUGUI_MQPCLIENT_MQPMESSAGEREPOSITORY_H__
+#define __MUGUI_MQPCLIENT_MQPMESSAGEREPOSITORY_H__
 
-#include <QMetaType>
-#include <QString>
-#include <QStringList>
+#include <memory>
+#include <vector>
+#include <QObject>
+#include <MailUnitUI/MqpClient/MqpMessage.h>
 
 namespace MailUnit {
 namespace Gui {
 
-struct Message
+class MqpMessageRepository : public QObject
 {
-    Message()
+    Q_OBJECT
+
+public:
+    explicit MqpMessageRepository(QObject * _parent = nullptr) :
+        QObject(_parent)
     {
-        static bool registered = false;
-        if(!registered)
-        {
-            registered = true;
-            qRegisterMetaType<Message>("Message");
-        }
     }
 
-    quint32 id;
-    QStringList from;
-    QStringList to;
-    QStringList cc;
-    QStringList bcc;
-    QString subject;
-    QByteArray body;
-}; // struct Message
+    void appendMessage(std::unique_ptr<MqpRawMessage> _message)
+    {
+        size_t index = m_messages.size();
+        m_messages.push_back(std::move(_message));
+        emit messageReceived(index);
+    }
+
+    const MqpRawMessage & get(size_t _index) const
+    {
+        return *m_messages[_index];
+    }
+
+    size_t count() const
+    {
+        return m_messages.size();
+    }
+
+signals:
+    void messageReceived(size_t _index);
+
+private:
+    std::vector<std::unique_ptr<MqpRawMessage>> m_messages;
+}; // class MqpMessageRepository
 
 } // namespace Gui
 } // namespace MailUnit
 
-#endif // __MUGUI_MESSAGE_H__
+#endif // __MUGUI_MQPCLIENT_MQPMESSAGEREPOSITORY_H__

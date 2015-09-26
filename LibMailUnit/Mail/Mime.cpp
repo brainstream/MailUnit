@@ -92,7 +92,7 @@ void MimeMessagePart::parseText(std::istream & _stream)
 {
     const size_t buffer_size = 1024;
     char buffer[buffer_size];
-    while(_stream.read(buffer, buffer_size))
+    while(_stream.read(buffer, buffer_size) || _stream.gcount())
         m_text_content.append(buffer, buffer + _stream.gcount());
 }
 
@@ -150,8 +150,10 @@ void MimeMessagePart::parseMultipart(std::istream & _stream)
                 m_parts.push_back(new MimeMessagePart(body));
                 body = std::stringstream();
             }
-            body_open = true;
-            body.str(std::string());
+            else
+            {
+                body_open = true;
+            }
         }
         else if(body_open)
         {

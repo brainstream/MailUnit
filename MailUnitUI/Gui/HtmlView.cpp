@@ -15,30 +15,24 @@
  *                                                                                             *
  ***********************************************************************************************/
 
-#include <QList>
-#include <QListView>
-#include <MailUnitUI/MqpClient/Message.h>
+#include <QVBoxLayout>
+#include <MailUnitUI/Gui/HtmlView.h>
 
-namespace MailUnit {
-namespace Gui {
+using namespace MailUnit::Gui;
 
-class MessageListView : public QListView
+HtmlView::HtmlView(QWidget * _parent /*= nullptr*/) :
+    QFrame(_parent)
 {
-    Q_OBJECT
+    QVBoxLayout * layout = new QVBoxLayout(this);
+    layout->setMargin(0);
+    mp_webview = new QWebView(this);
+    layout->addWidget(mp_webview);
+    mp_webview->setHtml("TEST");
+    setFrameStyle(QFrame::StyledPanel);
+    mp_webview->setContextMenuPolicy(Qt::ActionsContextMenu);
+}
 
-public:
-    explicit MessageListView(const QList<const Message *> & _messages, QWidget * _parent = nullptr);
-    void sync();
-
-protected slots:
-    void currentChanged(const QModelIndex & _current, const QModelIndex & _previous) override;
-
-signals:
-    void messageSelected(const Message * _message);
-
-private:
-    const QList<const Message *> & mr_messages;
-}; // class MessageListView
-
-} // namespace Gui
-} // namespace MailUnit
+void HtmlView::setSource(const MimeMessagePart & _source)
+{
+    mp_webview->setHtml("TEST");
+}

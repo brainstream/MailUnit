@@ -15,8 +15,8 @@
  *                                                                                             *
  ***********************************************************************************************/
 
-#ifndef __MUGUI_SERVERCONFIG_H__
-#define __MUGUI_SERVERCONFIG_H__
+#ifndef __MUGUI_MQPCLIENT_SERVERCONFIG_H__
+#define __MUGUI_MQPCLIENT_SERVERCONFIG_H__
 
 #include <QString>
 #include <QObject>
@@ -122,4 +122,4 @@ private:
 } // namespace MailUnit
 
 
-#endif // __MUGUI_SERVERCONFIG_H__
+#endif // __MUGUI_MQPCLIENT_SERVERCONFIG_H__

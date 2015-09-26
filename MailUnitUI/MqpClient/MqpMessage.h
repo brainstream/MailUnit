@@ -15,30 +15,49 @@
  *                                                                                             *
  ***********************************************************************************************/
 
-#include <QList>
-#include <QListView>
-#include <MailUnitUI/MqpClient/Message.h>
+#ifndef __MUGUI_MQPCLIENT_MQPRESPONSE_H__
+#define __MUGUI_MQPCLIENT_MQPRESPONSE_H__
+
+#include <QString>
+#include <QStringList>
+#include <MailUnitUI/MqpClient/MimeMessage.h>
 
 namespace MailUnit {
 namespace Gui {
 
-class MessageListView : public QListView
+struct MqpMessageHeader
 {
-    Q_OBJECT
+    quint32 id;
+    QStringList from;
+    QStringList to;
+    QStringList cc;
+    QStringList bcc;
+    QString subject;
+}; // struct MqpMessageHeader
 
+struct MqpRawMessage : MqpMessageHeader
+{
+    QByteArray body;
+}; // class MqpRawMessage
+
+class MqpMessage final
+{
 public:
-    explicit MessageListView(const QList<const Message *> & _messages, QWidget * _parent = nullptr);
-    void sync();
-
-protected slots:
-    void currentChanged(const QModelIndex & _current, const QModelIndex & _previous) override;
-
-signals:
-    void messageSelected(const Message * _message);
+    MqpMessage(const MqpRawMessage & _raw_message);
+    MqpMessage(const MqpMessage & _message);
+    MqpMessage(MqpMessage && _message);
+    ~MqpMessage();
+    MqpMessage & operator = (const MqpMessage & _message);
+    MqpMessage & operator = (MqpMessage && _message);
+    const MqpMessageHeader & header() const;
+    const MimeMessage & mime() const;
 
 private:
-    const QList<const Message *> & mr_messages;
-}; // class MessageListView
+    MqpMessageHeader * mp_header;
+    MimeMessage * mp_mime_message;
+}; // class MqpMessage
 
 } // namespace Gui
 } // namespace MailUnit
+
+#endif // __MUGUI_MQPCLIENT_MQPRESPONSE_H__

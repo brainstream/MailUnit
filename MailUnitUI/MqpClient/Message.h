@@ -15,30 +15,38 @@
  *                                                                                             *
  ***********************************************************************************************/
 
-#include <QList>
-#include <QListView>
-#include <MailUnitUI/MqpClient/Message.h>
+#ifndef __MUGUI_MQPCLIENT_MESSAGE_H__
+#define __MUGUI_MQPCLIENT_MESSAGE_H__
+
+#include <QMetaType>
+#include <QString>
+#include <QStringList>
 
 namespace MailUnit {
 namespace Gui {
 
-class MessageListView : public QListView
+struct Message
 {
-    Q_OBJECT
+    Message()
+    {
+        static bool registered = false;
+        if(!registered)
+        {
+            registered = true;
+            qRegisterMetaType<Message>("Message");
+        }
+    }
 
-public:
-    explicit MessageListView(const QList<const Message *> & _messages, QWidget * _parent = nullptr);
-    void sync();
-
-protected slots:
-    void currentChanged(const QModelIndex & _current, const QModelIndex & _previous) override;
-
-signals:
-    void messageSelected(const Message * _message);
-
-private:
-    const QList<const Message *> & mr_messages;
-}; // class MessageListView
+    quint32 id;
+    QStringList from;
+    QStringList to;
+    QStringList cc;
+    QStringList bcc;
+    QString subject;
+    QByteArray body;
+}; // struct Message
 
 } // namespace Gui
 } // namespace MailUnit
+
+#endif // __MUGUI_MQPCLIENT_MESSAGE_H__

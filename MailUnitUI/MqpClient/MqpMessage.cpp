@@ -15,40 +15,68 @@
  *                                                                                             *
  ***********************************************************************************************/
 
-#include <MailUnitUI/ServerConfig.h>
+#include <MailUnitUI/MqpClient/MqpMessage.h>
 
 using namespace MailUnit::Gui;
 
-ServerConfigList::~ServerConfigList()
+MqpMessage::MqpMessage(const MqpRawMessage & _raw_message) :
+    mp_header(new MqpMessageHeader(_raw_message)),
+    mp_mime_message(new MimeMessage(_raw_message.body))
 {
-    for(ServerConfig * server : m_servers)
-        delete server;
 }
 
-void ServerConfigList::add(const ServerConfig & _server)
+MqpMessage::MqpMessage(const MqpMessage & _message) :
+    mp_header(new MqpMessageHeader(*_message.mp_header)),
+    mp_mime_message(new MimeMessage(*_message.mp_mime_message))
 {
-    ServerConfig * server = new ServerConfig(_server);
-    m_servers.append(server);
-    emit added(*server);
 }
 
-bool ServerConfigList::remove(int _index)
+MqpMessage::MqpMessage(MqpMessage && _message) :
+    mp_header(_message.mp_header),
+    mp_mime_message(_message.mp_mime_message)
 {
-    if(_index < 0 || _index >= m_servers.size())
-        return false;
-    ServerConfig * server = m_servers.at(_index);
-    m_servers.remove(_index);
-    emit removed(*server);
-    delete server;
-    return true;
+    _message.mp_header = nullptr;
+    _message.mp_mime_message = nullptr;
 }
 
-bool ServerConfigList::update(int _index, const ServerConfig & _server)
+MqpMessage::~MqpMessage()
 {
-    if(_index < 0 || _index >= m_servers.size())
-        return false;
-    ServerConfig * server = m_servers.at(_index);
-    *server = _server;
-    emit updated(*server);
-    return true;
+    delete mp_header;
+    delete mp_mime_message;
+}
+
+MqpMessage & MqpMessage::operator = (const MqpMessage & _message)
+{
+    if(this != &_message)
+    {
+        delete mp_header;
+        delete mp_mime_message;
+        mp_header = new MqpMessageHeader(*_message.mp_header);
+        mp_mime_message = new MimeMessage(*_message.mp_mime_message);
+    }
+    return *this;
+}
+
+MqpMessage & MqpMessage::operator = (MqpMessage && _message)
+{
+    if(this != &_message)
+    {
+        delete mp_header;
+        delete mp_mime_message;
+        mp_header = new MqpMessageHeader(*_message.mp_header);
+        mp_mime_message = new MimeMessage(*_message.mp_mime_message);
+        _message.mp_header = nullptr;
+        _message.mp_mime_message = nullptr;
+    }
+    return *this;
+}
+
+const MqpMessageHeader & MqpMessage::header() const
+{
+    return *mp_header;
+}
+
+const MimeMessage & MqpMessage::mime() const
+{
+    return *mp_mime_message;
 }

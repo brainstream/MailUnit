@@ -15,83 +15,31 @@
  *                                                                                             *
  ***********************************************************************************************/
 
-#ifndef _MUGUI_MQPCLIENT_H__
-#define _MUGUI_MQPCLIENT_H__
+#ifndef __MUGUI_GUI_HTMLVIEW_H__
+#define __MUGUI_GUI_HTMLVIEW_H__
 
-#include <QTcpSocket>
-#include <MailUnitUI/ServerConfig.h>
-#include <MailUnitUI/Message.h>
+#include <QFrame>
+#include <QWebView>
+#include <MailUnitUI/MqpClient/MimeMessage.h>
 
 namespace MailUnit {
 namespace Gui {
 
-enum class MqpResponseType
-{
-    matched,
-    deleted,
-    error
-}; // enum class MqpResponseType
-
-struct MqpResponseHeader
-{
-    MqpResponseHeader()
-    {
-        static bool registered = false;
-        if(!registered)
-        {
-            registered = true;
-            qRegisterMetaType<MqpResponseHeader>("MqpResponseHeader");
-        }
-    }
-
-    MqpResponseType response_type;
-    quint32 status_code;
-    quint32 affected_count;
-}; // struct MqpResponseHeader
-
-class MqpClientNotifier : public QObject
+class HtmlView : public QFrame
 {
     Q_OBJECT
 
 public:
-    explicit MqpClientNotifier(QObject * _parent = nullptr) :
-        QObject(_parent)
-    {
-    }
+    explicit HtmlView(QWidget * _parent = nullptr);
+    void setSource(const MimeMessagePart & _source);
 
-signals:
-    void headerReceived(const MqpResponseHeader & _header);
-    void messageReceived(const Message & _message);
-    void finished();
-}; // class MqpClientNotifier
-
-class MqpClient : public MqpClientNotifier
-{
-    Q_OBJECT
-    friend void sendMqpRequestAsync(const ServerConfig &, const QString &, MqpClientNotifier *);
 
 private:
-    explicit MqpClient(const ServerConfig & _server, const QString & _request);
-    quint32 readHeader();
-    void readMessage();
-
-public:
-    void run();
-
-private slots:
-    void onSocketConnected();
-    void onSocketReadyRead();
-    void onSocketError(QAbstractSocket::SocketError _error);
-
-private:
-    QTcpSocket * mp_socket;
-    ServerConfig m_server;
-    QString m_request;
-}; // class MqpClient
-
-void sendMqpRequestAsync(const ServerConfig & _server, const QString & _request, MqpClientNotifier * _notifier = nullptr);
+    QWebView * mp_webview;
+    const MimeMessagePart * mp_source;
+}; // class HtmlView
 
 } // namespace Gui
 } // namespace MailUnit
 
-#endif // _MUGUI_MQPCLIENT_H__
+#endif // __MUGUI_GUI_HTMLVIEW_H__

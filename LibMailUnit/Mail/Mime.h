@@ -40,9 +40,19 @@ public:
         return *m_headers_ptr;
     }
 
+    const ContentType & contentType() const
+    {
+        return *m_content_type_ptr;
+    }
+
     const std::vector<const MimeMessagePart *> & parts() const
     {
         return m_parts;
+    }
+
+    const std::string & text() const
+    {
+        return m_text_content;
     }
 
 private:

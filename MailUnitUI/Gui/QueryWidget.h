@@ -20,8 +20,9 @@
 
 #include <QWidget>
 #include <ui_QueryWidget.h>
-#include <MailUnitUI/MqpClient.h>
+#include <MailUnitUI/MqpClient/MqpClient.h>
 #include <MailUnitUI/Gui/MessageListView.h>
+#include <MailUnitUI/Gui/HtmlView.h>
 
 namespace MailUnit {
 namespace Gui {
@@ -45,17 +46,19 @@ public slots:
     void execute();
 
 private slots:
-    void onHeaderReceived(const MqpResponseHeader & _header);
+    void onClientConnected(const MqpResponseHeader & _header);
     void onMessageReceived(const Message & _message);
     void onRequestFinished();
     void onMessageSelected(const Message * _message);
 
 private:
+    MqpClient * mp_client;
     ServerConfig m_server;
-    MqpClientNotifier * mp_notifier;
     LoadingState * mp_state;
     QList<const Message *> * mp_messages;
     MessageListView * mp_listview_result;
+    HtmlView * mp_html_view;
+    MimeMessage * mp_selected_message;
 };
 
 } // namespace Gui

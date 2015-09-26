@@ -27,6 +27,7 @@
 #include "../Def.h"
 #include "MailHeader.h"
 #include "Mailbox.h"
+#include "ContentType.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -57,9 +58,17 @@ MU_API MU_MAIL_HEADERLIST MU_CALL muMimePartHeaders(MU_MIME_PART _message_part);
 
 MU_API const char * MU_CALL muMimeSubject(MU_MIME_MESSAGE _message);
 
+MU_API const char * MU_CALL muMimeContent(MU_MIME_MESSAGE _message);
+
+MU_API const char * MU_CALL muMimePartContent(MU_MIME_PART _message_part);
+
 MU_API size_t MU_CALL muMimeMailboxGroupCount(MU_MIME_MESSAGE _message, MMailboxType _mailbox_type);
 
 MU_API MU_MAILBOXGROUP MU_CALL muMimeMailboxGroup(MU_MIME_MESSAGE _message, MMailboxType _mailbox_type, size_t _index);
+
+MU_API MU_MAIL_HEADER_CONTENT_TYPE MU_CALL muMimeContentType(MU_MIME_MESSAGE _message);
+
+MU_API MU_MAIL_HEADER_CONTENT_TYPE MU_CALL muMimePartContentType(MU_MIME_PART _message_part);
 
 #ifdef __cplusplus
 } // extern "C"

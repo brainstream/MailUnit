@@ -15,52 +15,44 @@
  *                                                                                             *
  ***********************************************************************************************/
 
-#include <QThread>
-#include <MailUnitUI/MqpClient.h>
+#include <MailUnitUI/MqpClient/MqpClient.h>
 
 using namespace MailUnit::Gui;
 
-MqpClient::MqpClient(const ServerConfig & _server, const QString & _request) :
+MqpClient::MqpClient(const ServerConfig & _server, QObject * _parent /*= nullptr*/) :
+    QObject(_parent),
+    mp_messages(nullptr),
     m_server(_server)
 {
-    m_request = _request.trimmed();
-    if(!m_request.endsWith(';'))
-        m_request += ';';
+    mp_messages = new MqpMessageRepository(this);
 }
 
-void MqpClient::run()
+void MqpClient::executeRequest(const QString & _request)
 {
-    mp_socket = new QTcpSocket(this);
-    connect(mp_socket, SIGNAL(connected()), this, SLOT(onSocketConnected()));
-    connect(mp_socket, SIGNAL(readyRead()), this, SLOT(onSocketReadyRead()));
-    connect(mp_socket, SIGNAL(error(QAbstractSocket::SocketError)),
-        this, SLOT(onSocketError(QAbstractSocket::SocketError)));
-    connect(mp_socket, SIGNAL(disconnected()), mp_socket, SLOT(deleteLater()));
-    connect(mp_socket, SIGNAL(disconnected()), SIGNAL(finished()));
-    mp_socket->connectToHost(m_server.host(), m_server.port());
+    QString request = _request.trimmed();
+    if(!request.endsWith(';'))
+        request += ';';
+    QTcpSocket * socket = new QTcpSocket(this);
+    connect(socket, &QTcpSocket::connected, [socket, request]() {
+        socket->write(request.toUtf8());
+    });
+    QMetaObject::Connection ready_con = connect(socket, &QTcpSocket::readyRead, [this, socket, ready_con]() {
+        disconnect(ready_con);
+        quint32 message_count = readHeader(*socket);
+        for(quint32 i = 0; i < message_count; ++i)
+            readMessage(*socket);
+        socket->write("quit;");
+    });
+    connect(socket, static_cast<void (QTcpSocket::*)(QAbstractSocket::SocketError)>(&QAbstractSocket::error),
+        [this](QAbstractSocket::SocketError) {
+        // TODO: handle
+    });
+    connect(socket, SIGNAL(disconnected()), socket, SLOT(deleteLater()));
+    connect(socket, SIGNAL(disconnected()), SIGNAL(finished()));
+    socket->connectToHost(m_server.host(), m_server.port());
 }
 
-void MqpClient::onSocketConnected()
-{
-    mp_socket->write(m_request.toUtf8());
-}
-
-void MqpClient::onSocketReadyRead()
-{
-    disconnect(mp_socket, SIGNAL(readyRead()), this, SLOT(onSocketReadyRead()));
-    quint32 message_count = readHeader();
-    for(quint32 i = 0; i < message_count; ++i)
-    {
-        readMessage();
-    }
-    mp_socket->write("quit;");
-}
-
-void MqpClient::onSocketError(QAbstractSocket::SocketError _error)
-{
-}
-
-quint32 MqpClient::readHeader()
+quint32 MqpClient::readHeader(QTcpSocket & _socket)
 {
     static const QString hdr_status  = "STATUS: ";
     static const QString hdr_matched = "MATCHED: ";
@@ -70,11 +62,11 @@ quint32 MqpClient::readHeader()
     bool has_messages = false;
     for(;;)
     {
-        if(!mp_socket->canReadLine()) {
-            mp_socket->waitForReadyRead();
+        if(!_socket.canReadLine()) {
+            _socket.waitForReadyRead();
             continue;
         }
-        QString line(mp_socket->readLine());
+        QString line(_socket.readLine());
         line = line.trimmed();
         if(line.isEmpty()) break;
         if(line.startsWith(hdr_status))
@@ -93,11 +85,11 @@ quint32 MqpClient::readHeader()
             header.response_type = MqpResponseType::deleted;
         }
     }
-    emit headerReceived(header);
+    emit connected(header);
     return has_messages ? header.affected_count : 0;
 }
 
-void MqpClient::readMessage()
+void MqpClient::readMessage(QTcpSocket & _socket)
 {
     static const QString hdr_item    = "ITEM: ";
     static const QString hdr_size    = "SIZE: ";
@@ -111,11 +103,11 @@ void MqpClient::readMessage()
     size_t size = 0;
     for(;;)
     {
-        if(!mp_socket->canReadLine()) {
-            mp_socket->waitForReadyRead();
+        if(!_socket.canReadLine()) {
+            _socket.waitForReadyRead();
             continue;
         }
-        QString line(mp_socket->readLine());
+        QString line(_socket.readLine());
         line = line.trimmed();
         if(line.isEmpty()) break;
         if(line.startsWith(hdr_item))
@@ -153,51 +145,13 @@ void MqpClient::readMessage()
     }
     for(size_t size_left = size; size_left > 0;)
     {
-        if(mp_socket->atEnd()) {
-            mp_socket->waitForReadyRead();
+        if(_socket.atEnd()) {
+            _socket.waitForReadyRead();
         }
-        QByteArray data = mp_socket->read(size_left);
+        QByteArray data = _socket.read(size_left);
         message.body.append(data);
         size_left -= data.length();
     }
     emit messageReceived(message);
 }
 
-namespace {
-
-class MqpRequestThread : public QThread
-{
-public:
-    explicit MqpRequestThread(MqpClient & _client) :
-        mr_client(_client)
-    {
-    }
-
-protected:
-    void run() override
-    {
-        mr_client.run();
-        exec();
-    }
-
-private:
-    MqpClient & mr_client;
-};
-
-} // namespace
-
-void MailUnit::Gui::sendMqpRequestAsync(const ServerConfig & _server, const QString & _request, MqpClientNotifier * _notifier /*= nullptr*/)
-{
-    MqpClient * client = new MqpClient(_server, _request);
-    MqpRequestThread * thread = new MqpRequestThread(*client);
-    client->moveToThread(thread);
-    if(nullptr != _notifier)
-    {
-        QObject::connect(client, SIGNAL(headerReceived(MqpResponseHeader)), _notifier, SIGNAL(headerReceived(MqpResponseHeader)));
-        QObject::connect(client, SIGNAL(messageReceived(Message)), _notifier, SIGNAL(messageReceived(Message)));
-        QObject::connect(client, SIGNAL(finished()), _notifier, SIGNAL(finished()));
-    }
-    QObject::connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
-    QObject::connect(thread, SIGNAL(finished()), client, SLOT(deleteLater()));
-    thread->start();
-}

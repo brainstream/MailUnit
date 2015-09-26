@@ -23,7 +23,7 @@ using namespace LibMailUnit::Mail;
 
 MU_MAIL_HEADER_CONTENT_TYPE MU_CALL muContentTypeParse(const char * _raw_content_type)
 {
-    ContentType * content_type = parseContentType(_raw_content_type).release();
+    const ContentType * content_type = parseContentType(_raw_content_type).release();
     if(nullptr != content_type)
         return new MHandle(content_type, true);
     return MU_INVALID_HANDLE;
@@ -33,7 +33,7 @@ MBool MU_CALL muContentType(MU_MAIL_HEADER_CONTENT_TYPE _content_type, const cha
 {
     if(MU_INVALID_HANDLE == _content_type || nullptr == _content_type)
         return mfalse;
-    ContentType * content_type = _content_type->pointer<ContentType>();
+    const ContentType * content_type = _content_type->pointer<const ContentType>();
     *_type_out = content_type->type.c_str();
     *_subtype_out = content_type->subtype.c_str();
     return mtrue;
@@ -43,7 +43,7 @@ const size_t MU_CALL muContentTypeParamsCount(MU_MAIL_HEADER_CONTENT_TYPE _conte
 {
     if(MU_INVALID_HANDLE == _content_type || nullptr == _content_type)
         return 0;
-    return _content_type->pointer<ContentType>()->params.size();
+    return _content_type->pointer<const ContentType>()->params.size();
 }
 
 MBool MU_CALL muContentTypeParam(MU_MAIL_HEADER_CONTENT_TYPE _content_type, size_t _index,
@@ -51,7 +51,7 @@ MBool MU_CALL muContentTypeParam(MU_MAIL_HEADER_CONTENT_TYPE _content_type, size
 {
     if(MU_INVALID_HANDLE == _content_type || nullptr == _content_type)
         return mfalse;
-    ContentTypeParam & param = _content_type->pointer<ContentType>()->params[_index];
+    const ContentTypeParam & param = _content_type->pointer<const ContentType>()->params[_index];
     *_name_out = param.name.c_str();
     *_value_out = param.value.c_str();
     return mtrue;
