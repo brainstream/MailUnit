@@ -36,7 +36,7 @@ void MqpClient::executeRequest(const QString & _request)
     connect(socket, &QTcpSocket::connected, [socket, request]() {
         socket->write(request.toUtf8());
     });
-    QMetaObject::Connection ready_con = connect(socket, &QTcpSocket::readyRead, [this, socket, ready_con]() {
+    QMetaObject::Connection ready_con = connect(socket, &QTcpSocket::readyRead, [this, socket, &ready_con]() {
         disconnect(ready_con);
         quint32 message_count = readHeader(*socket);
         for(quint32 i = 0; i < message_count; ++i)
