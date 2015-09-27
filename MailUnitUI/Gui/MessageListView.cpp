@@ -23,7 +23,7 @@ using namespace MailUnit::Gui;
 class MessageListViewModel : public QAbstractListModel
 {
 public:
-    explicit MessageListViewModel(const QList<const Message *> & _messages, QObject * _parent = nullptr) :
+    explicit MessageListViewModel(const QList<const MqpMessage *> & _messages, QObject * _parent = nullptr) :
         QAbstractListModel(_parent),
         m_row_count(0),
         mr_messages(_messages)
@@ -35,11 +35,11 @@ public:
     void sync();
 
 private:
-    QString formatMessage(const Message & _message) const;
+    QString formatMessage(const MqpMessage & _message) const;
 
 private:
     int m_row_count;
-    const QList<const Message *> & mr_messages;
+    const QList<const MqpMessage *> & mr_messages;
 }; // class MessageListViewModel
 
 int MessageListViewModel::rowCount(const QModelIndex &parent) const
@@ -63,33 +63,34 @@ QVariant MessageListViewModel::data(const QModelIndex & _index, int _role) const
 
 }
 
-QString MessageListViewModel::formatMessage(const Message & _message) const
+QString MessageListViewModel::formatMessage(const MqpMessage & _message) const
 {
     QString string;
     QTextStream stream(&string, QIODevice::WriteOnly);
-    if(_message.subject.isEmpty())
+    const MqpMessageHeader & header = _message.header();
+    if(header.subject.isEmpty())
     {
         stream << tr("<NO SUBJECT>");
     }
     else
     {
-        stream << _message.subject;
+        stream << header.subject;
     }
-    if(_message.from.length() > 0)
+    if(header.from.length() > 0)
     {
-        stream << "\nFrom: " << _message.from.join(", ");
+        stream << "\nFrom: " << header.from.join(", ");
     }
-    if(_message.to.length() > 0)
+    if(header.to.length() > 0)
     {
-        stream << "\nTo: " << _message.to.join(", ");
+        stream << "\nTo: " << header.to.join(", ");
     }
-    if(_message.cc.length() > 0)
+    if(header.cc.length() > 0)
     {
-        stream << "\nCC: " << _message.cc.join(", ");
+        stream << "\nCC: " << header.cc.join(", ");
     }
-    if(_message.bcc.length() > 0)
+    if(header.bcc.length() > 0)
     {
-        stream << "\nBCC: " << _message.bcc.join(", ");
+        stream << "\nBCC: " << header.bcc.join(", ");
     }
     return *stream.string();
 }
@@ -101,7 +102,7 @@ void MessageListViewModel::sync()
     emit dataChanged(createIndex(old_row_count, 0), createIndex(m_row_count, 0));
 }
 
-MessageListView::MessageListView(const QList<const Message *> & _messages, QWidget * _parent /*= nullptr*/) :
+MessageListView::MessageListView(const QList<const MqpMessage *> & _messages, QWidget * _parent /*= nullptr*/) :
     QListView(_parent),
     mr_messages(_messages)
 {
@@ -119,7 +120,7 @@ void MessageListView::sync()
 void MessageListView::currentChanged(const QModelIndex & _current, const QModelIndex & _previous)
 {
     QListView::currentChanged(_current, _previous);
-    const Message * message = nullptr;
+    const MqpMessage * message = nullptr;
     if(_current.row() < mr_messages.length())
         message = mr_messages[_current.row()];
     emit messageSelected(message);

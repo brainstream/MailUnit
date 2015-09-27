@@ -17,7 +17,7 @@
 
 #include <QList>
 #include <QListView>
-#include <MailUnitUI/MqpClient/Message.h>
+#include <MailUnitUI/MqpClient/MqpMessage.h>
 
 namespace MailUnit {
 namespace Gui {
@@ -27,17 +27,17 @@ class MessageListView : public QListView
     Q_OBJECT
 
 public:
-    explicit MessageListView(const QList<const Message *> & _messages, QWidget * _parent = nullptr);
+    explicit MessageListView(const QList<const MqpMessage *> & _messages, QWidget * _parent = nullptr);
     void sync();
 
 protected slots:
     void currentChanged(const QModelIndex & _current, const QModelIndex & _previous) override;
 
 signals:
-    void messageSelected(const Message * _message);
+    void messageSelected(const MqpMessage * _message);
 
 private:
-    const QList<const Message *> & mr_messages;
+    const QList<const MqpMessage *> & mr_messages;
 }; // class MessageListView
 
 } // namespace Gui

@@ -60,4 +60,7 @@ private:
 } // namespace Gui
 } // namespace MailUnit
 
+Q_DECLARE_METATYPE(MailUnit::Gui::MqpMessageHeader)
+Q_DECLARE_METATYPE(MailUnit::Gui::MqpRawMessage)
+
 #endif // __MUGUI_MQPCLIENT_MQPRESPONSE_H__

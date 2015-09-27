@@ -21,10 +21,8 @@ using namespace MailUnit::Gui;
 
 MqpClient::MqpClient(const ServerConfig & _server, QObject * _parent /*= nullptr*/) :
     QObject(_parent),
-    mp_messages(nullptr),
     m_server(_server)
 {
-    mp_messages = new MqpMessageRepository(this);
 }
 
 void MqpClient::executeRequest(const QString & _request)
@@ -36,8 +34,7 @@ void MqpClient::executeRequest(const QString & _request)
     connect(socket, &QTcpSocket::connected, [socket, request]() {
         socket->write(request.toUtf8());
     });
-    QMetaObject::Connection ready_con = connect(socket, &QTcpSocket::readyRead, [this, socket, &ready_con]() {
-        disconnect(ready_con);
+    connect(socket, &QTcpSocket::readyRead, [this, socket]() {
         quint32 message_count = readHeader(*socket);
         for(quint32 i = 0; i < message_count; ++i)
             readMessage(*socket);
@@ -99,7 +96,7 @@ void MqpClient::readMessage(QTcpSocket & _socket)
     static const QString hdr_to      = "TO: ";
     static const QString hdr_cc      = "CC: ";
     static const QString hdr_bcc     = "BCC: ";
-    Message message =  { };
+    MqpRawMessage message =  { };
     size_t size = 0;
     for(;;)
     {
@@ -154,4 +151,3 @@ void MqpClient::readMessage(QTcpSocket & _socket)
     }
     emit messageReceived(message);
 }
-

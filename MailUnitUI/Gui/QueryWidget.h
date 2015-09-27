@@ -47,15 +47,15 @@ public slots:
 
 private slots:
     void onClientConnected(const MqpResponseHeader & _header);
-    void onMessageReceived(const Message & _message);
+    void onMessageReceived(const MqpRawMessage & _message);
     void onRequestFinished();
-    void onMessageSelected(const Message * _message);
+    void onMessageSelected(const MqpRawMessage * _message);
 
 private:
     MqpClient * mp_client;
     ServerConfig m_server;
     LoadingState * mp_state;
-    QList<const Message *> * mp_messages;
+    QList<const MqpMessage *> * mp_messages;
     MessageListView * mp_listview_result;
     HtmlView * mp_html_view;
     MimeMessage * mp_selected_message;

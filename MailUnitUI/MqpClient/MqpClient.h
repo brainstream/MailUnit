@@ -20,8 +20,7 @@
 
 #include <QTcpSocket>
 #include <MailUnitUI/MqpClient/ServerConfig.h>
-#include <MailUnitUI/MqpClient/Message.h>
-#include <MailUnitUI/MqpClient/MqpMessageRepository.h>
+#include <MailUnitUI/MqpClient/MqpMessage.h>
 
 namespace MailUnit {
 namespace Gui {
@@ -58,15 +57,9 @@ public:
     explicit MqpClient(const ServerConfig & _server, QObject * _parent = nullptr);
     void executeRequest(const QString & _request);
 
-    const MqpMessageRepository & messages() const
-    {
-        return *mp_messages;
-    }
-
 signals:
     void connected(const MqpResponseHeader & _header);
-    //void messageReceived(const MqpRawMessage & _message);
-    void messageReceived(const Message & _message);
+    void messageReceived(const MqpRawMessage & _message);
     void finished();
 
 private:
@@ -74,7 +67,6 @@ private:
     void readMessage(QTcpSocket &_socket);
 
 private:
-    MqpMessageRepository * mp_messages;
     ServerConfig m_server;
 }; // class MqpClient
 

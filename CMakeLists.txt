@@ -242,7 +242,6 @@ set(SRC_SERVER
 set(SRC_GUI_MOC
     MailUnitUI/MqpClient/ServerConfig.h
     MailUnitUI/MqpClient/MqpClient.h
-    MailUnitUI/MqpClient/MqpMessageRepository.h
     MailUnitUI/Gui/MainWindow.h
     MailUnitUI/Gui/ServerDialog.h
     MailUnitUI/Gui/AboutDialog.h
@@ -275,7 +274,6 @@ set(SRC_GUI
     MailUnitUI/Config.cpp
     MailUnitUI/MqpClient/ServerConfig.cpp
     MailUnitUI/MqpClient/MqpClient.cpp
-    MailUnitUI/MqpClient/Message.h
     MailUnitUI/MqpClient/MimeMessage.h
     MailUnitUI/MqpClient/MimeMessage.cpp
     MailUnitUI/MqpClient/MqpMessage.h

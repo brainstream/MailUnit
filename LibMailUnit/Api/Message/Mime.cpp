@@ -88,6 +88,12 @@ MU_MAIL_HEADER_CONTENT_TYPE MU_CALL muMimeContentType(MU_MIME_MESSAGE _message)
     if(nullptr == _message || MU_INVALID_HANDLE == _message)
         return MU_INVALID_HANDLE;
     const MimeMessage * message = _message->pointer<const MimeMessage>();
+    //
+    //
+    // TODO: Separate method for a part
+    //
+    //
+    //const MimeMessagePart * message = _message->pointer<const MimeMessagePart>();
     return new MHandle(&message->contentType(), false);
 }
 

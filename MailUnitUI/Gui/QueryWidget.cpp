@@ -94,7 +94,7 @@ QueryWidget::QueryWidget(const ServerConfig & _server, QWidget * _parent /*= nul
     mp_client(nullptr),
     m_server(_server),
     mp_state(nullptr),
-    mp_messages(new QList<const Message *>),
+    mp_messages(new QList<const MqpMessage *>),
     mp_html_view(nullptr)
 {
     setupUi(this);
@@ -111,15 +111,14 @@ QueryWidget::QueryWidget(const ServerConfig & _server, QWidget * _parent /*= nul
     mp_layout_result->addWidget(mp_html_view);
     connect(mp_client, SIGNAL(connected(MqpResponseHeader)), this, SLOT(onClientConnected(MqpResponseHeader)));
     connect(mp_client, SIGNAL(finished()), this, SLOT(onRequestFinished()));
-    //connect(mp_client, SIGNAL(messageReceived(MqpRawMessage)), this, SLOT(onMessageReceived(Message)));
-    connect(mp_client, SIGNAL(messageReceived(Message)), this, SLOT(onMessageReceived(Message)));
-    connect(mp_listview_result, SIGNAL(messageSelected(const Message*)), this, SLOT(onMessageSelected(const Message*)));
+    connect(mp_client, SIGNAL(messageReceived(MqpRawMessage)), this, SLOT(onMessageReceived(MqpRawMessage)));
+    connect(mp_listview_result, SIGNAL(messageSelected(const MqpMessage*)), this, SLOT(onMessageSelected(const MqpMessage*)));
 }
 
 QueryWidget::~QueryWidget()
 {
     delete mp_state;
-    for(const Message * msg : *mp_messages)
+    for(const MqpMessage * msg : *mp_messages)
         delete msg;
     delete mp_messages;
 }
@@ -145,11 +144,11 @@ void QueryWidget::onClientConnected(const MqpResponseHeader & _header)
     mp_progress_bar->setValue(0);
 }
 
-void QueryWidget::onMessageReceived(const Message & _message)
+void QueryWidget::onMessageReceived(const MqpRawMessage & _message)
 {
     ++mp_state->loaded_count;
     mp_progress_bar->setValue(static_cast<int>(mp_state->loaded_count));
-    mp_messages->append(new Message(_message));
+    mp_messages->append(new MqpMessage(_message));
     mp_listview_result->sync();
 }
 
@@ -173,7 +172,7 @@ void QueryWidget::onRequestFinished()
     mp_state = nullptr;
 }
 
-void QueryWidget::onMessageSelected(const Message * _message)
+void QueryWidget::onMessageSelected(const MqpRawMessage * _message)
 {
     mp_edit_msg_body->clear();
     //mp_html_view->setHtml(QString());
