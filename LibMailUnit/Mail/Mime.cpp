@@ -129,7 +129,7 @@ void MimeMessagePart::parseMultipart(std::istream & _stream)
     }
     const std::string boundary_start = std::string("--") + boundary_it->value;
     const std::string boundary_end = boundary_start + "--";
-    std::stringstream body;
+    std::stringstream * body = new std::stringstream();
     std::string line;
     bool body_open = false;
     while(std::getline(_stream, line))
@@ -138,7 +138,7 @@ void MimeMessagePart::parseMultipart(std::istream & _stream)
         {
             if(body_open)
             {
-                m_parts.push_back(new MimeMessagePart(body));
+                m_parts.push_back(new MimeMessagePart(*body));
                 body_open = false;
             }
             break;
@@ -147,8 +147,9 @@ void MimeMessagePart::parseMultipart(std::istream & _stream)
         {
             if(body_open)
             {
-                m_parts.push_back(new MimeMessagePart(body));
-                body = std::stringstream();
+                m_parts.push_back(new MimeMessagePart(*body));
+                delete body;
+                body = new std::stringstream();
             }
             else
             {
@@ -157,13 +158,14 @@ void MimeMessagePart::parseMultipart(std::istream & _stream)
         }
         else if(body_open)
         {
-            body << line << "\n";
+            (*body) << line << "\n";
         }
     }
     if(body_open)
     {
-        m_parts.push_back(new MimeMessagePart(body));
+        m_parts.push_back(new MimeMessagePart(*body));
     }
+    delete body;
 }
 
 void MimeMessagePart::parseMessage(std::istream & _stream)
