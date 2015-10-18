@@ -172,13 +172,13 @@ void QueryWidget::onRequestFinished()
     mp_state = nullptr;
 }
 
-void QueryWidget::onMessageSelected(const MqpRawMessage * _message)
+void QueryWidget::onMessageSelected(const MqpMessage * _message)
 {
     mp_edit_msg_body->clear();
     //mp_html_view->setHtml(QString());
     if(nullptr == _message)
         return;
-    mp_edit_msg_body->setPlainText(_message->body);
+    mp_edit_msg_body->setPlainText(_message->mime().content()); // FIXME: crash!
 
 
 

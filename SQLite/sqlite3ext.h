@@ -25,14 +25,14 @@ typedef struct sqlite3_api_routines sqlite3_api_routines;
 ** The following structure holds pointers to all of the SQLite API
 ** routines.
 **
-** WARNING:  In order to maintain backwards compatibility, add new
+** WARNING_SQLITE:  In order to maintain backwards compatibility, add new
 ** interfaces to the end of this structure only.  If you insert new
 ** interfaces in the middle of this structure, then older different
 ** versions of SQLite will not be able to load each others' shared
 ** libraries!
 */
 struct sqlite3_api_routines {
-  void * (*aggregate_context)(sqlite3_context*,int nBytes);
+  void * (*aggregate_context)(sqlite3_context*,int nBFytes);
   int  (*aggregate_count)(sqlite3_context*);
   int  (*bind_blob)(sqlite3_stmt*,int,const void*,int n,void(*)(void*));
   int  (*bind_double)(sqlite3_stmt*,int,double);

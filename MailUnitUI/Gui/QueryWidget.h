@@ -49,7 +49,7 @@ private slots:
     void onClientConnected(const MqpResponseHeader & _header);
     void onMessageReceived(const MqpRawMessage & _message);
     void onRequestFinished();
-    void onMessageSelected(const MqpRawMessage * _message);
+    void onMessageSelected(const MqpMessage * _message);
 
 private:
     MqpClient * mp_client;

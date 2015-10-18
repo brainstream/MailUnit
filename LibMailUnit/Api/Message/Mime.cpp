@@ -18,152 +18,130 @@
 #include <sstream>
 #include <boost/iostreams/stream.hpp>
 #include <boost/iostreams/device/file_descriptor.hpp>
-#include <LibMailUnit/Memory.h>
-#include <LibMailUnit/Mail/Mime.h>
-#include <Include/LibMailUnit/Message/Mime.h>
+#include <LibMailUnit/Api/Message/Mime.h>
+#include <LibMailUnit/Api/Message/MailHeader.h>
+#include <LibMailUnit/Api/Message/ContentType.h>
+#include <LibMailUnit/Api/Message/Mailbox.h>
 
+using namespace LibMailUnit;
 using namespace LibMailUnit::Mail;
 
-MU_MIME_MESSAGE MU_CALL muMimeParseString(const char * _input)
+const MU_MimeMessage * MU_CALL muMimeParseString(const char * _input)
 {
     std::stringstream stream(_input);
     const MimeMessage * message = new MimeMessage(stream);
-    return new MHandle(message, true);
+    return new MU_MimeMessage(message, true);
 }
 
-MU_MIME_MESSAGE MU_CALL muMimeParseFile(MU_NATIVE_FILE _input)
+const MU_MimeMessage * MU_CALL muMimeParseFile(MU_NATIVE_FILE _input)
 {
     boost::iostreams::file_descriptor fdesc(_input, boost::iostreams::never_close_handle);
     boost::iostreams::stream<boost::iostreams::file_descriptor> stream(fdesc);
     const MimeMessage * message = new MimeMessage(stream);
-    return new MHandle(message, true);
+    return new MU_MimeMessage(message, true);
 }
 
-size_t MU_CALL muMimePartCount(MU_MIME_MESSAGE _message)
+const char * MU_CALL muMimeSubject(const MU_MimeMessage * _message)
 {
-    if(nullptr == _message || MU_INVALID_HANDLE == _message)
-        return 0;
-    const MimeMessage * mime = _message->pointer<const MimeMessage>();
-    return mime->parts().size();
-}
-
-MU_MIME_PART MU_CALL muMimePart(MU_MIME_MESSAGE _message, size_t _index)
-{
-    if(nullptr == _message || MU_INVALID_HANDLE == _message)
-        return MU_INVALID_HANDLE;
-    const MimeMessage * mime = _message->pointer<const MimeMessage>();
-    size_t count = mime->parts().size();
-    if(_index >= count)
-        return MU_INVALID_HANDLE;
-    return new MHandle(mime->parts()[_index], false);
-
-}
-
-MU_MAIL_HEADERLIST MU_CALL muMimeHeaders(MU_MIME_MESSAGE _message)
-{
-    if(nullptr == _message || MU_INVALID_HANDLE == _message)
-        return MU_INVALID_HANDLE;
-    const MimeMessage * mime = _message->pointer<const MimeMessage>();
-    return new MHandle(&mime->headers(), false);
-}
-
-MU_MAIL_HEADERLIST MU_CALL muMimePartHeaders(MU_MIME_PART _message_part)
-{
-    if(nullptr == _message_part || MU_INVALID_HANDLE == _message_part)
-        return MU_INVALID_HANDLE;
-    const MimeMessagePart * part = _message_part->pointer<const MimeMessagePart>();
-    return new MHandle(&part->headers(), false);
-}
-
-const char * MU_CALL muMimeSubject(MU_MIME_MESSAGE _message)
-{
-    if(nullptr == _message || MU_INVALID_HANDLE == _message)
+    if(nullptr == _message)
         return nullptr;
-    const MimeMessage * message = _message->pointer<const MimeMessage>();
+    const MimeMessage * message = _message->pointer();
     return message->subject().c_str();
 }
 
-MU_MAIL_HEADER_CONTENT_TYPE MU_CALL muMimeContentType(MU_MIME_MESSAGE _message)
+size_t MU_CALL muMimeMailboxGroupCount(const MU_MimeMessage * _message, MU_MailboxType _mailbox_type)
 {
-    if(nullptr == _message || MU_INVALID_HANDLE == _message)
-        return MU_INVALID_HANDLE;
-    const MimeMessage * message = _message->pointer<const MimeMessage>();
-    //
-    //
-    // TODO: Separate method for a part
-    //
-    //
-    //const MimeMessagePart * message = _message->pointer<const MimeMessagePart>();
-    return new MHandle(&message->contentType(), false);
-}
-
-MU_MAIL_HEADER_CONTENT_TYPE MU_CALL muMimePartContentType(MU_MIME_PART _message_part)
-{
-    if(nullptr == _message_part || MU_INVALID_HANDLE == _message_part)
-        return MU_INVALID_HANDLE;
-    const MimeMessagePart * part = _message_part->pointer<const MimeMessagePart>();
-    return new MHandle(&part->contentType(), false);
-}
-
-size_t MU_CALL muMimeMailboxGroupCount(MU_MIME_MESSAGE _message, MMailboxType _mailbox_type)
-{
-    if(nullptr == _message || MU_INVALID_HANDLE == _message)
+    if(nullptr == _message)
         return 0;
-    const MimeMessage * message = _message->pointer<const MimeMessage>();
+    const MimeMessage * message = _message->pointer();
     switch(_mailbox_type)
     {
-    case mb_from:
+    case mu_mbox_from:
         return message->from().size();
-    case mb_to:
+    case mu_mbox_to:
         return message->to().size();
-    case mb_cc:
+    case mu_mbox_cc:
         return message->cc().size();
-    case mb_bcc:
+    case mu_mbox_bcc:
         return message->bcc().size();
     default:
         return 0;
     }
 }
 
-MU_MAILBOXGROUP MU_CALL muMimeMailboxGroup(MU_MIME_MESSAGE _message, MMailboxType _mailbox_type, size_t _index)
+const MU_MailboxGroup * MU_CALL muMimeMailboxGroup(const MU_MimeMessage * _message, MU_MailboxType _mailbox_type, size_t _index)
 {
-    if(nullptr == _message || MU_INVALID_HANDLE == _message)
-        return MU_INVALID_HANDLE;
-    const MimeMessage * message = _message->pointer<const MimeMessage>();
+    if(nullptr == _message)
+        return nullptr;
+    const MimeMessage * message = _message->pointer();
     const std::vector<const MailboxGroup *> * groups = nullptr;
     switch(_mailbox_type)
     {
-    case mb_from:
+    case mu_mbox_from:
         groups = &message->from();
         break;
-    case mb_to:
+    case mu_mbox_to:
         groups = &message->to();
         break;
-    case mb_cc:
+    case mu_mbox_cc:
         groups = &message->cc();
         break;
-    case mb_bcc:
+    case mu_mbox_bcc:
         groups = &message->bcc();
         break;
     }
     if(nullptr == groups || _index >= groups->size())
-        return MU_INVALID_HANDLE;
-    return new MHandle((*groups)[_index], false);
+        return nullptr;
+    return new MU_MailboxGroup((*groups)[_index], false);
 }
 
-const char * MU_CALL muMimeContent(MU_MIME_MESSAGE _message)
+const MU_MimePart * MU_CALL muMimeToPart(const MU_MimeMessage * _message)
 {
-    if(nullptr == _message || MU_INVALID_HANDLE == _message)
+    if(nullptr == _message)
         return nullptr;
-    const MimeMessage * message = _message->pointer<const MimeMessage>();
-    return message->text().c_str();
+    const MimeMessage * mime = _message->pointer();
+    return new MU_MimePart(mime, false);
 }
 
-const char * MU_CALL muMimePartContent(MU_MIME_PART _message_part)
+size_t MU_CALL muMimePartCount(const MU_MimePart * _part)
 {
-    if(nullptr == _message_part || MU_INVALID_HANDLE == _message_part)
+    if(nullptr == _part)
+        return 0;
+    const MimePart * part = _part->pointer();
+    return part->parts().size();
+}
+
+const MU_MimePart * MU_CALL muMimePart(const MU_MimePart * _part, size_t _index)
+{
+    if(nullptr == _part)
         return nullptr;
-    const MimeMessagePart * part = _message_part->pointer<const MimeMessagePart>();
+    const MimePart * part = _part->pointer();
+    size_t count = part->parts().size();
+    if(_index >= count)
+        return nullptr;
+    return new MU_MimePart(part->parts()[_index], false);
+}
+
+const MU_MailHeaderList * MU_CALL muMimeHeaders(const MU_MimePart * _part)
+{
+    if(nullptr == _part)
+        return nullptr;
+    const MimePart * part = _part->pointer();
+    return new MU_MailHeaderList(&part->headers(), false);
+}
+
+const MU_MailHeaderContentType * MU_CALL muMimeContentType(const MU_MimePart * _part)
+{
+    if(nullptr == _part)
+        return nullptr;
+    const MimePart * part = _part->pointer();
+    return new MU_MailHeaderContentType(&part->contentType(), false);
+}
+
+const char * MU_CALL muMimeContent(const MU_MimePart * _part)
+{
+    if(nullptr == _part)
+        return nullptr;
+    const MimePart * part = _part->pointer();
     return part->text().c_str();
 }
-

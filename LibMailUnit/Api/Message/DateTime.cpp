@@ -45,52 +45,52 @@ constexpr char day_name_fri[] = "Fri";
 constexpr char day_name_sat[] = "Sat";
 constexpr char day_name_sun[] = "Sun";
 
-MMonth parseMonth(const std::string & _month_string)
+MU_Month parseMonth(const std::string & _month_string)
 {
     if(_month_string == month_name_jan)
-        return mmonth_jan;
+        return mu_month_jan;
     if(_month_string == month_name_feb)
-        return mmonth_feb;
+        return mu_month_feb;
     if(_month_string == month_name_mar)
-        return mmonth_mar;
+        return mu_month_mar;
     if(_month_string == month_name_apr)
-        return mmonth_apr;
+        return mu_month_apr;
     if(_month_string == month_name_may)
-        return mmonth_may;
+        return mu_month_may;
     if(_month_string == month_name_jun)
-        return mmonth_jun;
+        return mu_month_jun;
     if(_month_string == month_name_jul)
-        return mmonth_jul;
+        return mu_month_jul;
     if(_month_string == month_name_aug)
-        return mmonth_aug;
+        return mu_month_aug;
     if(_month_string == month_name_sep)
-        return mmonth_sep;
+        return mu_month_sep;
     if(_month_string == month_name_oct)
-        return mmonth_oct;
+        return mu_month_oct;
     if(_month_string == month_name_nov)
-        return mmonth_nov;
+        return mu_month_nov;
     if(_month_string == month_name_dec)
-        return mmonth_dec;
-    return  mmonth_invalid;
+        return mu_month_dec;
+    return  mu_month_invalid;
 }
 
-MDayOfWeek parseDayOfWeek(const std::string & _dow_string)
+MU_DayOfWeek parseDayOfWeek(const std::string & _dow_string)
 {
     if(_dow_string == day_name_mon)
-        return mdow_mon;
+        return mu_dow_mon;
     if(_dow_string == day_name_thu)
-        return mdow_thu;
+        return mu_dow_thu;
     if(_dow_string == day_name_wed)
-        return mdow_wed;
+        return mu_dow_wed;
     if(_dow_string == day_name_thu)
-        return mdow_thu;
+        return mu_dow_thu;
     if(_dow_string == day_name_fri)
-        return mdow_fri;
+        return mu_dow_fri;
     if(_dow_string == day_name_sat)
-        return mdow_sat;
+        return mu_dow_sat;
     if(_dow_string == day_name_sun)
-        return mdow_sun;
-    return mdow_invalid;
+        return mu_dow_sun;
+    return mu_dow_invalid;
 }
 
 std::pair<short, short> parseTimeZone(const std::string & _zone_string)
@@ -111,11 +111,11 @@ std::pair<short, short> parseTimeZone(const std::string & _zone_string)
 
 } // namespace
 
-MBool MU_CALL muDateTimeParse(const char * _raw_date_time, MDateTime * _date_time)
+MU_Bool MU_CALL muDateTimeParse(const char * _raw_date_time, MU_DateTime * _date_time)
 {
     if(nullptr == _date_time)
     {
-        return mfalse;
+        return mu_false;
     }
     boost::regex regex("\\s*"
         "((?<day_of_week>\\w{3})\\s*,\\s*)?"
@@ -130,7 +130,7 @@ MBool MU_CALL muDateTimeParse(const char * _raw_date_time, MDateTime * _date_tim
     boost::cmatch matches;
     if(!boost::regex_match(_raw_date_time, matches, regex))
     {
-        return mfalse;
+        return mu_false;
     }
     boost::csub_match day_of_week_match = matches["day_of_week"];
     boost::csub_match year_match = matches["year"];
@@ -143,18 +143,18 @@ MBool MU_CALL muDateTimeParse(const char * _raw_date_time, MDateTime * _date_tim
     if(!year_match.matched || !month_match.matched || !day_match.matched ||
        !hours_match.matched || !minutes_match.matched || !timezone_match.matched)
     {
-        return mfalse;
+        return mu_false;
     }
-    MDayOfWeek day_of_week = mdow_invalid;
+    MU_DayOfWeek day_of_week = mu_dow_invalid;
     if(day_of_week_match.matched)
     {
         day_of_week = parseDayOfWeek(day_of_week_match);
     }
     unsigned short year = boost::lexical_cast<unsigned short>(year_match.str());
-    MMonth month = parseMonth(month_match);
-    if(mmonth_invalid == month)
+    MU_Month month = parseMonth(month_match);
+    if(mu_month_invalid == month)
     {
-        return mfalse;
+        return mu_false;
     }
     unsigned short day = boost::lexical_cast<unsigned short>(day_match.str());
     unsigned short hours = boost::lexical_cast<unsigned short>(hours_match.str());
@@ -174,10 +174,10 @@ MBool MU_CALL muDateTimeParse(const char * _raw_date_time, MDateTime * _date_tim
     _date_time->seconds = seconds;
     _date_time->timezone_offset_hours = timezone_offset.first;
     _date_time->timezone_offset_minutes = timezone_offset.second;
-    return mtrue;
+    return mu_true;
 }
 
-time_t MU_CALL muDateTimeToUnixTime(const MDateTime * _date_time)
+time_t MU_CALL muDateTimeToUnixTime(const MU_DateTime * _date_time)
 {
     boost::posix_time::ptime ptime(
         boost::gregorian::date(_date_time->year, _date_time->month, _date_time->day),
@@ -188,7 +188,7 @@ time_t MU_CALL muDateTimeToUnixTime(const MDateTime * _date_time)
     return  duration.total_seconds();
 }
 
-void MU_CALL muUnixTimeToDateTime(time_t _unix_time, MDateTime * _date_time)
+void MU_CALL muUnixTimeToDateTime(time_t _unix_time, MU_DateTime * _date_time)
 {
     boost::posix_time::ptime ptime(boost::gregorian::date(1970, 1, 1));
     ptime += boost::posix_time::seconds(_unix_time);
@@ -196,71 +196,71 @@ void MU_CALL muUnixTimeToDateTime(time_t _unix_time, MDateTime * _date_time)
     switch(ptime.date().month())
     {
     case boost::date_time::Jan:
-        _date_time->month = mmonth_jan;
+        _date_time->month = mu_month_jan;
         break;
     case boost::date_time::Feb:
-        _date_time->month = mmonth_feb;
+        _date_time->month = mu_month_feb;
         break;
     case boost::date_time::Mar:
-        _date_time->month = mmonth_mar;
+        _date_time->month = mu_month_mar;
         break;
     case boost::date_time::Apr:
-        _date_time->month = mmonth_apr;
+        _date_time->month = mu_month_apr;
         break;
     case boost::date_time::May:
-        _date_time->month = mmonth_may;
+        _date_time->month = mu_month_may;
         break;
     case boost::date_time::Jun:
-        _date_time->month = mmonth_jun;
+        _date_time->month = mu_month_jun;
         break;
     case boost::date_time::Jul:
-        _date_time->month = mmonth_jul;
+        _date_time->month = mu_month_jul;
         break;
     case boost::date_time::Aug:
-        _date_time->month = mmonth_aug;
+        _date_time->month = mu_month_aug;
         break;
     case boost::date_time::Sep:
-        _date_time->month = mmonth_sep;
+        _date_time->month = mu_month_sep;
         break;
     case boost::date_time::Oct:
-        _date_time->month = mmonth_oct;
+        _date_time->month = mu_month_oct;
         break;
     case boost::date_time::Nov:
-        _date_time->month = mmonth_nov;
+        _date_time->month = mu_month_nov;
         break;
     case boost::date_time::Dec:
-        _date_time->month = mmonth_dec;
+        _date_time->month = mu_month_dec;
         break;
     default:
-        _date_time->month = mmonth_invalid;
+        _date_time->month = mu_month_invalid;
         break;
     }
     _date_time->day = ptime.date().day();
     switch(ptime.date().day_of_week())
     {
     case boost::date_time::Monday:
-        _date_time->day_of_week = mdow_mon;
+        _date_time->day_of_week = mu_dow_mon;
         break;
     case boost::date_time::Tuesday:
-        _date_time->day_of_week = mdow_tue;
+        _date_time->day_of_week = mu_dow_tue;
         break;
     case boost::date_time::Wednesday:
-        _date_time->day_of_week = mdow_wed;
+        _date_time->day_of_week = mu_dow_wed;
         break;
     case boost::date_time::Thursday:
-        _date_time->day_of_week = mdow_thu;
+        _date_time->day_of_week = mu_dow_thu;
         break;
     case boost::date_time::Friday:
-        _date_time->day_of_week = mdow_fri;
+        _date_time->day_of_week = mu_dow_fri;
         break;
     case boost::date_time::Saturday:
-        _date_time->day_of_week = mdow_sat;
+        _date_time->day_of_week = mu_dow_sat;
         break;
     case boost::date_time::Sunday:
-        _date_time->day_of_week = mdow_sun;
+        _date_time->day_of_week = mu_dow_sun;
         break;
     default:
-        _date_time->day_of_week = mdow_invalid;
+        _date_time->day_of_week = mu_dow_invalid;
         break;
     }
     _date_time->hours = ptime.time_of_day().hours();

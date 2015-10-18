@@ -38,51 +38,51 @@ extern "C" {
  */
 typedef enum
 {
-    mmonth_invalid = 0,  /**< The invalid month value */
-    mmonth_jan     = 1,  /**< January */
-    mmonth_feb     = 2,  /**< February */
-    mmonth_mar     = 3,  /**< March */
-    mmonth_apr     = 4,  /**< April */
-    mmonth_may     = 5,  /**< May */
-    mmonth_jun     = 6,  /**< June */
-    mmonth_jul     = 7,  /**< July */
-    mmonth_aug     = 8,  /**< August */
-    mmonth_sep     = 9,  /**< September */
-    mmonth_oct     = 10, /**< October */
-    mmonth_nov     = 11, /**< November */
-    mmonth_dec     = 12  /**< December */
-} MMonth;
+    mu_month_invalid = 0,  /**< The invalid month value */
+    mu_month_jan     = 1,  /**< January */
+    mu_month_feb     = 2,  /**< February */
+    mu_month_mar     = 3,  /**< March */
+    mu_month_apr     = 4,  /**< April */
+    mu_month_may     = 5,  /**< May */
+    mu_month_jun     = 6,  /**< June */
+    mu_month_jul     = 7,  /**< July */
+    mu_month_aug     = 8,  /**< August */
+    mu_month_sep     = 9,  /**< September */
+    mu_month_oct     = 10, /**< October */
+    mu_month_nov     = 11, /**< November */
+    mu_month_dec     = 12  /**< December */
+} MU_Month;
 
 /**
  * @brief The day of week
  */
 typedef enum
 {
-    mdow_invalid = 0, /**< The invalid day of week value */
-    mdow_mon     = 1, /**< Monday */
-    mdow_tue     = 2, /**< Tuesday */
-    mdow_wed     = 3, /**< Wednesday */
-    mdow_thu     = 4, /**< Thursday */
-    mdow_fri     = 5, /**< Friday */
-    mdow_sat     = 6, /**< Saturday */
-    mdow_sun     = 7  /**< Sunday */
-} MDayOfWeek;
+    mu_dow_invalid = 0, /**< The invalid day of week value */
+    mu_dow_mon     = 1, /**< Monday */
+    mu_dow_tue     = 2, /**< Tuesday */
+    mu_dow_wed     = 3, /**< Wednesday */
+    mu_dow_thu     = 4, /**< Thursday */
+    mu_dow_fri     = 5, /**< Friday */
+    mu_dow_sat     = 6, /**< Saturday */
+    mu_dow_sun     = 7  /**< Sunday */
+} MU_DayOfWeek;
 
 /**
  * @brief Representation of date and time.
  */
 typedef struct
 {
-    MDayOfWeek day_of_week;        /**< Day of week */
+    MU_DayOfWeek day_of_week;      /**< Day of week */
     unsigned short year;           /**< Year */
-    MMonth month;                  /**< Mont */
+    MU_Month month;                /**< Mont */
     unsigned short day;            /**< Day */
     unsigned short hours;          /**< Hours */
     unsigned short minutes;        /**< Minutes */
     unsigned short seconds;        /**< Seconds */
     short timezone_offset_hours;   /**< Hours in timezone offset. Can have a negative value. */
     short timezone_offset_minutes; /**< Minutes in timezone offset. Can have a negative value. */
-} MDateTime;
+} MU_DateTime;
 
 /**
  * @brief Parses string described in @ref rfc-datetime-id "RFC"
@@ -91,30 +91,30 @@ typedef struct
  * @param _date_time
  *     A pointer to a variable that will contain a result. <i>Must not be NULL.</i>
  * @return
- *     In success case returns @ref MBool::mtrue and @ref MBool::mfalse otherwise.
+ *     In success case returns @ref MU_Bool::mtrue and @ref MU_Bool::mfalse otherwise.
  *     The @a _date_time object will not be modified if parsing failed.
  */
-MU_API MBool MU_CALL muDateTimeParse(const char * _raw_date_time, MDateTime * _date_time);
+MU_API MU_Bool MU_CALL muDateTimeParse(const char * _raw_date_time, MU_DateTime * _date_time);
 
 /**
- * @brief Convert @ref MDateTime value to the UNIX time format
+ * @brief Convert @ref MU_DateTime value to the UNIX time format
  * @param _date_time
  *     Value to convert.
  * @return
  *     The UNIX time representation of @a _date_time.
  * @sa muUnixTimeToDateTime
  */
-MU_API time_t MU_CALL muDateTimeToUnixTime(const MDateTime * _date_time);
+MU_API time_t MU_CALL muDateTimeToUnixTime(const MU_DateTime * _date_time);
 
 /**
- * @brief Convert UNIX time value to @ref MDateTime
+ * @brief Convert UNIX time value to @ref MU_DateTime
  * @param _unix_time
  *     Date and time in the UNIX time format.
  * @param _date_time
  *     A pointer to a variable that will contain a result. <i>Must not be NULL.</i>
  * @sa muDateTimeToUnixTime
  */
-MU_API void MU_CALL muUnixTimeToDateTime(time_t _unix_time, MDateTime * _date_time);
+MU_API void MU_CALL muUnixTimeToDateTime(time_t _unix_time, MU_DateTime * _date_time);
 
 #ifdef __cplusplus
 } // extern "C"

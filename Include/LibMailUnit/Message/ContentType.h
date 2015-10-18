@@ -32,19 +32,20 @@
 extern "C" {
 #endif
 
-MU_DECLARE_HANDEL(MU_MAIL_HEADER_CONTENT_TYPE);
+
+MU_DECLARE_API_TYPE(MU_MailHeaderContentType)
 
 /**
  * @brief Parses string described in @ref rfc-content-type-id "RFC"
  * @param _raw_content_type
  *     String from a mail header.
  * @return
- *     Handle to a parsed ContentType or @a MU_INVALID_HANDLE
+ *     Handle to a parsed ContentType or @a NULL
  *     The @a _content_type object will not be modified if parsing failed.
  * @remarks
  *     Returned handle must be destroyed by calling the @ref muFree function.
  */
-MU_API MU_MAIL_HEADER_CONTENT_TYPE MU_CALL muContentTypeParse(const char * _raw_content_type);
+MU_API const MU_MailHeaderContentType * MU_CALL muContentTypeParse(const char * _raw_content_type);
 
 /**
  * @brief Extracts type and subtype from the parsed ContentType
@@ -55,10 +56,10 @@ MU_API MU_MAIL_HEADER_CONTENT_TYPE MU_CALL muContentTypeParse(const char * _raw_
  * @param _subtype_out
  *     Pointer to a pointer into which the @a subtype will be recorded
  * @return
- *     @ref MBool::mtrue and @ref MBool::mfalse otherwise.
+ *     @ref MU_Bool::mtrue and @ref MU_Bool::mfalse otherwise.
  * @sa muContentTypeParse
  */
-MU_API MBool MU_CALL muContentType(MU_MAIL_HEADER_CONTENT_TYPE _content_type,
+MU_API MU_Bool MU_CALL muContentType(const MU_MailHeaderContentType * _content_type,
     const char ** _type_out, const char ** _subtype_out);
 
 /**
@@ -69,7 +70,7 @@ MU_API MBool MU_CALL muContentType(MU_MAIL_HEADER_CONTENT_TYPE _content_type,
  *     A count of the ContentType parameters.
  * @sa muContentTypeParse
  */
-MU_API const size_t MU_CALL muContentTypeParamsCount(MU_MAIL_HEADER_CONTENT_TYPE _content_type);
+MU_API const size_t MU_CALL muContentTypeParamsCount(const MU_MailHeaderContentType * _content_type);
 
 /**
  * @brief Extracts parameter from the parsed ContentType
@@ -82,10 +83,10 @@ MU_API const size_t MU_CALL muContentTypeParamsCount(MU_MAIL_HEADER_CONTENT_TYPE
  * @param _value_out
  *     Pointer to a pointer into which the @a value will be recorded
  * @return
- *     @ref MBool::mtrue and @ref MBool::mfalse otherwise.
+ *     @ref MU_Bool::mtrue and @ref MU_Bool::mfalse otherwise.
  * @sa muContentTypeParse
  */
-MU_API MBool MU_CALL muContentTypeParam(MU_MAIL_HEADER_CONTENT_TYPE _content_type, size_t _index,
+MU_API MU_Bool MU_CALL muContentTypeParam(const MU_MailHeaderContentType * _content_type, size_t _index,
     const char ** _name_out, const char ** _value_out);
 
 #ifdef __cplusplus

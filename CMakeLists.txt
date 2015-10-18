@@ -172,14 +172,19 @@ set(SRC_LIB
     ${LIB_PUBIC_INCLUDE_DIR}/LibMailUnit/Message/DateTime.h
     ${LIB_PUBIC_INCLUDE_DIR}/LibMailUnit/Message/MessageId.h
     ${LIB_PUBIC_INCLUDE_DIR}/LibMailUnit/Message/ContentType.h
+    LibMailUnit/Api/ApiObject.h
+    LibMailUnit/Api/ApiObject.cpp
+    LibMailUnit/Api/Message/Mime.h
     LibMailUnit/Api/Message/Mime.cpp
+    LibMailUnit/Api/Message/MailHeader.h
     LibMailUnit/Api/Message/MailHeader.cpp
+    LibMailUnit/Api/Message/Mailbox.h
     LibMailUnit/Api/Message/Mailbox.cpp
     LibMailUnit/Api/Message/DateTime.cpp
+    LibMailUnit/Api/Message/MessageId.h
     LibMailUnit/Api/Message/MessageId.cpp
+    LibMailUnit/Api/Message/ContentType.h
     LibMailUnit/Api/Message/ContentType.cpp
-    LibMailUnit/Memory.h
-    LibMailUnit/Memory.cpp
     LibMailUnit/Mail/Headers.h
     LibMailUnit/Mail/Headers.cpp
     LibMailUnit/Mail/ContentType.h

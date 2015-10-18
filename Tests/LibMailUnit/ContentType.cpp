@@ -25,33 +25,33 @@ BOOST_AUTO_TEST_SUITE(ContentType)
 
 BOOST_AUTO_TEST_CASE(parseContentType)
 {
-    MU_MAIL_HEADER_CONTENT_TYPE content_type =
+    const MU_MailHeaderContentType * content_type =
         muContentTypeParse("multipart/mixed;boundary = ---___123456 ; X-test = \"quoted  string--!_\"");
-    BOOST_CHECK_NE(MU_INVALID_HANDLE, content_type);
+    BOOST_CHECK(content_type);
     const char * type = nullptr;
     const char * subtype = nullptr;
-    BOOST_CHECK_EQUAL(mtrue, muContentType(content_type, &type, &subtype));
+    BOOST_CHECK_EQUAL(mu_true, muContentType(content_type, &type, &subtype));
     BOOST_CHECK_EQUAL("multipart", type);
     BOOST_CHECK_EQUAL("mixed", subtype);
     BOOST_CHECK_EQUAL(2, muContentTypeParamsCount(content_type));
     const char * param_name = nullptr;
     const char * param_value = nullptr;
-    BOOST_CHECK_EQUAL(mtrue, muContentTypeParam(content_type, 0, &param_name, &param_value));
+    BOOST_CHECK_EQUAL(mu_true, muContentTypeParam(content_type, 0, &param_name, &param_value));
     BOOST_CHECK_EQUAL("boundary", param_name);
     BOOST_CHECK_EQUAL("---___123456", param_value);
-    BOOST_CHECK_EQUAL(mtrue, muContentTypeParam(content_type, 1, &param_name, &param_value));
+    BOOST_CHECK_EQUAL(mu_true, muContentTypeParam(content_type, 1, &param_name, &param_value));
     BOOST_CHECK_EQUAL("X-test", param_name);
     BOOST_CHECK_EQUAL("quoted  string--!_", param_value);
 }
 
 BOOST_AUTO_TEST_CASE(parseContentType2)
 {
-    MU_MAIL_HEADER_CONTENT_TYPE content_type =
+    const MU_MailHeaderContentType * content_type =
         muContentTypeParse("text/plain");
-    BOOST_CHECK_NE(MU_INVALID_HANDLE, content_type);
+    BOOST_CHECK(content_type);
     const char * type = nullptr;
     const char * subtype = nullptr;
-    BOOST_CHECK_EQUAL(mtrue, muContentType(content_type, &type, &subtype));
+    BOOST_CHECK_EQUAL(mu_true, muContentType(content_type, &type, &subtype));
     BOOST_CHECK_EQUAL("text", type);
     BOOST_CHECK_EQUAL("plain", subtype);
     BOOST_CHECK_EQUAL(0, muContentTypeParamsCount(content_type));
@@ -59,12 +59,12 @@ BOOST_AUTO_TEST_CASE(parseContentType2)
 
 BOOST_AUTO_TEST_CASE(parseContentType3)
 {
-    MU_MAIL_HEADER_CONTENT_TYPE content_type =
+    const MU_MailHeaderContentType * content_type =
         muContentTypeParse("X-text/X-some_value");
-    BOOST_CHECK_NE(MU_INVALID_HANDLE, content_type);
+    BOOST_CHECK(content_type);
     const char * type = nullptr;
     const char * subtype = nullptr;
-    BOOST_CHECK_EQUAL(mtrue, muContentType(content_type, &type, &subtype));
+    BOOST_CHECK_EQUAL(mu_true, muContentType(content_type, &type, &subtype));
     BOOST_CHECK_EQUAL("X-text", type);
     BOOST_CHECK_EQUAL("X-some_value", subtype);
     BOOST_CHECK_EQUAL(0, muContentTypeParamsCount(content_type));

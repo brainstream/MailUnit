@@ -51,18 +51,18 @@ using namespace LibMailUnit::Mail;
 #define CT_MESSAGE "message"
 #define CST_MESSAGE_RFC822 "rfc822"
 
-MimeMessagePart::MimeMessagePart(std::istream & _stream)
+MimePart::MimePart(std::istream & _stream)
 {
     parse(_stream);
 }
 
-MimeMessagePart::~MimeMessagePart()
+MimePart::~MimePart()
 {
-    for(const MimeMessagePart * part : m_parts)
+    for(const MimePart * part : m_parts)
         delete part;
 }
 
-void MimeMessagePart::parse(std::istream & _stream)
+void MimePart::parse(std::istream & _stream)
 {
     HeaderMap * map = new HeaderMap();
     HeaderParser::parse(_stream, *map);
@@ -88,7 +88,7 @@ void MimeMessagePart::parse(std::istream & _stream)
         parseText(_stream);
 }
 
-void MimeMessagePart::parseText(std::istream & _stream)
+void MimePart::parseText(std::istream & _stream)
 {
     const size_t buffer_size = 1024;
     char buffer[buffer_size];
@@ -96,27 +96,27 @@ void MimeMessagePart::parseText(std::istream & _stream)
         m_text_content.append(buffer, buffer + _stream.gcount());
 }
 
-void MimeMessagePart::parseImage(std::istream & _stream)
+void MimePart::parseImage(std::istream & _stream)
 {
     parseText(_stream);
 }
 
-void MimeMessagePart::parseAudio(std::istream & _stream)
+void MimePart::parseAudio(std::istream & _stream)
 {
     parseText(_stream);
 }
 
-void MimeMessagePart::parseVideo(std::istream & _stream)
+void MimePart::parseVideo(std::istream & _stream)
 {
     parseText(_stream);
 }
 
-void MimeMessagePart::parseApplication(std::istream & _stream)
+void MimePart::parseApplication(std::istream & _stream)
 {
     parseText(_stream);
 }
 
-void MimeMessagePart::parseMultipart(std::istream & _stream)
+void MimePart::parseMultipart(std::istream & _stream)
 {
     std::vector<ContentTypeParam>::const_iterator boundary_it = std::find_if(m_content_type_ptr->params.cbegin(),
         m_content_type_ptr->params.cend(), [](const ContentTypeParam & param) {
@@ -138,7 +138,7 @@ void MimeMessagePart::parseMultipart(std::istream & _stream)
         {
             if(body_open)
             {
-                m_parts.push_back(new MimeMessagePart(*body));
+                m_parts.push_back(new MimePart(*body));
                 body_open = false;
             }
             break;
@@ -147,7 +147,7 @@ void MimeMessagePart::parseMultipart(std::istream & _stream)
         {
             if(body_open)
             {
-                m_parts.push_back(new MimeMessagePart(*body));
+                m_parts.push_back(new MimePart(*body));
                 delete body;
                 body = new std::stringstream();
             }
@@ -163,19 +163,19 @@ void MimeMessagePart::parseMultipart(std::istream & _stream)
     }
     if(body_open)
     {
-        m_parts.push_back(new MimeMessagePart(*body));
+        m_parts.push_back(new MimePart(*body));
     }
     delete body;
 }
 
-void MimeMessagePart::parseMessage(std::istream & _stream)
+void MimePart::parseMessage(std::istream & _stream)
 {
     // TODO: implement
     throw std::runtime_error("The message MIME is not supported yet");
 }
 
 MimeMessage::MimeMessage(std::istream & _stream) :
-    MimeMessagePart(_stream)
+    MimePart(_stream)
 {
     const Header * subject_header = headers().find(MU_MAILHDR_SUBJECT);
     if(subject_header && !subject_header->values.empty())

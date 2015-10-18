@@ -172,10 +172,8 @@ extern "C" {
  */
 #define MU_MAILHDR_CONTENTTYPE "Content-Type"
 
-
-
-MU_DECLARE_HANDEL(MU_MAIL_HEADER);
-MU_DECLARE_HANDEL(MU_MAIL_HEADERLIST);
+MU_DECLARE_API_TYPE(MU_MailHeader)
+MU_DECLARE_API_TYPE(MU_MailHeaderList)
 
 /**
  * @brief Contains values of headers with common name.
@@ -184,23 +182,26 @@ MU_DECLARE_HANDEL(MU_MAIL_HEADERLIST);
  * <A HREF="http://tools.ietf.org/html/rfc5322#section-3.6">RFC 5322 3.6</A> some of the headers
  * can appear more than once.
  */
-typedef struct
-{
-    /**
-     * @brief A name of the header
-     */
-    const char * const name;
-    /**
-     * @brief List of values.
-     *
-     * Containst @ref values_count elements.
-     */
-    const char ** const values;
-    /**
-     * @brief Count of @ref values
-     */
-    const size_t values_count;
-} MMailHeader;
+//
+// FIXME: uncomment or delete
+//
+//typedef struct
+//{
+//    /**
+//     * @brief A name of the header
+//     */
+//    const char * const name;
+//    /**
+//     * @brief List of values.
+//     *
+//     * Containst @ref values_count elements.
+//     */
+//    const char ** const values;
+//    /**
+//     * @brief Count of @ref values
+//     */
+//    const size_t values_count;
+//} MU_MailHeader;
 
 /**
  * @brief Parses headers of mail message from string.
@@ -208,11 +209,11 @@ typedef struct
  *     String contained mail header. Can contain full mail message. Headers must be splitted
  *     from a data by an empty line as described in the \ref rfc-headers "RFC".
  * @return
- *     Handle to headers list or @ref MU_INVALID_HANDLE.
+ *     Handle to headers list or @ref NULL.
  * @remarks
  *     Returned handle must be destroyed by calling the @ref muFree function.
  */
-MU_API MU_MAIL_HEADERLIST MU_CALL muMailHeadersParseString(const char * _input);
+MU_API const MU_MailHeaderList * MU_CALL muMailHeadersParseString(const char * _input);
 
 /**
  * @brief Parses headers of mail message from file.
@@ -220,7 +221,7 @@ MU_API MU_MAIL_HEADERLIST MU_CALL muMailHeadersParseString(const char * _input);
  *     File that contains mail header. Can contain full mail message. Headers must be splitted
  *     from a data by an empty line as described in the \ref rfc-headers "RFC".
  * @return
- *     Handle to headers list or @ref MU_INVALID_HANDLE.
+ *     Handle to headers list or @ref NULL.
  *
  * Function will read file from current position.
  * After execution a read position will be placed after end of a header section.
@@ -228,12 +229,12 @@ MU_API MU_MAIL_HEADERLIST MU_CALL muMailHeadersParseString(const char * _input);
  * @remarks
  *     Returned handle must be destroyed by calling the @ref muFree function.
  */
-MU_API MU_MAIL_HEADERLIST MU_CALL muMailHeadersParseFile(MU_NATIVE_FILE _input);
+MU_API const MU_MailHeaderList * MU_CALL muMailHeadersParseFile(MU_NATIVE_FILE _input);
 
 /**
  * @brief Returns a count of @a _headers.
  */
-MU_API size_t MU_CALL muMailHeadersCount(MU_MAIL_HEADERLIST _headers);
+MU_API size_t MU_CALL muMailHeadersCount(const MU_MailHeaderList * _headers);
 
 /**
  * @brief Returns a header at @a _index position or @a NULL.
@@ -241,20 +242,20 @@ MU_API size_t MU_CALL muMailHeadersCount(MU_MAIL_HEADERLIST _headers);
  *     Returned handle must be destroyed by calling the @ref muFree function.
  * @sa muMailHeadersCount
  */
-MU_API MU_MAIL_HEADER MU_CALL muMailHeaderByIndex(MU_MAIL_HEADERLIST _headers, size_t _index);
+MU_API const MU_MailHeader * MU_CALL muMailHeaderByIndex(const MU_MailHeaderList * _headers, size_t _index);
 
 /**
  * @brief Returns a header named @a _name or @a NULL.
  * @remarks
  *     Returned handle must be destroyed by calling the @ref muFree function.
  */
-MU_API MU_MAIL_HEADER MU_CALL muMailHeaderByName(MU_MAIL_HEADERLIST _headers, const char * _name);
+MU_API const MU_MailHeader * MU_CALL muMailHeaderByName(const MU_MailHeaderList * _headers, const char * _name);
 
 /**
  * @brief Returns a name of @a _header or @a NULL.
  * @sa muMailHeaderByIndex
 */
-MU_API const char * MU_CALL muMailHeaderName(MU_MAIL_HEADER _header);
+MU_API const char * MU_CALL muMailHeaderName(const MU_MailHeader * _header);
 
 /**
  * @brief Returns a count of values in the @a _header.
@@ -265,7 +266,7 @@ MU_API const char * MU_CALL muMailHeaderName(MU_MAIL_HEADER _header);
  *
  * @sa muMailHeaderValue
  */
-MU_API size_t MU_CALL muMailHeaderValueCount(MU_MAIL_HEADER _header);
+MU_API size_t MU_CALL muMailHeaderValueCount(const MU_MailHeader * _header);
 
 /**
  * @brief Returns a value of @a _header at @a _index position or @a NULL.
@@ -276,7 +277,7 @@ MU_API size_t MU_CALL muMailHeaderValueCount(MU_MAIL_HEADER _header);
  *
  * @sa muMailHeaderValueCount
 */
-MU_API const char * MU_CALL muMailHeaderValue(MU_MAIL_HEADER _header, size_t _index);
+MU_API const char * MU_CALL muMailHeaderValue(const MU_MailHeader * _header, size_t _index);
 
 #ifdef __cplusplus
 } // extern "C"

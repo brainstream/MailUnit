@@ -29,11 +29,11 @@
 namespace LibMailUnit {
 namespace Mail {
 
-class MimeMessagePart : private boost::noncopyable
+class MimePart : private boost::noncopyable
 {
 public:
-    explicit MimeMessagePart(std::istream & _stream);
-    virtual ~MimeMessagePart();
+    explicit MimePart(std::istream & _stream);
+    virtual ~MimePart();
 
     const HeaderMap & headers() const
     {
@@ -45,7 +45,7 @@ public:
         return *m_content_type_ptr;
     }
 
-    const std::vector<const MimeMessagePart *> & parts() const
+    const std::vector<const MimePart *> & parts() const
     {
         return m_parts;
     }
@@ -69,10 +69,10 @@ private:
     std::shared_ptr<HeaderMap> m_headers_ptr;
     std::shared_ptr<ContentType> m_content_type_ptr;
     std::string m_text_content;
-    std::vector<const MimeMessagePart *> m_parts;
-}; // class MimeMessagePart
+    std::vector<const MimePart *> m_parts;
+}; // class MimePart
 
-class MimeMessage final : public MimeMessagePart
+class MimeMessage final : public MimePart
 {
 public:
     explicit MimeMessage(std::istream & _stream);

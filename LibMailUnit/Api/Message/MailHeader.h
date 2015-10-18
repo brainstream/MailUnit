@@ -15,53 +15,14 @@
  *                                                                                             *
  ***********************************************************************************************/
 
-#ifndef __LIBMUIMPL_MEMORY_H__
-#define __LIBMUIMPL_MEMORY_H__
+#ifndef __LIBMU_API_MESSAGE_MAILHEADER_H__
+#define __LIBMU_API_MESSAGE_MAILHEADER_H__
 
-#include <stdexcept>
-#include <functional>
-#include <boost/any.hpp>
-#include <boost/noncopyable.hpp>
-#include <Include/LibMailUnit/Def.h>
+#include <LibMailUnit/Api/ApiObject.h>
+#include <LibMailUnit/Mail/Headers.h>
+#include <Include/LibMailUnit/Message/MailHeader.h>
 
-struct MHandle : private boost::noncopyable
-{
-public:
-    template<typename Type>
-    MHandle(Type * _object, bool _destructible)
-    {
-        if(nullptr != _object)
-            m_object = _object;
-        if(_destructible)
-        {
-            m_destruct_funct = [this]() {
-                delete boost::any_cast<Type *>(m_object);
-            };
-        }
-    }
+MU_DEFINE_API_TYPE(MU_MailHeader, LibMailUnit::Mail::Header)
+MU_DEFINE_API_TYPE(MU_MailHeaderList, LibMailUnit::Mail::HeaderMap)
 
-    ~MHandle()
-    {
-        if(m_destruct_funct && !m_object.empty())
-        {
-           m_destruct_funct();
-        }
-    }
-
-    template<typename Type>
-    Type * pointer() const
-    {
-        if(m_object.empty())
-            return nullptr;
-        Type * ptr = boost::any_cast<Type *>(m_object);
-        if(nullptr == ptr)
-            throw std::runtime_error("Unable to cast a handle pointer to a requested type");
-        return ptr;
-    }
-
-private:
-    boost::any m_object;
-    std::function<void()> m_destruct_funct;
-}; // struct MHandle
-
-#endif // __LIBMUIMPL_MEMORY_H__
+#endif // __LIBMU_API_MESSAGE_MAILHEADER_H__

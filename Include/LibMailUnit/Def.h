@@ -70,26 +70,17 @@
  */
 typedef enum
 {
-    mfalse = 0, /**< The @a false value */
-    mtrue  = 1  /**< The @a true value */
-} MBool;
+    mu_false = 0, /**< The @a false value */
+    mu_true  = 1  /**< The @a true value */
+} MU_Bool;
 
-/**
- * @brief Type of object to handle and manipulate a memory.
- * @sa muFree
-*/
-typedef struct MHandle * MU_HANDLE;
-
-#define MU_DECLARE_HANDEL(type) typedef MU_HANDLE type
-
-/**
- * @brief Invalid handle value.
- */
-#define MU_INVALID_HANDLE ((MU_HANDLE)-1)
+#define MU_DECLARE_API_TYPE(type) \
+    struct type;
+    //typedef struct type type;
 
 /**
  * @brief Releases an allocated memory.
  */
-MU_API void MU_CALL muFree(MU_HANDLE _handle);
+MU_API void MU_CALL muFree(const void * _object);
 
 #endif // __LIBMU_DEF_H__

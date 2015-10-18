@@ -32,8 +32,8 @@
 extern "C" {
 #endif
 
-MU_DECLARE_HANDEL(MU_MAILBOXGROUP);
-MU_DECLARE_HANDEL(MU_MAILBOX);
+MU_DECLARE_API_TYPE(MU_Mailbox)
+MU_DECLARE_API_TYPE(MU_MailboxGroup)
 
 /**
  * @brief Parses string described in @ref rfc-address-id "RFC"
@@ -42,42 +42,42 @@ MU_DECLARE_HANDEL(MU_MAILBOX);
  *     String that describes either a mailbox or a mailbox group.
  * @return
  *     If string parsed successfully function returns a handle of the mailbox group object.
- *     In failure case the function returns @a MU_INVALID_HANDLE.
+ *     In failure case the function returns @a NULL.
  * @remarks
  *     Returned handle must be destroyed by calling the @ref muFree function.
  */
-MU_API MU_MAILBOXGROUP MU_CALL muMailboxGroupParse(const char * _raw_address_group);
+MU_API const MU_MailboxGroup * MU_CALL muMailboxGroupParse(const char * _raw_address_group);
 
 /**
  * @brief Returns a count of mailboxes in @a _mailbox_group.
  */
-MU_API size_t MU_CALL muMailboxCount(MU_MAILBOXGROUP _mailbox_group);
+MU_API size_t MU_CALL muMailboxCount(const MU_MailboxGroup * _mailbox_group);
 
 /**
- * @brief Returns a mailbox at @a _index position in @a _mailbox_group or @a MU_INVALID_HANDLE.
+ * @brief Returns a mailbox at @a _index position in @a _mailbox_group or @a NULL.
  * @remarks
  *     Returned handle must be destroyed by calling the @ref muFree function.
  */
-MU_API MU_MAILBOX MU_CALL muMailbox(MU_MAILBOXGROUP _mailbox_group, size_t _index);
+MU_API const MU_Mailbox * MU_CALL muMailbox(const MU_MailboxGroup * _mailbox_group, size_t _index);
 
 /**
  * @brief Returns the optional name of the mailbox group.
  *
  * If @a _mailbox_group does not contain a name, function returns @a NULL.
  */
-MU_API const char * MU_CALL muMailboxGroupName(MU_MAILBOXGROUP _mailbox_group);
+MU_API const char * MU_CALL muMailboxGroupName(const MU_MailboxGroup * _mailbox_group);
 
 /**
  * @brief Returns the optional name of the mailbox.
  *
  * If @a _mailbox does not contain a name, function returns @a NULL.
  */
-MU_API const char * MU_CALL muMailboxName(MU_MAILBOX _mailbox);
+MU_API const char * MU_CALL muMailboxName(const MU_Mailbox * _mailbox);
 
 /**
  * @brief Returns an address from @a _mailbox or @a NULL.
  */
-MU_API const char * MU_CALL muMailboxAddress(MU_MAILBOX _mailbox);
+MU_API const char * MU_CALL muMailboxAddress(const MU_Mailbox * _mailbox);
 
 #ifdef __cplusplus
 } // extern "C"

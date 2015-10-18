@@ -15,22 +15,11 @@
  *                                                                                             *
  ***********************************************************************************************/
 
-#include <string>
-#include <LibMailUnit/Memory.h>
-#include <Include/LibMailUnit/Message/MessageId.h>
+#include <LibMailUnit/Api/Message/MessageId.h>
 
-namespace {
+using namespace LibMailUnit::Api::Message;
 
-struct MessageId
-{
-    std::string id_string;
-    std::string left;
-    std::string right;
-}; // struct MessageId
-
-} // namespace
-
-MU_MSGID MU_CALL muMessageIdParse(const char * _raw_message_id)
+const MU_MailMessageId * muMessageIdParse(const char * _raw_message_id)
 {
     MessageId * message_id = new MessageId();
     message_id->id_string = _raw_message_id;
@@ -40,7 +29,7 @@ MU_MSGID MU_CALL muMessageIdParse(const char * _raw_message_id)
     if(std::string::npos == at_pos || std::string::npos == lt_pos || std::string::npos == gt_pos)
     {
         delete message_id;
-        return MU_INVALID_HANDLE;
+        return nullptr;
     }
     size_t left_pos = lt_pos + 1;
     size_t left_len = left_pos ? at_pos - 1 : at_pos;
@@ -48,26 +37,26 @@ MU_MSGID MU_CALL muMessageIdParse(const char * _raw_message_id)
     size_t right_len = gt_pos - at_pos - 1;
     message_id->left = message_id->id_string.substr(left_pos, left_len);
     message_id->right = message_id->id_string.substr(right_pos, right_len);
-    return new MHandle(message_id, true);
+    return new MU_MailMessageId(message_id, true);
 }
 
-const char * MU_CALL muMessageIdString(MU_MSGID _msg_id)
+const char * MU_CALL muMessageIdString(const MU_MailMessageId * _msg_id)
 {
     if(nullptr == _msg_id)
         return nullptr;
-    return _msg_id->pointer<MessageId>()->id_string.c_str();
+    return _msg_id->pointer()->id_string.c_str();
 }
 
-const char * MU_CALL muMessageIdLeft(MU_MSGID _msg_id)
+const char * MU_CALL muMessageIdLeft(const MU_MailMessageId * _msg_id)
 {
     if(nullptr == _msg_id)
         return nullptr;
-    return _msg_id->pointer<MessageId>()->left.c_str();
+    return _msg_id->pointer()->left.c_str();
 }
 
-const char * MU_CALL muMessageIdRight(MU_MSGID _msg_id)
+const char * MU_CALL muMessageIdRight(const MU_MailMessageId * _msg_id)
 {
     if(nullptr == _msg_id)
         return nullptr;
-    return _msg_id->pointer<MessageId>()->right.c_str();
+    return _msg_id->pointer()->right.c_str();
 }

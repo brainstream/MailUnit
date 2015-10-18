@@ -32,21 +32,21 @@
 extern "C" {
 #endif
 
-MU_DECLARE_HANDEL(MU_MSGID);
+MU_DECLARE_API_TYPE(MU_MailMessageId)
 
 /**
  * @brief Parses string described in @ref rfc-message-id "RFC"
  * @param _raw_message_id
  *     String from a mail header.
  * @return
- *     Handle to parsed message id or @ref MU_INVALID_HANDLE.
+ *     Handle to parsed message id or @ref NULL.
  * @remarks
  *     Returned handle must be destroyed by calling the @ref muFree function.
  * @sa muMessageIdString
  * @sa muMessageIdLeft
  * @sa muMessageIdRight
  */
-MU_API MU_MSGID MU_CALL muMessageIdParse(const char * _raw_message_id);
+MU_API const MU_MailMessageId * MU_CALL muMessageIdParse(const char * _raw_message_id);
 
 /**
  * @brief Returns source string passed to the @ref muMessageIdParse function.
@@ -56,7 +56,7 @@ MU_API MU_MSGID MU_CALL muMessageIdParse(const char * _raw_message_id);
  * @sa muMessageIdLeft
  * @sa muMessageIdRight
  */
-MU_API const char * MU_CALL muMessageIdString(MU_MSGID _msg_id);
+MU_API const char * MU_CALL muMessageIdString(const MU_MailMessageId * _msg_id);
 
 /**
  * @brief Returns left part of message id.
@@ -66,7 +66,7 @@ MU_API const char * MU_CALL muMessageIdString(MU_MSGID _msg_id);
  * @sa muMessageIdString
  * @sa muMessageIdRight
  */
-MU_API const char * MU_CALL muMessageIdLeft(MU_MSGID _msg_id);
+MU_API const char * MU_CALL muMessageIdLeft(const MU_MailMessageId * _msg_id);
 
 /**
  * @brief Returns right part of message id.
@@ -76,7 +76,7 @@ MU_API const char * MU_CALL muMessageIdLeft(MU_MSGID _msg_id);
  * @sa muMessageIdString
  * @sa muMessageIdLeft
  */
-MU_API const char * MU_CALL muMessageIdRight(MU_MSGID _msg_id);
+MU_API const char * MU_CALL muMessageIdRight(const MU_MailMessageId * _msg_id);
 
 #ifdef __cplusplus
 } // extern "C"

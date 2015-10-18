@@ -40,12 +40,12 @@ BOOST_AUTO_TEST_CASE(parseString)
         "Name:Simple value 2\r\n"
         "\r\n"
         "Error:String beyond header";
-    MU_MAIL_HEADERLIST headers = muMailHeadersParseString(raw_headers.c_str());
-    BOOST_CHECK_NE(MU_INVALID_HANDLE, headers);
+    const MU_MailHeaderList * headers = muMailHeadersParseString(raw_headers.c_str());
+    BOOST_CHECK(headers);
     BOOST_CHECK_EQUAL(3, muMailHeadersCount(headers));
 
-    MU_MAIL_HEADER header = muMailHeaderByName(headers, "Name");
-    BOOST_CHECK_NE(MU_INVALID_HANDLE, header);
+    const MU_MailHeader * header = muMailHeaderByName(headers, "Name");
+    BOOST_CHECK(header);
     BOOST_CHECK_EQUAL("Name", muMailHeaderName(header));
     BOOST_CHECK_EQUAL(2, muMailHeaderValueCount(header));
     const char * value = muMailHeaderValue(header, 0);
@@ -55,7 +55,7 @@ BOOST_AUTO_TEST_CASE(parseString)
     muFree(header);
 
     header = muMailHeaderByName(headers, "Name2");
-    BOOST_CHECK_NE(MU_INVALID_HANDLE, header);
+    BOOST_CHECK(header);
     BOOST_CHECK_EQUAL("Name2", muMailHeaderName(header));
     BOOST_CHECK_EQUAL(1, muMailHeaderValueCount(header));
     value = muMailHeaderValue(header, 0);
@@ -63,7 +63,7 @@ BOOST_AUTO_TEST_CASE(parseString)
     muFree(header);
 
     header = muMailHeaderByName(headers, "Name3");
-    BOOST_CHECK_NE(MU_INVALID_HANDLE, header);
+    BOOST_CHECK(header);
     BOOST_CHECK_EQUAL("Name3", muMailHeaderName(header));
     BOOST_CHECK_EQUAL(1, muMailHeaderValueCount(header));
     value = muMailHeaderValue(header, 0);
@@ -85,18 +85,18 @@ BOOST_AUTO_TEST_CASE(parseFileTest)
         "Name:Simple value 2\r\n"
         "\r\n"
         "Error:String beyond header";
-    MU_MAIL_HEADERLIST headers = MU_INVALID_HANDLE;
+    const MU_MailHeaderList * headers = nullptr;
     {
         TempFile temp_file;
         temp_file.write(raw_headers);
         temp_file.seek(0, std::ios_base::beg);
         headers = muMailHeadersParseFile(temp_file);
     }
-    BOOST_CHECK_NE(MU_INVALID_HANDLE, headers);
+    BOOST_CHECK(headers);
     BOOST_CHECK_EQUAL(3, muMailHeadersCount(headers));
 
-    MU_MAIL_HEADER header = muMailHeaderByIndex(headers, 0);
-    BOOST_CHECK_NE(MU_INVALID_HANDLE, header);
+    const MU_MailHeader * header = muMailHeaderByIndex(headers, 0);
+    BOOST_CHECK(header);
     BOOST_CHECK_EQUAL("Name", muMailHeaderName(header));
     BOOST_CHECK_EQUAL(2, muMailHeaderValueCount(header));
     const char * value = muMailHeaderValue(header, 0);
@@ -106,7 +106,7 @@ BOOST_AUTO_TEST_CASE(parseFileTest)
     muFree(header);
 
     header = muMailHeaderByIndex(headers, 1);
-    BOOST_CHECK_NE(MU_INVALID_HANDLE, header);
+    BOOST_CHECK(header);
     BOOST_CHECK_EQUAL("Name2", muMailHeaderName(header));
     BOOST_CHECK_EQUAL(1, muMailHeaderValueCount(header));
     value = muMailHeaderValue(header, 0);
@@ -114,7 +114,7 @@ BOOST_AUTO_TEST_CASE(parseFileTest)
     muFree(header);
 
     header = muMailHeaderByIndex(headers, 2);
-    BOOST_CHECK_NE(MU_INVALID_HANDLE, header);
+    BOOST_CHECK(header);
     BOOST_CHECK_EQUAL("Name3", muMailHeaderName(header));
     BOOST_CHECK_EQUAL(1, muMailHeaderValueCount(header));
     value = muMailHeaderValue(header, 0);

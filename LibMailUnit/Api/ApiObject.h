@@ -15,42 +15,59 @@
  *                                                                                             *
  ***********************************************************************************************/
 
-#include <LibMailUnit/Api/Message/ContentType.h>
+#ifndef __LIBMUIMPL_API_APIOBJECT_H__
+#define __LIBMUIMPL_API_APIOBJECT_H__
 
-using namespace LibMailUnit::Mail;
+#include <boost/noncopyable.hpp>
+#include <Include/LibMailUnit/Def.h>
 
-const MU_MailHeaderContentType * muContentTypeParse(const char * _raw_content_type)
+namespace LibMailUnit {
+
+class Object
 {
-    const ContentType * content_type = parseContentType(_raw_content_type).release();
-    if(nullptr != content_type)
-        return new MU_MailHeaderContentType(content_type, true);
-    return nullptr;
-}
+protected:
+    Object() { }
 
-MU_Bool MU_CALL muContentType(const MU_MailHeaderContentType * _content_type, const char ** _type_out, const char ** _subtype_out)
-{
-    if(nullptr == _content_type)
-        return mu_false;
-    const ContentType * content_type = _content_type->pointer();
-    *_type_out = content_type->type.c_str();
-    *_subtype_out = content_type->subtype.c_str();
-    return mu_true;
-}
+public:
+    virtual ~Object() { }
+}; // class Object
 
-const size_t MU_CALL muContentTypeParamsCount(const MU_MailHeaderContentType * _content_type)
+template<typename PointerType>
+class ApiObject : public Object, private boost::noncopyable
 {
-    if(nullptr == _content_type)
-        return 0;
-    return _content_type->pointer()->params.size();
-}
+public:
+    ApiObject(const PointerType * _pointer, bool _destructible) :
+        mp_pointer(_pointer),
+        m_is_destructible(_destructible)
+    {
+    }
 
-MU_Bool MU_CALL muContentTypeParam(const MU_MailHeaderContentType * _content_type, size_t _index,
-    const char ** _name_out, const char ** _value_out)
-{
-    if(nullptr == _content_type)
-        return mu_false;
-    const ContentTypeParam & param = _content_type->pointer()->params[_index];
-    *_name_out = param.name.c_str();
-    *_value_out = param.value.c_str();
-    return mu_true;
-}
+    ~ApiObject() override
+    {
+        if(m_is_destructible)
+           delete mp_pointer;
+    }
+
+    const PointerType * pointer() const
+    {
+        return mp_pointer;
+    }
+
+private:
+    const PointerType * mp_pointer;
+    bool m_is_destructible;
+}; // class ApiObject
+
+} // namespace LibMailUnit
+
+#define MU_DEFINE_API_TYPE(type, ptr_type)                    \
+    struct type : public LibMailUnit::ApiObject<ptr_type>     \
+    {                                                         \
+    public:                                                   \
+        type(const ptr_type * _pointer, bool _destructible) : \
+            ApiObject(_pointer, _destructible)                \
+        {                                                     \
+        }                                                     \
+    };
+
+#endif // __LIBMUIMPL_API_APIOBJECT_H__

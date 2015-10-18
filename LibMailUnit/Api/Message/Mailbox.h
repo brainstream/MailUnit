@@ -15,11 +15,14 @@
  *                                                                                             *
  ***********************************************************************************************/
 
-#include <LibMailUnit/Memory.h>
+#ifndef __LIBMU_API_MESSAGE_MAILBOX_H__
+#define __LIBMU_API_MESSAGE_MAILBOX_H__
 
-void MU_CALL muFree(MU_HANDLE _handle)
-{
-    if(MU_INVALID_HANDLE == _handle || nullptr == _handle)
-        return;
-    delete _handle;
-}
+#include <LibMailUnit/Api/ApiObject.h>
+#include <LibMailUnit/Mail/Mailbox.h>
+#include <Include/LibMailUnit/Message/Mailbox.h>
+
+MU_DEFINE_API_TYPE(MU_Mailbox, LibMailUnit::Mail::Mailbox)
+MU_DEFINE_API_TYPE(MU_MailboxGroup, LibMailUnit::Mail::MailboxGroup)
+
+#endif // __LIBMU_API_MESSAGE_MAILBOX_H__

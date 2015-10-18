@@ -15,63 +15,61 @@
  *                                                                                             *
  ***********************************************************************************************/
 
-#include <LibMailUnit/Memory.h>
-#include <LibMailUnit/Mail/Mailbox.h>
-#include <Include/LibMailUnit/Message/Mailbox.h>
+#include <LibMailUnit/Api/Message/Mailbox.h>
 
 using namespace LibMailUnit::Mail;
 
-MU_MAILBOXGROUP MU_CALL muMailboxGroupParse(const char * _raw_address_group)
+const MU_MailboxGroup * muMailboxGroupParse(const char * _raw_address_group)
 {
     if(nullptr == _raw_address_group)
     {
-        return MU_INVALID_HANDLE;
+        return nullptr;
     }
     const MailboxGroup * group = new MailboxGroup(_raw_address_group);
     if(group->empty())
     {
         delete group;
-        return MU_INVALID_HANDLE;
+        return nullptr;
     }
-    return new MHandle(group, true);
+    return new MU_MailboxGroup(group, true);
 }
 
-size_t MU_CALL muMailboxCount(MU_MAILBOXGROUP _mailbox_group)
+size_t MU_CALL muMailboxCount(const MU_MailboxGroup * _mailbox_group)
 {
     if(nullptr == _mailbox_group)
         return 0;
-    return _mailbox_group->pointer<const MailboxGroup>()->mailboxCount();
+    return _mailbox_group->pointer()->mailboxCount();
 }
 
-MU_MAILBOX MU_CALL muMailbox(MU_MAILBOXGROUP _mailbox_group, size_t _index)
-{
-    if(nullptr == _mailbox_group)
-        return MU_INVALID_HANDLE;
-    const MailboxGroup & group = *_mailbox_group->pointer<const MailboxGroup>();
-    const Mailbox * mailbox = &group[_index];
-    return _index >= group.mailboxCount() ? MU_INVALID_HANDLE : new MHandle(mailbox, false);
-}
-
-const char * MU_CALL muMailboxGroupName(MU_MAILBOXGROUP _mailbox_group)
+const MU_Mailbox * muMailbox(const MU_MailboxGroup * _mailbox_group, size_t _index)
 {
     if(nullptr == _mailbox_group)
         return nullptr;
-    const MailboxGroup * group = _mailbox_group->pointer<const MailboxGroup>();
+    const MailboxGroup & group = *_mailbox_group->pointer();
+    const Mailbox * mailbox = &group[_index];
+    return _index >= group.mailboxCount() ? nullptr : new MU_Mailbox(mailbox, false);
+}
+
+const char * MU_CALL muMailboxGroupName(const MU_MailboxGroup * _mailbox_group)
+{
+    if(nullptr == _mailbox_group)
+        return nullptr;
+    const MailboxGroup * group = _mailbox_group->pointer();
     return group->name().empty() ? nullptr : group->name().c_str();
 }
 
-const char * MU_CALL muMailboxName(MU_MAILBOX _mailbox)
+const char * MU_CALL muMailboxName(const MU_Mailbox * _mailbox)
 {
     if(nullptr == _mailbox)
         return nullptr;
-    const Mailbox * mailbox = _mailbox->pointer<const Mailbox>();
+    const Mailbox * mailbox = _mailbox->pointer();
     return mailbox->name().empty() ? nullptr : mailbox->name().c_str();
 }
 
-const char * MU_CALL muMailboxAddress(MU_MAILBOX _mailbox)
+const char * MU_CALL muMailboxAddress(const MU_Mailbox * _mailbox)
 {
     if(nullptr == _mailbox)
         return nullptr;
-    const Mailbox * mailbox = _mailbox->pointer<const Mailbox>();
+    const Mailbox * mailbox = _mailbox->pointer();
     return mailbox->address().empty() ? nullptr : mailbox->address().c_str();
 }

@@ -33,42 +33,38 @@
 extern "C" {
 #endif
 
-MU_DECLARE_HANDEL(MU_MIME_MESSAGE);
-MU_DECLARE_HANDEL(MU_MIME_PART);
+MU_DECLARE_API_TYPE(MU_MimeMessage)
+MU_DECLARE_API_TYPE(MU_MimePart)
 
 typedef enum
 {
-    mb_from,
-    mb_to,
-    mb_cc,
-    mb_bcc
-} MMailboxType;
+    mu_mbox_from,
+    mu_mbox_to,
+    mu_mbox_cc,
+    mu_mbox_bcc
+} MU_MailboxType;
 
-MU_API MU_MIME_MESSAGE MU_CALL muMimeParseString(const char * _input);
+MU_API const MU_MimeMessage * MU_CALL muMimeParseString(const char * _input);
 
-MU_API MU_MIME_MESSAGE MU_CALL muMimeParseFile(MU_NATIVE_FILE _input);
+MU_API const MU_MimeMessage * MU_CALL muMimeParseFile(MU_NATIVE_FILE _input);
 
-MU_API size_t MU_CALL muMimePartCount(MU_MIME_MESSAGE _message);
+MU_API const char * MU_CALL muMimeSubject(const MU_MimeMessage * _message);
 
-MU_API MU_MIME_PART MU_CALL muMimePart(MU_MIME_MESSAGE _message, size_t _index);
+MU_API size_t MU_CALL muMimeMailboxGroupCount(const MU_MimeMessage * _message, MU_MailboxType _mailbox_type);
 
-MU_API MU_MAIL_HEADERLIST MU_CALL muMimeHeaders(MU_MIME_MESSAGE _message);
+MU_API const MU_MailboxGroup * MU_CALL muMimeMailboxGroup(const MU_MimeMessage * _message, MU_MailboxType _mailbox_type, size_t _index);
 
-MU_API MU_MAIL_HEADERLIST MU_CALL muMimePartHeaders(MU_MIME_PART _message_part);
+MU_API const MU_MimePart * MU_CALL muMimeToPart(const MU_MimeMessage * _message);
 
-MU_API const char * MU_CALL muMimeSubject(MU_MIME_MESSAGE _message);
+MU_API size_t MU_CALL muMimePartCount(const MU_MimePart * _part);
 
-MU_API const char * MU_CALL muMimeContent(MU_MIME_MESSAGE _message);
+MU_API const MU_MimePart * MU_CALL muMimePart(const MU_MimePart * _part, size_t _index);
 
-MU_API const char * MU_CALL muMimePartContent(MU_MIME_PART _message_part);
+MU_API const MU_MailHeaderList * MU_CALL muMimeHeaders(const MU_MimePart * _part);
 
-MU_API size_t MU_CALL muMimeMailboxGroupCount(MU_MIME_MESSAGE _message, MMailboxType _mailbox_type);
+MU_API const MU_MailHeaderContentType * MU_CALL muMimeContentType(const MU_MimePart * _part);
 
-MU_API MU_MAILBOXGROUP MU_CALL muMimeMailboxGroup(MU_MIME_MESSAGE _message, MMailboxType _mailbox_type, size_t _index);
-
-MU_API MU_MAIL_HEADER_CONTENT_TYPE MU_CALL muMimeContentType(MU_MIME_MESSAGE _message);
-
-MU_API MU_MAIL_HEADER_CONTENT_TYPE MU_CALL muMimePartContentType(MU_MIME_PART _message_part);
+MU_API const char * MU_CALL muMimeContent(const MU_MimePart * _part);
 
 #ifdef __cplusplus
 } // extern "C"

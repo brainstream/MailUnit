@@ -15,42 +15,28 @@
  *                                                                                             *
  ***********************************************************************************************/
 
-#include <LibMailUnit/Api/Message/ContentType.h>
+#ifndef __LIBMU_API_MESSAGE_MESSAGEID_H__
+#define __LIBMU_API_MESSAGE_MESSAGEID_H__
 
-using namespace LibMailUnit::Mail;
+#include <string>
+#include <LibMailUnit/Api/ApiObject.h>
+#include <Include/LibMailUnit/Message/MessageId.h>
 
-const MU_MailHeaderContentType * muContentTypeParse(const char * _raw_content_type)
+namespace LibMailUnit {
+namespace Api {
+namespace Message {
+
+struct MessageId
 {
-    const ContentType * content_type = parseContentType(_raw_content_type).release();
-    if(nullptr != content_type)
-        return new MU_MailHeaderContentType(content_type, true);
-    return nullptr;
-}
+    std::string id_string;
+    std::string left;
+    std::string right;
+}; // struct MessageId
 
-MU_Bool MU_CALL muContentType(const MU_MailHeaderContentType * _content_type, const char ** _type_out, const char ** _subtype_out)
-{
-    if(nullptr == _content_type)
-        return mu_false;
-    const ContentType * content_type = _content_type->pointer();
-    *_type_out = content_type->type.c_str();
-    *_subtype_out = content_type->subtype.c_str();
-    return mu_true;
-}
+} // namespace Message
+} // namespace Api
+} // namespace LibMailUnit
 
-const size_t MU_CALL muContentTypeParamsCount(const MU_MailHeaderContentType * _content_type)
-{
-    if(nullptr == _content_type)
-        return 0;
-    return _content_type->pointer()->params.size();
-}
+MU_DEFINE_API_TYPE(MU_MailMessageId, LibMailUnit::Api::Message::MessageId)
 
-MU_Bool MU_CALL muContentTypeParam(const MU_MailHeaderContentType * _content_type, size_t _index,
-    const char ** _name_out, const char ** _value_out)
-{
-    if(nullptr == _content_type)
-        return mu_false;
-    const ContentTypeParam & param = _content_type->pointer()->params[_index];
-    *_name_out = param.name.c_str();
-    *_value_out = param.value.c_str();
-    return mu_true;
-}
+#endif // __LIBMU_API_MESSAGE_MESSAGEID_H__
