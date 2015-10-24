@@ -187,8 +187,8 @@ void MimeMessagePart::setup(const MimeMessagePartPrivate * _private)
 
 const QByteArray & MimeMessagePart::content() const
 {
-    const QByteArray & result = mp_private ? mp_private->content() : QByteArray();
-    return result;
+    static const QByteArray empty_content;
+    return mp_private ? mp_private->content() : empty_content;
 }
 
 const std::vector<std::unique_ptr<const MimeMessagePart>> & MimeMessagePart::parts() const
@@ -201,14 +201,14 @@ const std::vector<std::unique_ptr<const MimeMessagePart>> & MimeMessagePart::par
 
 const QString & MimeMessagePart::contentType() const
 {
-    const QString & result = mp_private ? mp_private->contentType() : QString();
-    return result;
+    static const QString default_content_type;
+    return mp_private ? mp_private->contentType() : default_content_type;
 }
 
 const QString & MimeMessagePart::contentSubtype() const
 {
-    const QString & result = mp_private ? mp_private->contentSubtype() : QString();
-    return result;
+    static const QString default_content_subtype;
+    return mp_private ? mp_private->contentSubtype() : default_content_subtype;
 }
 
 MimeMessage::MimeMessage(const QByteArray &_raw_data)

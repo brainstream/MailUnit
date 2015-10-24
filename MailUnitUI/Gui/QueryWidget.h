@@ -52,6 +52,10 @@ private slots:
     void onMessageSelected(const MqpMessage * _message);
 
 private:
+    void setPlainTextContent(const MimeMessage & _message);
+    void setHtmlContent(const MimeMessage & _message);
+
+private:
     MqpClient * mp_client;
     ServerConfig m_server;
     LoadingState * mp_state;

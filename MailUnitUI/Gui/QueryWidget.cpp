@@ -175,12 +175,47 @@ void QueryWidget::onRequestFinished()
 void QueryWidget::onMessageSelected(const MqpMessage * _message)
 {
     mp_edit_msg_body->clear();
-    //mp_html_view->setHtml(QString());
+    mp_html_view->clear();
     if(nullptr == _message)
         return;
-    mp_edit_msg_body->setPlainText(_message->mime().content()); // FIXME: crash!
+    setPlainTextContent(_message->mime());
+    setHtmlContent(_message->mime());
+}
 
+void QueryWidget::setPlainTextContent(const MimeMessage & _message)
+{
+    if(_message.contentType() == "text" && _message.contentSubtype() == "plain")
+    {
+        mp_edit_msg_body->setPlainText(_message.content());
+    }
+    else if(_message.contentType() == "multipart")
+    {
+        for(const std::unique_ptr<const MimeMessagePart> & part : _message.parts())
+        {
+            // TODO: recursive
+            if(part->contentType() == "text" && part->contentSubtype() == "plain")
+            {
+                mp_edit_msg_body->setPlainText(part->content());
+            }
+        }
+    }
+}
 
-
-    //mp_html_view->setSource();
+void QueryWidget::setHtmlContent(const MimeMessage & _message)
+{
+    if(_message.contentType() == "text" && _message.contentSubtype() == "html")
+    {
+        mp_html_view->setSource(_message);
+    }
+    else if(_message.contentType() == "multipart")
+    {
+        for(const std::unique_ptr<const MimeMessagePart> & part : _message.parts())
+        {
+            // TODO: recursive
+            if(part->contentType() == "text" && part->contentSubtype() == "html")
+            {
+                mp_html_view->setSource(*part);
+            }
+        }
+    }
 }

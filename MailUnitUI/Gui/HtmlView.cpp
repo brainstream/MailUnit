@@ -36,3 +36,8 @@ void HtmlView::setSource(const MimeMessagePart & _source)
 {
     mp_webview->setHtml("TEST");
 }
+
+void HtmlView::clear()
+{
+    mp_webview->setHtml(nullptr);
+}
