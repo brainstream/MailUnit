@@ -204,19 +204,15 @@ void QueryWidget::setPlainTextContent(const MimeMessage & _message)
 
 void QueryWidget::setHtmlContent(const MimeMessage & _message)
 {
-    if(_message.contentType() == "text" && _message.contentSubtype() == "html")
-    {
-        mp_html_view->setSource(_message);
-    }
-    else if(_message.contentType() == "multipart")
+    if(mp_html_view->trySetContent(_message))
+        return;
+    if(_message.contentType() == "multipart")
     {
         for(const std::unique_ptr<const MimeMessagePart> & part : _message.parts())
         {
             // TODO: recursive
-            if(part->contentType() == "text" && part->contentSubtype() == "html")
-            {
-                mp_html_view->setSource(*part);
-            }
+            if(mp_html_view->trySetContent(*part))
+                return;
         }
     }
 }

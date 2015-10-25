@@ -31,9 +31,12 @@ class HtmlView : public QFrame
 
 public:
     explicit HtmlView(QWidget * _parent = nullptr);
-    void setSource(const MimeMessagePart & _source);
+    bool trySetContent(const MimeMessagePart & _source);
     void clear();
 
+private:
+    void setTextHtmlSource(const MimeMessagePart & _source);
+    void setMulitpartRelatedSource(const MimeMessagePart & _source);
 
 private:
     QWebView * mp_webview;

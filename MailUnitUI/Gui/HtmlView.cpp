@@ -31,9 +31,44 @@ HtmlView::HtmlView(QWidget * _parent /*= nullptr*/) :
     mp_webview->setContextMenuPolicy(Qt::ActionsContextMenu);
 }
 
-void HtmlView::setSource(const MimeMessagePart & _source)
+bool HtmlView::trySetContent(const MimeMessagePart & _source)
+{
+    if(_source.contentType().compare("text", Qt::CaseInsensitive) == 0 &&
+       _source.contentSubtype().compare("html", Qt::CaseInsensitive) == 0)
+    {
+        setTextHtmlSource(_source);
+    }
+    else if(_source.contentType().compare("multipart", Qt::CaseInsensitive) == 0 &&
+        _source.contentSubtype().compare("related", Qt::CaseInsensitive) == 0)
+    {
+        setMulitpartRelatedSource(_source);
+    }
+    else
+    {
+        return false;
+    }
+    return true;
+}
+
+void HtmlView::setTextHtmlSource(const MimeMessagePart & _source)
 {
     mp_webview->setHtml(_source.content());
+}
+
+void HtmlView::setMulitpartRelatedSource(const MimeMessagePart & _source)
+{
+    for(const std::unique_ptr<const MimeMessagePart> & part : _source.parts())
+    {
+        if(part->contentType().compare("text", Qt::CaseInsensitive) == 0 &&
+           part->contentSubtype().compare("html", Qt::CaseInsensitive) == 0)
+        {
+            mp_webview->setHtml(part->content()); // TODO: the "cid:" url handler
+        }
+        else
+        {
+            // TODO: map of cid-content
+        }
+    }
 }
 
 void HtmlView::clear()
