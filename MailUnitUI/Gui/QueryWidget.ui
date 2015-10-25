@@ -33,16 +33,36 @@
    <item>
     <layout class="QHBoxLayout" name="mp_layout_result">
      <item>
-      <widget class="QPlainTextEdit" name="mp_edit_msg_body">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Expanding" vsizetype="MinimumExpanding">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
+      <widget class="QTabWidget" name="mp_tabs">
+       <property name="currentIndex">
+        <number>0</number>
        </property>
-       <property name="readOnly">
-        <bool>true</bool>
-       </property>
+       <widget class="QWidget" name="mp_tab_text">
+        <attribute name="title">
+         <string>Plain Text</string>
+        </attribute>
+        <layout class="QVBoxLayout" name="verticalLayout_2">
+         <item>
+          <widget class="QPlainTextEdit" name="mp_edit_msg_body">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Expanding" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="readOnly">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QWidget" name="mp_tab_html">
+        <attribute name="title">
+         <string>HTML</string>
+        </attribute>
+        <layout class="QVBoxLayout" name="verticalLayout_3"/>
+       </widget>
       </widget>
      </item>
     </layout>

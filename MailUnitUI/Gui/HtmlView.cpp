@@ -27,14 +27,13 @@ HtmlView::HtmlView(QWidget * _parent /*= nullptr*/) :
     layout->setMargin(0);
     mp_webview = new QWebView(this);
     layout->addWidget(mp_webview);
-    mp_webview->setHtml("TEST");
     setFrameStyle(QFrame::StyledPanel);
     mp_webview->setContextMenuPolicy(Qt::ActionsContextMenu);
 }
 
 void HtmlView::setSource(const MimeMessagePart & _source)
 {
-    mp_webview->setHtml("TEST");
+    mp_webview->setHtml(_source.content());
 }
 
 void HtmlView::clear()

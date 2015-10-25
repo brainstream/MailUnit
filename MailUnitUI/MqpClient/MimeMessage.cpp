@@ -88,7 +88,6 @@ void MimeMessagePartPrivate::init(const MU_MimePart * _part)
     m_content_type = content_type;
     m_content_subtype = content_subtype;
     if(m_content_type.compare("multipart", Qt::CaseInsensitive) != 0)
-        //|| m_content_subtype.compare("alternative", Qt::CaseInsensitive) != 0)
     {
         m_content = muMimeContent(_part);
         return;

@@ -100,6 +100,7 @@ QueryWidget::QueryWidget(const ServerConfig & _server, QWidget * _parent /*= nul
     setupUi(this);
     mp_client = new MqpClient(m_server, this);
     mp_listview_result = new MessageListView(*mp_messages, this);
+    mp_listview_result->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Expanding);
     mp_layout_result->insertWidget(0, mp_listview_result);
     mp_label_server->setText(QString("%1 [%2:%3]")
         .arg(_server.name())
@@ -108,7 +109,7 @@ QueryWidget::QueryWidget(const ServerConfig & _server, QWidget * _parent /*= nul
     mp_label_status->setText(tr("Ready"));
     mp_progress_bar->setVisible(false);
     mp_html_view = new HtmlView(this);
-    mp_layout_result->addWidget(mp_html_view);
+    mp_tab_html->layout()->addWidget(mp_html_view);
     connect(mp_client, SIGNAL(connected(MqpResponseHeader)), this, SLOT(onClientConnected(MqpResponseHeader)));
     connect(mp_client, SIGNAL(finished()), this, SLOT(onRequestFinished()));
     connect(mp_client, SIGNAL(messageReceived(MqpRawMessage)), this, SLOT(onMessageReceived(MqpRawMessage)));
