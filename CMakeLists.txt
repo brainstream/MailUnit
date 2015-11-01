@@ -323,6 +323,7 @@ set(OTHER_FILES
     Doxygen/Snippets/RFC/AddressSpec.html
     Doxygen/Snippets/RFC/IdentificationFieldsSpec.html
     Doxygen/Snippets/RFC/ContentTypeSpec.html
+    Doxygen/Groups/EMail.dox
 )
 
 

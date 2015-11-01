@@ -35,6 +35,7 @@ extern "C" {
 
 /**
  * @brief The month
+ * @ingroup date_time
  */
 typedef enum
 {
@@ -55,6 +56,7 @@ typedef enum
 
 /**
  * @brief The day of week
+ * @ingroup date_time
  */
 typedef enum
 {
@@ -70,6 +72,7 @@ typedef enum
 
 /**
  * @brief Representation of date and time.
+ * @ingroup date_time
  */
 typedef struct
 {
@@ -91,8 +94,9 @@ typedef struct
  * @param _date_time
  *     A pointer to a variable that will contain a result. <i>Must not be NULL.</i>
  * @return
- *     In success case returns @ref MU_Bool::mtrue and @ref MU_Bool::mfalse otherwise.
+ *     In success case returns @ref MU_Bool::mu_true and @ref MU_Bool::mu_false otherwise.
  *     The @a _date_time object will not be modified if parsing failed.
+ * @ingroup date_time
  */
 MU_API MU_Bool MU_CALL muDateTimeParse(const char * _raw_date_time, MU_DateTime * _date_time);
 
@@ -103,6 +107,7 @@ MU_API MU_Bool MU_CALL muDateTimeParse(const char * _raw_date_time, MU_DateTime 
  * @return
  *     The UNIX time representation of @a _date_time.
  * @sa muUnixTimeToDateTime
+ * @ingroup date_time
  */
 MU_API time_t MU_CALL muDateTimeToUnixTime(const MU_DateTime * _date_time);
 
@@ -113,11 +118,12 @@ MU_API time_t MU_CALL muDateTimeToUnixTime(const MU_DateTime * _date_time);
  * @param _date_time
  *     A pointer to a variable that will contain a result. <i>Must not be NULL.</i>
  * @sa muDateTimeToUnixTime
+ * @ingroup date_time
  */
 MU_API void MU_CALL muUnixTimeToDateTime(time_t _unix_time, MU_DateTime * _date_time);
 
 #ifdef __cplusplus
-} // extern "C"
+} /* extern "C" */
 #endif
 
-#endif // __LIBMU_DATETIME_H__
+#endif /* __LIBMU_DATETIME_H__ */

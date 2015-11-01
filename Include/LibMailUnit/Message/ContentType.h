@@ -40,24 +40,26 @@ MU_DECLARE_API_TYPE(MU_MailHeaderContentType)
  * @param _raw_content_type
  *     String from a mail header.
  * @return
- *     Handle to a parsed ContentType or @a NULL
+ *     Pointer to a parsed ContentType or @a NULL
  *     The @a _content_type object will not be modified if parsing failed.
  * @remarks
- *     Returned handle must be destroyed by calling the @ref muFree function.
+ *     Returned pointer must be destroyed by calling the @ref muFree function.
+ * @ingroup content_type
  */
 MU_API const MU_MailHeaderContentType * MU_CALL muContentTypeParse(const char * _raw_content_type);
 
 /**
  * @brief Extracts type and subtype from the parsed ContentType
  * @param _content_type
- *     Parsed ContentType handle
+ *     Pointer to a parsed ContentType
  * @param _type_out
  *     Pointer to a pointer into which the @a type will be recorded
  * @param _subtype_out
  *     Pointer to a pointer into which the @a subtype will be recorded
  * @return
- *     @ref MU_Bool::mtrue and @ref MU_Bool::mfalse otherwise.
+ *     @ref MU_Bool::mu_true and @ref MU_Bool::mu_false otherwise.
  * @sa muContentTypeParse
+ * @ingroup content_type
  */
 MU_API MU_Bool MU_CALL muContentType(const MU_MailHeaderContentType * _content_type,
     const char ** _type_out, const char ** _subtype_out);
@@ -65,17 +67,18 @@ MU_API MU_Bool MU_CALL muContentType(const MU_MailHeaderContentType * _content_t
 /**
  * @brief Extracts parameters count from the parsed ContentType
  * @param _content_type
- *     Parsed ContentType handle
+ *     Pointer to a parsed ContentType
  * @return
  *     A count of the ContentType parameters.
  * @sa muContentTypeParse
+ * @ingroup content_type
  */
 MU_API const size_t MU_CALL muContentTypeParamsCount(const MU_MailHeaderContentType * _content_type);
 
 /**
  * @brief Extracts parameter from the parsed ContentType
  * @param _content_type
- *     Parsed ContentType handle
+ *     Pointer to a parsed ContentType handle
  * @param _index
  *     Zero-based index of parameter
  * @param _name_out
@@ -83,14 +86,15 @@ MU_API const size_t MU_CALL muContentTypeParamsCount(const MU_MailHeaderContentT
  * @param _value_out
  *     Pointer to a pointer into which the @a value will be recorded
  * @return
- *     @ref MU_Bool::mtrue and @ref MU_Bool::mfalse otherwise.
+ *     @ref MU_Bool::mu_true and @ref MU_Bool::mu_false otherwise.
  * @sa muContentTypeParse
+ * @ingroup content_type
  */
 MU_API MU_Bool MU_CALL muContentTypeParam(const MU_MailHeaderContentType * _content_type, size_t _index,
     const char ** _name_out, const char ** _value_out);
 
 #ifdef __cplusplus
-} // extern "C"
+} /* extern "C" */
 #endif
 
-#endif // __LIBMU_MESSAGE_CONTENTTYPE_H__
+#endif /* __LIBMU_MESSAGE_CONTENTTYPE_H__ */

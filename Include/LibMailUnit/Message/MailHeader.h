@@ -30,12 +30,17 @@ extern "C" {
  *
  * @anchor rfc-headers
  * @htmlinclude RFC/HeaderSpec.html
-*/
+ *
+ * @remarks According with the table in
+ * <A HREF="http://tools.ietf.org/html/rfc5322#section-3.6">RFC 5322 3.6</A> some of the headers
+ * can appear more than once.
+ */
 
 /**
  * @brief The "Message-ID" mail header field.
  *
  * @htmlinclude RFC/IdentificationFieldsSpec.html
+ * @ingroup mail_header
  */
 #define MU_MAILHDR_MESSAGEID "Message-ID"
 
@@ -43,6 +48,7 @@ extern "C" {
  * @brief The "In-Reply-To" mail header field.
  *
  * @htmlinclude RFC/IdentificationFieldsSpec.html
+ * @ingroup mail_header
  */
 #define MU_MAILHDR_INREPLYTO "In-Reply-To"
 
@@ -50,6 +56,7 @@ extern "C" {
  * @brief The "References" mail header field.
  *
  * @htmlinclude RFC/IdentificationFieldsSpec.html
+ * @ingroup mail_header
  */
 #define MU_MAILHDR_REFERENCES "References"
 
@@ -58,9 +65,10 @@ extern "C" {
  *
  * <A HREF="http://tools.ietf.org/html/rfc5322#section-3.6.1">RFC 5322 3.6.1</A>:
  * <BLOCKQUOTE><PRE>
- * orig-date       =   "Date:" date-time CRLF
+ * orig-date       =   "Date:" date_time CRLF
  * </PRE></BLOCKQUOTE>
  * @htmlinclude RFC/DateSpec.html
+ * @ingroup mail_header
  */
 #define MU_MAILHDR_DATE "Date"
 
@@ -72,6 +80,7 @@ extern "C" {
  * from = "From:" (mailbox-list / address-list) CRLF
  * </PRE></BLOCKQUOTE>
  * @htmlinclude RFC/AddressSpec.html
+ * @ingroup mail_header
  */
 #define MU_MAILHDR_FROM "From"
 
@@ -83,6 +92,7 @@ extern "C" {
  * sender = "Sender:" (mailbox / address) CRLF
  * </PRE></BLOCKQUOTE>
  * @htmlinclude RFC/AddressSpec.html
+ * @ingroup mail_header
  */
 #define MU_MAILHDR_SENDER "Sender"
 
@@ -94,6 +104,7 @@ extern "C" {
  * reply-to = "Reply-To:" address-list CRLF
  * </PRE></BLOCKQUOTE>
  * @htmlinclude RFC/AddressSpec.html
+ * @ingroup mail_header
  */
 #define MU_MAILHDR_REPLYTO "Reply-To"
 
@@ -105,6 +116,7 @@ extern "C" {
  * to              =   "To:" address-list CRLF
  * </PRE></BLOCKQUOTE>
  * @htmlinclude RFC/AddressSpec.html
+ * @ingroup mail_header
  */
 #define MU_MAILHDR_TO "To"
 
@@ -116,6 +128,7 @@ extern "C" {
  * cc              =   "Cc:" address-list CRLF
  * </PRE></BLOCKQUOTE>
  * @htmlinclude RFC/AddressSpec.html
+ * @ingroup mail_header
  */
 #define MU_MAILHDR_CC "Cc"
 
@@ -129,6 +142,7 @@ extern "C" {
  * @htmlinclude RFC/AddressSpec.html
  * @remarks
  *     BCC addresses can be defined by SMTP without including in the mail header.
+ * @ingroup mail_header
  */
 #define MU_MAILHDR_BCC "Bcc"
 
@@ -139,6 +153,7 @@ extern "C" {
  * <BLOCKQUOTE><PRE>
  * subject         =   "Subject:" unstructured CRLF
  * </PRE></BLOCKQUOTE>
+ * @ingroup mail_header
  */
 #define MU_MAILHDR_SUBJECT "Subject"
 
@@ -152,6 +167,7 @@ extern "C" {
  * product         = token ["/" product-version]
  * product-version = token
  * </PRE></BLOCKQUOTE>
+ * @ingroup mail_header
  */
 #define MU_MAILHDR_USERAGENT "User-Agent"
 
@@ -162,6 +178,7 @@ extern "C" {
  * <BLOCKQUOTE><PRE>
  * version := "MIME-Version" ":" 1*DIGIT "." 1*DIGIT
  * </PRE></BLOCKQUOTE>
+ * @ingroup mail_header
  */
 #define MU_MAILHDR_VERSION "MIME-Version"
 
@@ -169,39 +186,13 @@ extern "C" {
  * @brief The "Content-Type" MIME header field.
  *
  * @htmlinclude RFC/ContentTypeSpec.html
+ * @ingroup mail_header
  */
 #define MU_MAILHDR_CONTENTTYPE "Content-Type"
 
 MU_DECLARE_API_TYPE(MU_MailHeader)
 MU_DECLARE_API_TYPE(MU_MailHeaderList)
 
-/**
- * @brief Contains values of headers with common name.
- *
- * According with the table in
- * <A HREF="http://tools.ietf.org/html/rfc5322#section-3.6">RFC 5322 3.6</A> some of the headers
- * can appear more than once.
- */
-//
-// FIXME: uncomment or delete
-//
-//typedef struct
-//{
-//    /**
-//     * @brief A name of the header
-//     */
-//    const char * const name;
-//    /**
-//     * @brief List of values.
-//     *
-//     * Containst @ref values_count elements.
-//     */
-//    const char ** const values;
-//    /**
-//     * @brief Count of @ref values
-//     */
-//    const size_t values_count;
-//} MU_MailHeader;
 
 /**
  * @brief Parses headers of mail message from string.
@@ -209,9 +200,10 @@ MU_DECLARE_API_TYPE(MU_MailHeaderList)
  *     String contained mail header. Can contain full mail message. Headers must be splitted
  *     from a data by an empty line as described in the \ref rfc-headers "RFC".
  * @return
- *     Handle to headers list or @ref NULL.
+ *     Pointer to a header list or @a NULL.
  * @remarks
- *     Returned handle must be destroyed by calling the @ref muFree function.
+ *     Returned potinter must be destroyed by calling the @ref muFree function.
+ * @ingroup mail_header
  */
 MU_API const MU_MailHeaderList * MU_CALL muMailHeadersParseString(const char * _input);
 
@@ -221,13 +213,14 @@ MU_API const MU_MailHeaderList * MU_CALL muMailHeadersParseString(const char * _
  *     File that contains mail header. Can contain full mail message. Headers must be splitted
  *     from a data by an empty line as described in the \ref rfc-headers "RFC".
  * @return
- *     Handle to headers list or @ref NULL.
+ *     Potinter to a header list or @a NULL.
  *
  * Function will read file from current position.
  * After execution a read position will be placed after end of a header section.
  *
  * @remarks
- *     Returned handle must be destroyed by calling the @ref muFree function.
+ *     Returned potinter must be destroyed by calling the @ref muFree function.
+ * @ingroup mail_header
  */
 MU_API const MU_MailHeaderList * MU_CALL muMailHeadersParseFile(MU_NATIVE_FILE _input);
 
@@ -239,21 +232,24 @@ MU_API size_t MU_CALL muMailHeadersCount(const MU_MailHeaderList * _headers);
 /**
  * @brief Returns a header at @a _index position or @a NULL.
  * @remarks
- *     Returned handle must be destroyed by calling the @ref muFree function.
+ *     Returned potinter must be destroyed by calling the @ref muFree function.
  * @sa muMailHeadersCount
+ * @ingroup mail_header
  */
 MU_API const MU_MailHeader * MU_CALL muMailHeaderByIndex(const MU_MailHeaderList * _headers, size_t _index);
 
 /**
  * @brief Returns a header named @a _name or @a NULL.
  * @remarks
- *     Returned handle must be destroyed by calling the @ref muFree function.
+ *     Returned potinter must be destroyed by calling the @ref muFree function.
+ * @ingroup mail_header
  */
 MU_API const MU_MailHeader * MU_CALL muMailHeaderByName(const MU_MailHeaderList * _headers, const char * _name);
 
 /**
  * @brief Returns a name of @a _header or @a NULL.
  * @sa muMailHeaderByIndex
+ * @ingroup mail_header
 */
 MU_API const char * MU_CALL muMailHeaderName(const MU_MailHeader * _header);
 
@@ -265,6 +261,7 @@ MU_API const char * MU_CALL muMailHeaderName(const MU_MailHeader * _header);
  * can appear more than once.
  *
  * @sa muMailHeaderValue
+ * @ingroup mail_header
  */
 MU_API size_t MU_CALL muMailHeaderValueCount(const MU_MailHeader * _header);
 
@@ -276,11 +273,12 @@ MU_API size_t MU_CALL muMailHeaderValueCount(const MU_MailHeader * _header);
  * can appear more than once.
  *
  * @sa muMailHeaderValueCount
+ * @ingroup mail_header
 */
 MU_API const char * MU_CALL muMailHeaderValue(const MU_MailHeader * _header, size_t _index);
 
 #ifdef __cplusplus
-} // extern "C"
+} /* extern "C" */
 #endif
 
-#endif // __LIBMU_MAILHEADER_H__
+#endif /* __LIBMU_MAILHEADER_H__ */

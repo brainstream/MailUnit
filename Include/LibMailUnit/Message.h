@@ -30,4 +30,4 @@
 #include "Message/DateTime.h"
 #include "Message/ContentType.h"
 
-#endif // __LIBMU_MESSAGE_H__
+#endif /* __LIBMU_MESSAGE_H__ */

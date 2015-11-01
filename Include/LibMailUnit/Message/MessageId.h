@@ -39,47 +39,51 @@ MU_DECLARE_API_TYPE(MU_MailMessageId)
  * @param _raw_message_id
  *     String from a mail header.
  * @return
- *     Handle to parsed message id or @ref NULL.
+ *     Potinter to the parsed message id or @a NULL.
  * @remarks
- *     Returned handle must be destroyed by calling the @ref muFree function.
+ *     Returned potinter must be destroyed by calling the @ref muFree function.
  * @sa muMessageIdString
  * @sa muMessageIdLeft
  * @sa muMessageIdRight
+ * @ingroup message_id
  */
 MU_API const MU_MailMessageId * MU_CALL muMessageIdParse(const char * _raw_message_id);
 
 /**
  * @brief Returns source string passed to the @ref muMessageIdParse function.
  * @param _msg_id
- *     Handle returned from the @ref muMessageIdParse function.
+ *     Potinter returned from the @ref muMessageIdParse function.
  * @sa muParseMessageId
  * @sa muMessageIdLeft
  * @sa muMessageIdRight
+ * @ingroup message_id
  */
 MU_API const char * MU_CALL muMessageIdString(const MU_MailMessageId * _msg_id);
 
 /**
  * @brief Returns left part of message id.
  * @param _msg_id
- *     Handle returned from the @ref muMessageIdParse function.
+ *     Potinter returned from the @ref muMessageIdParse function.
  * @sa muMessageIdParse
  * @sa muMessageIdString
  * @sa muMessageIdRight
+ * @ingroup message_id
  */
 MU_API const char * MU_CALL muMessageIdLeft(const MU_MailMessageId * _msg_id);
 
 /**
  * @brief Returns right part of message id.
  * @param _msg_id
- *     Handle returned from the @ref muMessageIdParse function.
+ *     Potinter returned from the @ref muMessageIdParse function.
  * @sa muMessageIdParse
  * @sa muMessageIdString
  * @sa muMessageIdLeft
+ * @ingroup message_id
  */
 MU_API const char * MU_CALL muMessageIdRight(const MU_MailMessageId * _msg_id);
 
 #ifdef __cplusplus
-} // extern "C"
+} /* extern "C" */
 #endif
 
-#endif // __LIBMU_MESSAGEID_H__
+#endif /* __LIBMU_MESSAGEID_H__ */

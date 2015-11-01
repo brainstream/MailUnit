@@ -1,0 +1,11 @@
+/**
+@defgroup email E-mail message API
+@{
+@defgroup mail_header Header API
+@defgroup mime MIME API
+@defgroup mailbox Mailbox API
+@defgroup content_type Content type API
+@defgroup date_time Date and time API
+@defgroup message_id Message ID API
+@}
+*/

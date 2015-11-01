@@ -16,7 +16,8 @@
  ***********************************************************************************************/
 
 /**
- * @file Main and auxiliary definitions
+ * @file
+ * @brief Main and auxiliary definitions
  */
 
 #ifndef __LIBMU_DEF_H__
@@ -83,4 +84,4 @@ typedef enum
  */
 MU_API void MU_CALL muFree(const void * _object);
 
-#endif // __LIBMU_DEF_H__
+#endif /* __LIBMU_DEF_H__ */
