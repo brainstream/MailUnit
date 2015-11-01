@@ -2,6 +2,7 @@
 [Dd]istrib*
 Binary
 Doxygen/html/
+Doxygen/doxygen_sqlite3.db
 CMakeLists.txt.user*
 /.project
 *.autosave
