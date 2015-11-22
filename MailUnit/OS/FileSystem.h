@@ -42,7 +42,7 @@ static const uint16_t file_open_append = 0x08;
 
 typedef boost::filesystem::path::string_type PathString;
 
-void closeNativeFile(MU_NATIVE_FILE _native_file);
+void closeNativeFile(MU_File _native_file);
 
 inline void deleteFile(const PathString & _filepath)
 {
@@ -83,7 +83,7 @@ public:
     {
     }
 
-    File(MU_NATIVE_FILE _native_file, bool _autoclose) :
+    File(MU_File _native_file, bool _autoclose) :
         m_file(boost::iostreams::file_descriptor(_native_file, s_descriptor_flags)),
         m_autoclose(_autoclose)
     {
@@ -114,12 +114,12 @@ public:
             closeNativeFile(m_file.handle());
     }
 
-    operator MU_NATIVE_FILE ()
+    operator MU_File ()
     {
         return m_file.handle();
     }
 
-    MU_NATIVE_FILE native()
+    MU_File native()
     {
         return m_file.handle();
     }
@@ -154,20 +154,20 @@ public:
         return m_file.seek(_offset, _seekdir);
     }
 
-    MU_NATIVE_FILE reset()
+    MU_File reset()
     {
-        return swap(MU_INVALID_NATIVE_FILE);
+        return swap(MU_INVALID_FILE);
     }
 
-    MU_NATIVE_FILE swap(MU_NATIVE_FILE _new_native_file)
+    MU_File swap(MU_File _new_native_file)
     {
-        MU_NATIVE_FILE old_file = m_file.handle();
+        MU_File old_file = m_file.handle();
         m_file.open(_new_native_file, s_descriptor_flags);
         return old_file;
     }
 
 protected:
-    static MU_NATIVE_FILE openNativeFile(const boost::filesystem::path & _filepath, uint16_t _nf_flags);
+    static MU_File openNativeFile(const boost::filesystem::path & _filepath, uint16_t _nf_flags);
 
 private:
     static const boost::iostreams::file_descriptor_flags s_descriptor_flags =
@@ -186,7 +186,7 @@ public:
 
     ~TempFile() override
     {
-        MU_NATIVE_FILE file = reset();
+        MU_File file = reset();
         closeNativeFile(file);
         boost::filesystem::remove(m_filepath);
     }
@@ -197,16 +197,16 @@ public:
     }
 
 private:
-    explicit TempFile(std::pair<MU_NATIVE_FILE, boost::filesystem::path> && _init_data) :
+    explicit TempFile(std::pair<MU_File, boost::filesystem::path> && _init_data) :
         File(_init_data.first, false),
         m_filepath(_init_data.second)
     {
     }
 
-    static std::pair<MU_NATIVE_FILE, boost::filesystem::path> init()
+    static std::pair<MU_File, boost::filesystem::path> init()
     {
         boost::filesystem::path path = tempFilepath();;
-        MU_NATIVE_FILE file = openNativeFile(path, file_open_create | file_open_read | file_open_write);
+        MU_File file = openNativeFile(path, file_open_create | file_open_read | file_open_write);
         return std::make_pair(file, path);
     }
 

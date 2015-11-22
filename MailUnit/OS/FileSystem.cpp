@@ -26,7 +26,7 @@
 using namespace MailUnit::OS;
 namespace fs = boost::filesystem;
 
-MU_NATIVE_FILE File::openNativeFile(const fs::path & _filepath, uint16_t _nf_flags)
+MU_File File::openNativeFile(const fs::path & _filepath, uint16_t _nf_flags)
 {
 #ifdef _WIN32
     unsigned long desired_access = 0;
@@ -78,9 +78,9 @@ MU_NATIVE_FILE File::openNativeFile(const fs::path & _filepath, uint16_t _nf_fla
 #endif
 }
 
-void MailUnit::OS::closeNativeFile(MU_NATIVE_FILE _native_file)
+void MailUnit::OS::closeNativeFile(MU_File _native_file)
 {
-    if(MU_INVALID_NATIVE_FILE == _native_file)
+    if(MU_INVALID_FILE == _native_file)
         return;
 #ifdef _WIN32
     CloseHandle(_native_file);

@@ -25,7 +25,7 @@ BOOST_AUTO_TEST_SUITE(ContentType)
 
 BOOST_AUTO_TEST_CASE(parseContentType)
 {
-    const MU_MailHeaderContentType * content_type =
+    MU_MailHeaderContentType * content_type =
         muContentTypeParse("multipart/mixed;boundary = ---___123456 ; X-test = \"quoted  string--!_\"");
     BOOST_CHECK(content_type);
     const char * type = nullptr;
@@ -46,8 +46,7 @@ BOOST_AUTO_TEST_CASE(parseContentType)
 
 BOOST_AUTO_TEST_CASE(parseContentType2)
 {
-    const MU_MailHeaderContentType * content_type =
-        muContentTypeParse("text/plain");
+    MU_MailHeaderContentType * content_type = muContentTypeParse("text/plain");
     BOOST_CHECK(content_type);
     const char * type = nullptr;
     const char * subtype = nullptr;
@@ -59,8 +58,7 @@ BOOST_AUTO_TEST_CASE(parseContentType2)
 
 BOOST_AUTO_TEST_CASE(parseContentType3)
 {
-    const MU_MailHeaderContentType * content_type =
-        muContentTypeParse("X-text/X-some_value");
+    MU_MailHeaderContentType * content_type = muContentTypeParse("X-text/X-some_value");
     BOOST_CHECK(content_type);
     const char * type = nullptr;
     const char * subtype = nullptr;

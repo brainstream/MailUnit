@@ -21,6 +21,8 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <LibMailUnit/ApiObject.h>
+#include <Include/LibMailUnit/Message/ContentType.h>
 
 namespace LibMailUnit {
 namespace Mail {
@@ -42,5 +44,7 @@ std::unique_ptr<ContentType> parseContentType(const std::string & _raw_content_t
 
 } // namespace Mail
 } // namespace LibMailUnit
+
+MU_DEFINE_API_TYPE(MU_MailHeaderContentType, const LibMailUnit::Mail::ContentType)
 
 #endif // __LIBMU_MAIL_CONTENTTYPE_H__

@@ -15,13 +15,11 @@
  *                                                                                             *
  ***********************************************************************************************/
 
-#ifndef __LIBMU_API_MESSAGE_CONTENTTYPE_H__
-#define __LIBMU_API_MESSAGE_CONTENTTYPE_H__
+#include <LibMailUnit/ApiObject.h>
 
-#include <LibMailUnit/Api/ApiObject.h>
-#include <LibMailUnit/Mail/ContentType.h>
-#include <Include/LibMailUnit/Message/ContentType.h>
+using namespace LibMailUnit;
 
-MU_DEFINE_API_TYPE(MU_MailHeaderContentType, LibMailUnit::Mail::ContentType)
-
-#endif // __LIBMU_API_MESSAGE_CONTENTTYPE_H__
+void MU_CALL muFree(void * _object)
+{
+    delete reinterpret_cast<Object *>(_object);
+}

@@ -11,10 +11,10 @@ namespace fs = boost::filesystem;
 
 namespace {
 
-void collectAddressesFromHeader(const MU_MailHeaderList * _headers, const char * _header_name,
+void collectAddressesFromHeader(MU_MailHeaderList * _headers, const char * _header_name,
     Email::AddressSet & _collection)
 {
-    const MU_MailHeader * header = muMailHeaderByName(_headers, _header_name);
+    MU_MailHeader * header = muMailHeaderByName(_headers, _header_name);
     if(nullptr == header)
         return;
     size_t value_count = muMailHeaderValueCount(header);
@@ -23,13 +23,13 @@ void collectAddressesFromHeader(const MU_MailHeaderList * _headers, const char *
         const char * header_value = muMailHeaderValue(header, value_index);
         if(nullptr == header_value)
             continue;
-        const MU_MailboxGroup * group = muMailboxGroupParse(header_value);
+        MU_MailboxGroup * group = muMailboxGroupParse(header_value);
         if(nullptr == group)
             continue;
         size_t mailbox_count = muMailboxCount(group);
         for(size_t mailbox_index = 0; mailbox_index < mailbox_count; ++mailbox_index)
         {
-            const MU_Mailbox * mailbox = muMailbox(group, mailbox_index);
+            MU_Mailbox * mailbox = muMailbox(group, mailbox_index);
             if(nullptr != mailbox)
                 _collection.insert(muMailboxAddress(mailbox));
             muFree(mailbox);
@@ -39,9 +39,9 @@ void collectAddressesFromHeader(const MU_MailHeaderList * _headers, const char *
     muFree(header);
 }
 
-std::time_t getDateTimeFromHeaders(const MU_MailHeaderList * _headers)
+std::time_t getDateTimeFromHeaders(MU_MailHeaderList * _headers)
 {
-    const MU_MailHeader * date_time_header = muMailHeaderByName(_headers, MU_MAILHDR_DATE);
+    MU_MailHeader * date_time_header = muMailHeaderByName(_headers, MU_MAILHDR_DATE);
     if(nullptr == date_time_header || muMailHeaderValueCount(date_time_header) == 0)
         return 0;
     const char * date_time_string = muMailHeaderValue(date_time_header, 0);
@@ -85,12 +85,12 @@ Email::Email(const RawEmail & _raw, const boost::filesystem::path & _data_file_p
     appendBcc(_raw);
 }
 
-void Email::parseHeaders(MU_NATIVE_FILE _file)
+void Email::parseHeaders(MU_File _file)
 {
-    const MU_MailHeaderList * headers = muMailHeadersParseFile(_file);
+    MU_MailHeaderList * headers = muMailHeadersParseFile(_file);
     if(nullptr == headers)
         return;
-    const MU_MailHeader * subject_header = muMailHeaderByName(headers, MU_MAILHDR_SUBJECT);
+    MU_MailHeader * subject_header = muMailHeaderByName(headers, MU_MAILHDR_SUBJECT);
     if(nullptr != subject_header && muMailHeaderValueCount(subject_header) > 0)
         m_subject = muMailHeaderValue(subject_header, 0);
     muFree(subject_header);
@@ -106,11 +106,11 @@ void Email::appendFrom(const RawEmail & _raw)
 {
     for(const std::string raw_from : _raw.fromAddresses())
     {
-        const MU_MailboxGroup * group = muMailboxGroupParse(raw_from.c_str());
+        MU_MailboxGroup * group = muMailboxGroupParse(raw_from.c_str());
         size_t mailbox_count = muMailboxCount(group);
         for(size_t i = 0; i < mailbox_count; ++i)
         {
-            const MU_Mailbox * mailbox = muMailbox(group, i);
+            MU_Mailbox * mailbox = muMailbox(group, i);
             if(nullptr == mailbox)
             {
                 muFree(mailbox);
@@ -135,13 +135,13 @@ void Email::appendBcc(const RawEmail & _raw)
 {
     for(const std::string & raw_to: _raw.toAddresses())
     {
-        const MU_MailboxGroup * group = muMailboxGroupParse(raw_to.c_str());
+        MU_MailboxGroup * group = muMailboxGroupParse(raw_to.c_str());
         if(nullptr == group)
             continue;
         size_t mailbox_count = muMailboxCount(group);
         for(size_t i = 0; i < mailbox_count; ++i)
         {
-            const MU_Mailbox * mailbox = muMailbox(group, i);
+            MU_Mailbox * mailbox = muMailbox(group, i);
             if(nullptr == mailbox)
             {
                 muFree(mailbox);

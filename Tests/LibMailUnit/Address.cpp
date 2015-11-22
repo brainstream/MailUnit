@@ -26,11 +26,11 @@ BOOST_AUTO_TEST_SUITE(Address)
 BOOST_AUTO_TEST_CASE(ParseMailboxTest)
 {
     const char text[] = " my.test@test.example.com ";
-    const MU_MailboxGroup * mailbox_group = muMailboxGroupParse(text);
+    MU_MailboxGroup * mailbox_group = muMailboxGroupParse(text);
     BOOST_CHECK(mailbox_group);
     BOOST_CHECK(nullptr == muMailboxGroupName(mailbox_group));
     BOOST_CHECK_EQUAL(1, muMailboxCount(mailbox_group));
-    const MU_Mailbox * mailbox = muMailbox(mailbox_group, 0);
+    MU_Mailbox * mailbox = muMailbox(mailbox_group, 0);
     BOOST_CHECK(mailbox);
     BOOST_CHECK(nullptr == muMailboxName(mailbox));
     BOOST_CHECK_EQUAL("my.test@test.example.com", muMailboxAddress(mailbox));
@@ -41,11 +41,11 @@ BOOST_AUTO_TEST_CASE(ParseMailboxTest)
 BOOST_AUTO_TEST_CASE(ParseNamedMailboxTest)
 {
     const char text[] = " The name <my.test@test.example.com> ";
-    const MU_MailboxGroup * mailbox_group = muMailboxGroupParse(text);
+    MU_MailboxGroup * mailbox_group = muMailboxGroupParse(text);
     BOOST_CHECK(mailbox_group);
     BOOST_CHECK(nullptr == muMailboxGroupName(mailbox_group));
     BOOST_CHECK_EQUAL(1, muMailboxCount(mailbox_group));
-    const MU_Mailbox * mailbox = muMailbox(mailbox_group, 0);
+    MU_Mailbox * mailbox = muMailbox(mailbox_group, 0);
     BOOST_CHECK(mailbox);
     BOOST_CHECK_EQUAL("The name", muMailboxName(mailbox));
     BOOST_CHECK_EQUAL("my.test@test.example.com", muMailboxAddress(mailbox));
@@ -56,12 +56,12 @@ BOOST_AUTO_TEST_CASE(ParseNamedMailboxTest)
 BOOST_AUTO_TEST_CASE(ParseMailboxGroupTest)
 {
     const char text[] = " my.test@test.example.com, my.test.2@test.example.com ";
-    const MU_MailboxGroup * mailbox_group = muMailboxGroupParse(text);
+    MU_MailboxGroup * mailbox_group = muMailboxGroupParse(text);
     BOOST_CHECK(mailbox_group);
     BOOST_CHECK(nullptr == muMailboxGroupName(mailbox_group));
     BOOST_CHECK_EQUAL(2, muMailboxCount(mailbox_group));
 
-    const MU_Mailbox * mailbox = muMailbox(mailbox_group, 0);
+    MU_Mailbox * mailbox = muMailbox(mailbox_group, 0);
     BOOST_CHECK(mailbox);
     BOOST_CHECK(nullptr == muMailboxName(mailbox));
     BOOST_CHECK_EQUAL("my.test@test.example.com", muMailboxAddress(mailbox));
@@ -78,12 +78,12 @@ BOOST_AUTO_TEST_CASE(ParseMailboxGroupTest)
 BOOST_AUTO_TEST_CASE(ParseNamedMailboxGroupTest)
 {
     const char text[] = " My mailbox name: my.test@test.example.com, my.test.2@test.example.com ";
-    const MU_MailboxGroup * mailbox_group = muMailboxGroupParse(text);
+    MU_MailboxGroup * mailbox_group = muMailboxGroupParse(text);
     BOOST_CHECK(mailbox_group);
     BOOST_CHECK_EQUAL("My mailbox name", muMailboxGroupName(mailbox_group));
     BOOST_CHECK_EQUAL(2, muMailboxCount(mailbox_group));
 
-    const MU_Mailbox * mailbox = muMailbox(mailbox_group, 0);
+    MU_Mailbox * mailbox = muMailbox(mailbox_group, 0);
     BOOST_CHECK(mailbox);
     BOOST_CHECK(nullptr == muMailboxName(mailbox));
     BOOST_CHECK_EQUAL("my.test@test.example.com", muMailboxAddress(mailbox));
@@ -101,12 +101,12 @@ BOOST_AUTO_TEST_CASE(ParseNamedMailboxGroupWithNamedMailboxesTest)
 {
     const char text[] = " My mailbox name: Mailbox 1 <my.test@test.example.com>, "
             "Mailbox 2 <my.test.2@test.example.com> ";
-    const MU_MailboxGroup * mailbox_group = muMailboxGroupParse(text);
+    MU_MailboxGroup * mailbox_group = muMailboxGroupParse(text);
     BOOST_CHECK(mailbox_group);
     BOOST_CHECK_EQUAL("My mailbox name", muMailboxGroupName(mailbox_group));
     BOOST_CHECK_EQUAL(2, muMailboxCount(mailbox_group));
 
-    const MU_Mailbox * mailbox = muMailbox(mailbox_group, 0);
+    MU_Mailbox * mailbox = muMailbox(mailbox_group, 0);
     BOOST_CHECK(mailbox);
     BOOST_CHECK_EQUAL("Mailbox 1", muMailboxName(mailbox));
     BOOST_CHECK_EQUAL("my.test@test.example.com", muMailboxAddress(mailbox));

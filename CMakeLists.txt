@@ -165,6 +165,7 @@ set(LIB_PUBIC_INCLUDE_DIR ${CMAKE_CURRENT_LIST_DIR}/Include)
 
 set(SRC_LIB
     ${LIB_PUBIC_INCLUDE_DIR}/LibMailUnit/Def.h
+    ${LIB_PUBIC_INCLUDE_DIR}/LibMailUnit/IO.h
     ${LIB_PUBIC_INCLUDE_DIR}/LibMailUnit/Message.h
     ${LIB_PUBIC_INCLUDE_DIR}/LibMailUnit/Message/Mime.h
     ${LIB_PUBIC_INCLUDE_DIR}/LibMailUnit/Message/MailHeader.h
@@ -172,27 +173,22 @@ set(SRC_LIB
     ${LIB_PUBIC_INCLUDE_DIR}/LibMailUnit/Message/DateTime.h
     ${LIB_PUBIC_INCLUDE_DIR}/LibMailUnit/Message/MessageId.h
     ${LIB_PUBIC_INCLUDE_DIR}/LibMailUnit/Message/ContentType.h
-    LibMailUnit/Api/ApiObject.h
-    LibMailUnit/Api/ApiObject.cpp
-    LibMailUnit/Api/Message/Mime.h
-    LibMailUnit/Api/Message/Mime.cpp
-    LibMailUnit/Api/Message/MailHeader.h
-    LibMailUnit/Api/Message/MailHeader.cpp
-    LibMailUnit/Api/Message/Mailbox.h
-    LibMailUnit/Api/Message/Mailbox.cpp
-    LibMailUnit/Api/Message/DateTime.cpp
-    LibMailUnit/Api/Message/MessageId.h
-    LibMailUnit/Api/Message/MessageId.cpp
-    LibMailUnit/Api/Message/ContentType.h
-    LibMailUnit/Api/Message/ContentType.cpp
+    ${LIB_PUBIC_INCLUDE_DIR}/LibMailUnit/Mqp/Client.h
+    LibMailUnit/ApiObject.h
+    LibMailUnit/ApiObject.cpp
+    LibMailUnit/Mail/DateTime.cpp
     LibMailUnit/Mail/Headers.h
     LibMailUnit/Mail/Headers.cpp
     LibMailUnit/Mail/ContentType.h
     LibMailUnit/Mail/ContentType.cpp
     LibMailUnit/Mail/Mailbox.h
     LibMailUnit/Mail/Mailbox.cpp
+    LibMailUnit/Mail/MessageId.h
+    LibMailUnit/Mail/MessageId.cpp
     LibMailUnit/Mail/Mime.h
     LibMailUnit/Mail/Mime.cpp
+    LibMailUnit/Mqp/Client.h
+    LibMailUnit/Mqp/Client.cpp
 )
 
 set(SRC_SERVER_LIB

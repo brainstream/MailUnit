@@ -15,14 +15,26 @@
  *                                                                                             *
  ***********************************************************************************************/
 
-#ifndef __LIBMU_API_MESSAGE_MAILHEADER_H__
-#define __LIBMU_API_MESSAGE_MAILHEADER_H__
+#ifndef __LIBMU_MAIL_MESSAGEID_H__
+#define __LIBMU_MAIL_MESSAGEID_H__
 
-#include <LibMailUnit/Api/ApiObject.h>
-#include <LibMailUnit/Mail/Headers.h>
-#include <Include/LibMailUnit/Message/MailHeader.h>
+#include <string>
+#include <LibMailUnit/ApiObject.h>
+#include <Include/LibMailUnit/Message/MessageId.h>
 
-MU_DEFINE_API_TYPE(MU_MailHeader, LibMailUnit::Mail::Header)
-MU_DEFINE_API_TYPE(MU_MailHeaderList, LibMailUnit::Mail::HeaderMap)
+namespace LibMailUnit {
+namespace Mail {
 
-#endif // __LIBMU_API_MESSAGE_MAILHEADER_H__
+struct MessageId
+{
+    std::string id_string;
+    std::string left;
+    std::string right;
+}; // struct MessageId
+
+} // namespace Mail
+} // namespace LibMailUnit
+
+MU_DEFINE_API_TYPE(MU_MailMessageId, const LibMailUnit::Mail::MessageId)
+
+#endif // __LIBMU_MAIL_MESSAGEID_H__

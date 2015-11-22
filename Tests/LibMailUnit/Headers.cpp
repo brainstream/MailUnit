@@ -40,11 +40,11 @@ BOOST_AUTO_TEST_CASE(parseString)
         "Name:Simple value 2\r\n"
         "\r\n"
         "Error:String beyond header";
-    const MU_MailHeaderList * headers = muMailHeadersParseString(raw_headers.c_str());
+    MU_MailHeaderList * headers = muMailHeadersParseString(raw_headers.c_str());
     BOOST_CHECK(headers);
     BOOST_CHECK_EQUAL(3, muMailHeadersCount(headers));
 
-    const MU_MailHeader * header = muMailHeaderByName(headers, "Name");
+    MU_MailHeader * header = muMailHeaderByName(headers, "Name");
     BOOST_CHECK(header);
     BOOST_CHECK_EQUAL("Name", muMailHeaderName(header));
     BOOST_CHECK_EQUAL(2, muMailHeaderValueCount(header));
@@ -85,7 +85,7 @@ BOOST_AUTO_TEST_CASE(parseFileTest)
         "Name:Simple value 2\r\n"
         "\r\n"
         "Error:String beyond header";
-    const MU_MailHeaderList * headers = nullptr;
+    MU_MailHeaderList * headers = nullptr;
     {
         TempFile temp_file;
         temp_file.write(raw_headers);
@@ -95,7 +95,7 @@ BOOST_AUTO_TEST_CASE(parseFileTest)
     BOOST_CHECK(headers);
     BOOST_CHECK_EQUAL(3, muMailHeadersCount(headers));
 
-    const MU_MailHeader * header = muMailHeaderByIndex(headers, 0);
+    MU_MailHeader * header = muMailHeaderByIndex(headers, 0);
     BOOST_CHECK(header);
     BOOST_CHECK_EQUAL("Name", muMailHeaderName(header));
     BOOST_CHECK_EQUAL(2, muMailHeaderValueCount(header));

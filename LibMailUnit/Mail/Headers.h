@@ -22,6 +22,8 @@
 #include <vector>
 #include <istream>
 #include <memory>
+#include <LibMailUnit/ApiObject.h>
+#include <Include/LibMailUnit/Message/MailHeader.h>
 
 namespace LibMailUnit {
 namespace Mail {
@@ -68,5 +70,8 @@ private:
 
 } // namespace Mail
 } // namespace LibMailUnit
+
+MU_DEFINE_API_TYPE(MU_MailHeader, const LibMailUnit::Mail::Header)
+MU_DEFINE_API_TYPE(MU_MailHeaderList, const LibMailUnit::Mail::HeaderMap)
 
 #endif // __LIBMUIMPL_MAIL_HEADERS_H__

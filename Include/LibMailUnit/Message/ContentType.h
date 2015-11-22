@@ -23,8 +23,8 @@
  * @htmlinclude RFC/ContentTypeSpec.html
 */
 
-#ifndef __LIBMU_MESSAGE_CONTENTTYPE_H__
-#define __LIBMU_MESSAGE_CONTENTTYPE_H__
+#ifndef __LIBMU_PUBAPI_MESSAGE_CONTENTTYPE_H__
+#define __LIBMU_PUBAPI_MESSAGE_CONTENTTYPE_H__
 
 #include "../Def.h"
 
@@ -46,7 +46,7 @@ MU_DECLARE_API_TYPE(MU_MailHeaderContentType)
  *     Returned pointer must be destroyed by calling the @ref muFree function.
  * @ingroup content_type
  */
-MU_API const MU_MailHeaderContentType * MU_CALL muContentTypeParse(const char * _raw_content_type);
+MU_API MU_MailHeaderContentType * MU_CALL muContentTypeParse(const char * _raw_content_type);
 
 /**
  * @brief Extracts type and subtype from the parsed ContentType
@@ -61,7 +61,7 @@ MU_API const MU_MailHeaderContentType * MU_CALL muContentTypeParse(const char * 
  * @sa muContentTypeParse
  * @ingroup content_type
  */
-MU_API MU_Bool MU_CALL muContentType(const MU_MailHeaderContentType * _content_type,
+MU_API MU_Bool MU_CALL muContentType(MU_MailHeaderContentType * _content_type,
     const char ** _type_out, const char ** _subtype_out);
 
 /**
@@ -73,7 +73,7 @@ MU_API MU_Bool MU_CALL muContentType(const MU_MailHeaderContentType * _content_t
  * @sa muContentTypeParse
  * @ingroup content_type
  */
-MU_API const size_t MU_CALL muContentTypeParamsCount(const MU_MailHeaderContentType * _content_type);
+MU_API size_t MU_CALL muContentTypeParamsCount(MU_MailHeaderContentType * _content_type);
 
 /**
  * @brief Extracts parameter from the parsed ContentType
@@ -90,11 +90,11 @@ MU_API const size_t MU_CALL muContentTypeParamsCount(const MU_MailHeaderContentT
  * @sa muContentTypeParse
  * @ingroup content_type
  */
-MU_API MU_Bool MU_CALL muContentTypeParam(const MU_MailHeaderContentType * _content_type, size_t _index,
+MU_API MU_Bool MU_CALL muContentTypeParam(MU_MailHeaderContentType * _content_type, size_t _index,
     const char ** _name_out, const char ** _value_out);
 
 #ifdef __cplusplus
 } /* extern "C" */
 #endif
 
-#endif /* __LIBMU_MESSAGE_CONTENTTYPE_H__ */
+#endif /* __LIBMU_PUBAPI_MESSAGE_CONTENTTYPE_H__ */

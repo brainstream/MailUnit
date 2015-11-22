@@ -29,7 +29,7 @@ BOOST_AUTO_TEST_CASE(ParseTest)
     const char invalid_id_1[] = "_539DD070.1070602@127.0.0.1>";
     const char invalid_id_2[] = "<539DD070.1070602@127.0.0.1_";
     const char invalid_id_3[] = "<539DD070.1070602_127.0.0.1>";
-    const MU_MailMessageId * msg_id = muMessageIdParse(valid_id);
+    MU_MailMessageId * msg_id = muMessageIdParse(valid_id);
     BOOST_CHECK(msg_id);
     BOOST_CHECK_EQUAL(valid_id, muMessageIdString(msg_id));
     BOOST_CHECK_EQUAL("539DD070.1070602", muMessageIdLeft(msg_id));

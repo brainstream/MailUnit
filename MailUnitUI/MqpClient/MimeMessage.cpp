@@ -25,8 +25,8 @@ namespace Gui {
 class MimeMessagePartPrivate final
 {
 public:
-    explicit MimeMessagePartPrivate(const MU_MimeMessage * _message);
-    explicit MimeMessagePartPrivate(const MU_MimePart * _part);
+    explicit MimeMessagePartPrivate(MU_MimeMessage * _message);
+    explicit MimeMessagePartPrivate(MU_MimePart * _part);
     MimeMessagePartPrivate(const MimeMessagePartPrivate & _private);
     MimeMessagePartPrivate(MimeMessagePartPrivate &&) = default;
     ~MimeMessagePartPrivate() = default;
@@ -54,7 +54,7 @@ public:
     }
 
 private:
-    void init(const MU_MimePart * _part);
+    void init(MU_MimePart * _part);
 
 private:
     QByteArray m_content;
@@ -66,21 +66,21 @@ private:
 } // namespace Gui
 } // namespace MailUnit
 
-MimeMessagePartPrivate::MimeMessagePartPrivate(const MU_MimeMessage * _message)
+MimeMessagePartPrivate::MimeMessagePartPrivate(MU_MimeMessage * _message)
 {
-    const MU_MimePart * part = muMimeToPart(_message);
+    MU_MimePart * part = muMimeToPart(_message);
     init(part);
     muFree(part);
 }
 
-MimeMessagePartPrivate::MimeMessagePartPrivate(const MU_MimePart * _part)
+MimeMessagePartPrivate::MimeMessagePartPrivate(MU_MimePart * _part)
 {
     init(_part);
 }
 
-void MimeMessagePartPrivate::init(const MU_MimePart * _part)
+void MimeMessagePartPrivate::init(MU_MimePart * _part)
 {
-    const MU_MailHeaderContentType * content_type_hdr = muMimeContentType(_part);
+    MU_MailHeaderContentType * content_type_hdr = muMimeContentType(_part);
     const char * content_type = nullptr;
     const char * content_subtype = nullptr;
     muContentType(content_type_hdr, &content_type, &content_subtype);
@@ -100,7 +100,7 @@ void MimeMessagePartPrivate::init(const MU_MimePart * _part)
     }
     for(size_t i = 0; i < part_count; ++i)
     {
-        const MU_MimePart * child_part = muMimePart(_part, i);
+        MU_MimePart * child_part = muMimePart(_part, i);
         if(nullptr == child_part)
             continue;
         m_parts.push_back(std::make_unique<const MimeMessagePart>(new MimeMessagePartPrivate(child_part)));
@@ -212,7 +212,7 @@ const QString & MimeMessagePart::contentSubtype() const
 
 MimeMessage::MimeMessage(const QByteArray &_raw_data)
 {
-    const MU_MimeMessage * message = muMimeParseString(_raw_data);
+    MU_MimeMessage * message = muMimeParseString(_raw_data);
     if(nullptr == message)
         return;
     setup(new MimeMessagePartPrivate(message));

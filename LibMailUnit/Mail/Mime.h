@@ -25,6 +25,8 @@
 #include <LibMailUnit/Mail/Headers.h>
 #include <LibMailUnit/Mail/ContentType.h>
 #include <LibMailUnit/Mail/Mailbox.h>
+#include <LibMailUnit/ApiObject.h>
+#include <Include/LibMailUnit/Message/Mime.h>
 
 namespace LibMailUnit {
 namespace Mail {
@@ -116,5 +118,8 @@ private:
 
 } // namespace Mail
 } // namespace LibMailUnit
+
+MU_DEFINE_API_TYPE(MU_MimeMessage, const LibMailUnit::Mail::MimeMessage)
+MU_DEFINE_API_TYPE(MU_MimePart, const LibMailUnit::Mail::MimePart)
 
 #endif // __LIBMU_MAIL_MIME_H__

@@ -15,8 +15,8 @@
  *                                                                                             *
  ***********************************************************************************************/
 
-#ifndef __LIBMU_MAILHEADER_H__
-#define __LIBMU_MAILHEADER_H__
+#ifndef __LIBMU_PUBAPI_MAILHEADER_H__
+#define __LIBMU_PUBAPI_MAILHEADER_H__
 
 #include "../Def.h"
 
@@ -205,7 +205,7 @@ MU_DECLARE_API_TYPE(MU_MailHeaderList)
  *     Returned potinter must be destroyed by calling the @ref muFree function.
  * @ingroup mail_header
  */
-MU_API const MU_MailHeaderList * MU_CALL muMailHeadersParseString(const char * _input);
+MU_API MU_MailHeaderList * MU_CALL muMailHeadersParseString(const char * _input);
 
 /**
  * @brief Parses headers of mail message from file.
@@ -222,12 +222,12 @@ MU_API const MU_MailHeaderList * MU_CALL muMailHeadersParseString(const char * _
  *     Returned potinter must be destroyed by calling the @ref muFree function.
  * @ingroup mail_header
  */
-MU_API const MU_MailHeaderList * MU_CALL muMailHeadersParseFile(MU_NATIVE_FILE _input);
+MU_API MU_MailHeaderList * MU_CALL muMailHeadersParseFile(MU_File _input);
 
 /**
  * @brief Returns a count of @a _headers.
  */
-MU_API size_t MU_CALL muMailHeadersCount(const MU_MailHeaderList * _headers);
+MU_API size_t MU_CALL muMailHeadersCount(MU_MailHeaderList * _headers);
 
 /**
  * @brief Returns a header at @a _index position or @a NULL.
@@ -236,7 +236,7 @@ MU_API size_t MU_CALL muMailHeadersCount(const MU_MailHeaderList * _headers);
  * @sa muMailHeadersCount
  * @ingroup mail_header
  */
-MU_API const MU_MailHeader * MU_CALL muMailHeaderByIndex(const MU_MailHeaderList * _headers, size_t _index);
+MU_API MU_MailHeader * MU_CALL muMailHeaderByIndex(MU_MailHeaderList * _headers, size_t _index);
 
 /**
  * @brief Returns a header named @a _name or @a NULL.
@@ -244,14 +244,14 @@ MU_API const MU_MailHeader * MU_CALL muMailHeaderByIndex(const MU_MailHeaderList
  *     Returned potinter must be destroyed by calling the @ref muFree function.
  * @ingroup mail_header
  */
-MU_API const MU_MailHeader * MU_CALL muMailHeaderByName(const MU_MailHeaderList * _headers, const char * _name);
+MU_API MU_MailHeader * MU_CALL muMailHeaderByName(MU_MailHeaderList * _headers, const char * _name);
 
 /**
  * @brief Returns a name of @a _header or @a NULL.
  * @sa muMailHeaderByIndex
  * @ingroup mail_header
 */
-MU_API const char * MU_CALL muMailHeaderName(const MU_MailHeader * _header);
+MU_API const char * MU_CALL muMailHeaderName(MU_MailHeader * _header);
 
 /**
  * @brief Returns a count of values in the @a _header.
@@ -263,7 +263,7 @@ MU_API const char * MU_CALL muMailHeaderName(const MU_MailHeader * _header);
  * @sa muMailHeaderValue
  * @ingroup mail_header
  */
-MU_API size_t MU_CALL muMailHeaderValueCount(const MU_MailHeader * _header);
+MU_API size_t MU_CALL muMailHeaderValueCount(MU_MailHeader * _header);
 
 /**
  * @brief Returns a value of @a _header at @a _index position or @a NULL.
@@ -275,10 +275,10 @@ MU_API size_t MU_CALL muMailHeaderValueCount(const MU_MailHeader * _header);
  * @sa muMailHeaderValueCount
  * @ingroup mail_header
 */
-MU_API const char * MU_CALL muMailHeaderValue(const MU_MailHeader * _header, size_t _index);
+MU_API const char * MU_CALL muMailHeaderValue(MU_MailHeader * _header, size_t _index);
 
 #ifdef __cplusplus
 } /* extern "C" */
 #endif
 
-#endif /* __LIBMU_MAILHEADER_H__ */
+#endif /* __LIBMU_PUBAPI_MAILHEADER_H__ */

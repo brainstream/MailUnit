@@ -157,7 +157,7 @@ public:
     }
 
 private:
-    void parseHeaders(MU_NATIVE_FILE _file);
+    void parseHeaders(MU_File _file);
     void appendFrom(const RawEmail & _raw);
     void appendBcc(const RawEmail & _raw);
 

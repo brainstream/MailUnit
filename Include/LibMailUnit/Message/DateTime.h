@@ -23,8 +23,8 @@
  * @htmlinclude RFC/DateSpec.html
 */
 
-#ifndef __LIBMU_DATETIME_H__
-#define __LIBMU_DATETIME_H__
+#ifndef __LIBMU_PUBAPI_DATETIME_H__
+#define __LIBMU_PUBAPI_DATETIME_H__
 
 #include <time.h>
 #include "../Def.h"
@@ -126,4 +126,4 @@ MU_API void MU_CALL muUnixTimeToDateTime(time_t _unix_time, MU_DateTime * _date_
 } /* extern "C" */
 #endif
 
-#endif /* __LIBMU_DATETIME_H__ */
+#endif /* __LIBMU_PUBAPI_DATETIME_H__ */

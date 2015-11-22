@@ -1,4 +1,4 @@
-/***********************************************************************************************
+ /***********************************************************************************************
  *                                                                                             *
  * This file is part of MailUnit Library.                                                      *
  *                                                                                             *
@@ -15,42 +15,23 @@
  *                                                                                             *
  ***********************************************************************************************/
 
-#include <LibMailUnit/Api/Message/ContentType.h>
+#ifndef __LIBMU_PUBAPI_IO_H__
+#define __LIBMU_PUBAPI_IO_H__
 
-using namespace LibMailUnit::Mail;
+#include "Def.h"
 
-const MU_MailHeaderContentType * muContentTypeParse(const char * _raw_content_type)
-{
-    const ContentType * content_type = parseContentType(_raw_content_type).release();
-    if(nullptr != content_type)
-        return new MU_MailHeaderContentType(content_type, true);
-    return nullptr;
-}
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-MU_Bool MU_CALL muContentType(const MU_MailHeaderContentType * _content_type, const char ** _type_out, const char ** _subtype_out)
-{
-    if(nullptr == _content_type)
-        return mu_false;
-    const ContentType * content_type = _content_type->pointer();
-    *_type_out = content_type->type.c_str();
-    *_subtype_out = content_type->subtype.c_str();
-    return mu_true;
-}
+MU_DECLARE_API_TYPE(MU_Stream)
 
-const size_t MU_CALL muContentTypeParamsCount(const MU_MailHeaderContentType * _content_type)
-{
-    if(nullptr == _content_type)
-        return 0;
-    return _content_type->pointer()->params.size();
-}
+const MU_Stream * muCreateFileStream(MU_File _file);
 
-MU_Bool MU_CALL muContentTypeParam(const MU_MailHeaderContentType * _content_type, size_t _index,
-    const char ** _name_out, const char ** _value_out)
-{
-    if(nullptr == _content_type)
-        return mu_false;
-    const ContentTypeParam & param = _content_type->pointer()->params[_index];
-    *_name_out = param.name.c_str();
-    *_value_out = param.value.c_str();
-    return mu_true;
-}
+const MU_Stream * muCreateMemoryStream();
+
+#ifdef __cplusplus
+} /* extern "C" */
+#endif
+
+#endif  /* __LIBMU_PUBAPI_IO_H__ */

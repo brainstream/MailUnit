@@ -15,14 +15,59 @@
  *                                                                                             *
  ***********************************************************************************************/
 
-#ifndef __LIBMU_API_MESSAGE_MIME_H__
-#define __LIBMU_API_MESSAGE_MIME_H__
+#ifndef __LIBMUIMPL_API_APIOBJECT_H__
+#define __LIBMUIMPL_API_APIOBJECT_H__
 
-#include <LibMailUnit/Mail/Mime.h>
-#include <LibMailUnit/Api/ApiObject.h>
-#include <Include/LibMailUnit/Message/Mime.h>
+#include <boost/noncopyable.hpp>
+#include <Include/LibMailUnit/Def.h>
 
-MU_DEFINE_API_TYPE(MU_MimeMessage, LibMailUnit::Mail::MimeMessage)
-MU_DEFINE_API_TYPE(MU_MimePart, LibMailUnit::Mail::MimePart)
+namespace LibMailUnit {
 
-#endif // __LIBMU_API_MESSAGE_MIME_H__
+class Object
+{
+protected:
+    Object() { }
+
+public:
+    virtual ~Object() { }
+}; // class Object
+
+template<typename PointerType>
+class ApiObject : public Object, private boost::noncopyable
+{
+public:
+    ApiObject(PointerType * _pointer, bool _destructible) :
+        mp_pointer(_pointer),
+        m_is_destructible(_destructible)
+    {
+    }
+
+    ~ApiObject() override
+    {
+        if(m_is_destructible)
+           delete mp_pointer;
+    }
+
+    PointerType * pointer() const
+    {
+        return mp_pointer;
+    }
+
+private:
+    PointerType * mp_pointer;
+    bool m_is_destructible;
+}; // class ApiObject
+
+} // namespace LibMailUnit
+
+#define MU_DEFINE_API_TYPE(type, ptr_type)                                         \
+    struct __ ## type : public LibMailUnit::ApiObject<ptr_type>       \
+    {                                                                              \
+    public:                                                                        \
+        __ ## type(ptr_type * _pointer, bool _destructible) :   \
+            ApiObject(_pointer, _destructible)                                     \
+        {                                                                          \
+        }                                                                          \
+    };
+
+#endif // __LIBMUIMPL_API_APIOBJECT_H__

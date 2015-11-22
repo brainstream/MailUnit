@@ -35,7 +35,7 @@ BOOST_AUTO_TEST_CASE(openNewReadonlyFileTest)
 {
     boost::filesystem::path path = tempFilepath();
     OS::File file(path, file_open_create, false);
-    BOOST_CHECK_EQUAL(MU_INVALID_NATIVE_FILE, file.native());
+    BOOST_CHECK_EQUAL(MU_INVALID_FILE, file.native());
     BOOST_CHECK(boost::filesystem::exists(path) == false);
 }
 
@@ -43,13 +43,13 @@ BOOST_AUTO_TEST_CASE(openNewWriteOnlyFileTest)
 {
     boost::filesystem::path path = tempFilepath();
     OS::File file(path, file_open_create | file_open_write, false);
-    BOOST_CHECK_NE(MU_INVALID_NATIVE_FILE, file.native());
+    BOOST_CHECK_NE(MU_INVALID_FILE, file.native());
     BOOST_CHECK(boost::filesystem::exists(path) == true);
     boost::filesystem::perms perms = boost::filesystem::status(path).permissions();
     BOOST_CHECK_EQUAL(boost::filesystem::owner_write | boost::filesystem::owner_read, perms);
     closeNativeFile(file);
     file.reset();
-    BOOST_CHECK_EQUAL(MU_INVALID_NATIVE_FILE, file.native());
+    BOOST_CHECK_EQUAL(MU_INVALID_FILE, file.native());
     deleteFile(path);
     BOOST_CHECK(boost::filesystem::exists(path) == false);
 }
@@ -58,13 +58,13 @@ BOOST_AUTO_TEST_CASE(openNewReadWriteOnlyFileTest)
 {
     boost::filesystem::path path = tempFilepath();
     OS::File file(path, file_open_create | file_open_write | file_open_read, false);
-    BOOST_CHECK_NE(MU_INVALID_NATIVE_FILE, file.native());
+    BOOST_CHECK_NE(MU_INVALID_FILE, file.native());
     BOOST_CHECK(boost::filesystem::exists(path) == true);
     boost::filesystem::perms perms = boost::filesystem::status(path).permissions();
     BOOST_CHECK_EQUAL(boost::filesystem::owner_write | boost::filesystem::owner_read, perms);
     closeNativeFile(file);
     file.reset();
-    BOOST_CHECK_EQUAL(MU_INVALID_NATIVE_FILE, file.native());
+    BOOST_CHECK_EQUAL(MU_INVALID_FILE, file.native());
     deleteFile(path);
     BOOST_CHECK(boost::filesystem::exists(path) == false);
 }
@@ -88,11 +88,11 @@ BOOST_AUTO_TEST_CASE(openExistentReadOnlyFileTest)
 {
     boost::filesystem::path path = createAndWriteTestConten();
     OS::File file(path, file_open_read, false);
-    BOOST_CHECK_NE(MU_INVALID_NATIVE_FILE, file.native());
+    BOOST_CHECK_NE(MU_INVALID_FILE, file.native());
     BOOST_CHECK(boost::filesystem::exists(path) == true);
     closeNativeFile(file);
     file.reset();
-    BOOST_CHECK_EQUAL(MU_INVALID_NATIVE_FILE, file.native());
+    BOOST_CHECK_EQUAL(MU_INVALID_FILE, file.native());
     size_t size = boost::filesystem::file_size(path);
     BOOST_CHECK_EQUAL(test_content.size(), size);
     deleteFile(path);
@@ -103,7 +103,7 @@ BOOST_AUTO_TEST_CASE(openExistentAppendFileTest)
 {
     boost::filesystem::path path = createAndWriteTestConten();
     OS::File file(path, file_open_write | file_open_append, false);
-    BOOST_CHECK_NE(MU_INVALID_NATIVE_FILE, file.native());
+    BOOST_CHECK_NE(MU_INVALID_FILE, file.native());
     BOOST_CHECK(boost::filesystem::exists(path) == true);
     size_t size = boost::filesystem::file_size(path);
     BOOST_CHECK_EQUAL(test_content.size(), size);
@@ -112,7 +112,7 @@ BOOST_AUTO_TEST_CASE(openExistentAppendFileTest)
     BOOST_CHECK_EQUAL(test_content.size() + 3, size);
     closeNativeFile(file);
     file.reset();
-    BOOST_CHECK_EQUAL(MU_INVALID_NATIVE_FILE, file.native());
+    BOOST_CHECK_EQUAL(MU_INVALID_FILE, file.native());
     deleteFile(path);
     BOOST_CHECK(boost::filesystem::exists(path) == false);
 }
@@ -121,7 +121,7 @@ BOOST_AUTO_TEST_CASE(openExistentTruncateFileTest)
 {
     boost::filesystem::path path = createAndWriteTestConten();
     OS::File file(path, file_open_write | file_open_create, false);
-    BOOST_CHECK_NE(MU_INVALID_NATIVE_FILE, file.native());
+    BOOST_CHECK_NE(MU_INVALID_FILE, file.native());
     BOOST_CHECK(boost::filesystem::exists(path) == true);
     size_t size = boost::filesystem::file_size(path);
     BOOST_CHECK_EQUAL(0, size);
@@ -130,14 +130,14 @@ BOOST_AUTO_TEST_CASE(openExistentTruncateFileTest)
     BOOST_CHECK_EQUAL(3, size);
     closeNativeFile(file);
     file.reset();
-    BOOST_CHECK_EQUAL(MU_INVALID_NATIVE_FILE, file.native());
+    BOOST_CHECK_EQUAL(MU_INVALID_FILE, file.native());
     deleteFile(path);
     BOOST_CHECK(boost::filesystem::exists(path) == false);
 }
 
 BOOST_AUTO_TEST_CASE(autocloseTrueTest)
 {
-    MU_NATIVE_FILE native_file = MU_INVALID_NATIVE_FILE;
+    MU_File native_file = MU_INVALID_FILE;
     boost::filesystem::path path = tempFilepath();
     {
         OS::File file(path, file_open_create | file_open_write | file_open_read, true);
@@ -154,7 +154,7 @@ BOOST_AUTO_TEST_CASE(autocloseTrueTest)
 
 BOOST_AUTO_TEST_CASE(autocloseFalseTest)
 {
-    MU_NATIVE_FILE native_file = MU_INVALID_NATIVE_FILE;
+    MU_File native_file = MU_INVALID_FILE;
     boost::filesystem::path path = tempFilepath();
     {
         OS::File file(path, file_open_create | file_open_write | file_open_read, false);
@@ -184,7 +184,7 @@ BOOST_AUTO_TEST_CASE(tempFileTest)
     {
         TempFile temp_file;
         path = temp_file.path();
-        BOOST_CHECK_NE(MU_INVALID_NATIVE_FILE, temp_file.native());
+        BOOST_CHECK_NE(MU_INVALID_FILE, temp_file.native());
         BOOST_CHECK(boost::filesystem::exists(path) == true);
         boost::filesystem::perms perms = boost::filesystem::status(path).permissions();
         BOOST_CHECK_EQUAL(boost::filesystem::owner_write | boost::filesystem::owner_read, perms);

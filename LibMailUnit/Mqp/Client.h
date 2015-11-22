@@ -15,11 +15,45 @@
  *                                                                                             *
  ***********************************************************************************************/
 
-#include <LibMailUnit/Api/ApiObject.h>
+#ifndef __LIBMU_MQP_CLIENT_H__
+#define __LIBMU_MQP_CLIENT_H__
 
-using namespace LibMailUnit;
+#include <string>
+#include <set>
+#include <Include/LibMailUnit/Mqp/Client.h>
+#include <LibMailUnit/ApiObject.h>
 
-void MU_CALL muFree(const void * _object)
+namespace LibMailUnit {
+namespace Mqp {
+
+typedef MU_MqpResponseHeader ResponseHeader;
+typedef MU_MqpResponseType ResponseType;
+typedef MU_MqpMessageHeader MessageHeader;
+
+class ClientObserver
 {
-    delete reinterpret_cast<const Object *>(_object);
-}
+public:
+    virtual ~ClientObserver() { }
+    virtual void onResponseHeaderReceived(const ResponseHeader & _header, void * _user_data) = 0;
+    virtual void onMessageHeaderReceived(const MessageHeader & _header, void * _user_data) = 0;
+}; // class ClientObserver
+
+class Client
+{
+public:
+    Client(const std::string & _host, unsigned short _port);
+    bool subscribe(ClientObserver * _observer);
+    bool unsubscribe(ClientObserver * _observer);
+
+private:
+    std::string m_host;
+    unsigned short m_port;
+    std::set<ClientObserver *> m_observers;
+}; // class Client
+
+} // namespace Mqp
+} // namespace LibMailUnit
+
+MU_DEFINE_API_TYPE(MU_MqpClient, LibMailUnit::Mqp::Client)
+
+#endif // __LIBMU_MQP_CLIENT_H__

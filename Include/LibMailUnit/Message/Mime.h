@@ -21,8 +21,8 @@
 */
 
 
-#ifndef __LIBMU_MIME_H__
-#define __LIBMU_MIME_H__
+#ifndef __LIBMU_PUBAPI_MIME_H__
+#define __LIBMU_PUBAPI_MIME_H__
 
 #include "../Def.h"
 #include "MailHeader.h"
@@ -59,7 +59,7 @@ typedef enum
  *     Pointer must be destroyed by calling the @ref muFree function
  * @ingroup mime
  */
-MU_API const MU_MimeMessage * MU_CALL muMimeParseString(const char * _input);
+MU_API MU_MimeMessage * MU_CALL muMimeParseString(const char * _input);
 
 /**
  * @brief Parses message in MIME format from a file
@@ -71,20 +71,20 @@ MU_API const MU_MimeMessage * MU_CALL muMimeParseString(const char * _input);
  *     Returned pointer must be destroyed by calling the @ref muFree function
  * @ingroup mime
  */
-MU_API const MU_MimeMessage * MU_CALL muMimeParseFile(MU_NATIVE_FILE _input);
+MU_API MU_MimeMessage * MU_CALL muMimeParseFile(MU_File _input);
 
 /**
  * @brief Returns a message subject of @a _message
  * @ingroup mime
  */
-MU_API const char * MU_CALL muMimeSubject(const MU_MimeMessage * _message);
+MU_API const char * MU_CALL muMimeSubject(MU_MimeMessage * _message);
 
 /**
  * @brief Returns a count of mailbox groups of @a _mailobx_type type form the @a _message
  * @sa mailbox
  * @ingroup mime
  */
-MU_API size_t MU_CALL muMimeMailboxGroupCount(const MU_MimeMessage * _message, MU_MailboxType _mailbox_type);
+MU_API size_t MU_CALL muMimeMailboxGroupCount(MU_MimeMessage * _message, MU_MailboxType _mailbox_type);
 
 /**
  * @brief Returns a mailbox group
@@ -102,7 +102,7 @@ MU_API size_t MU_CALL muMimeMailboxGroupCount(const MU_MimeMessage * _message, M
  * @sa mailbox
  * @ingroup mime
  */
-MU_API const MU_MailboxGroup * MU_CALL muMimeMailboxGroup(const MU_MimeMessage * _message, MU_MailboxType _mailbox_type, size_t _index);
+MU_API MU_MailboxGroup * MU_CALL muMimeMailboxGroup(MU_MimeMessage * _message, MU_MailboxType _mailbox_type, size_t _index);
 
 /**
  * @brief Converts a @a MU_MimeMessage pointer to a @a MU_MimePart pointer
@@ -113,14 +113,14 @@ MU_API const MU_MailboxGroup * MU_CALL muMimeMailboxGroup(const MU_MimeMessage *
  *     Returned pointer must be destroyed by calling the @ref muFree function
  * @ingroup mime
  */
-MU_API const MU_MimePart * MU_CALL muMimeToPart(const MU_MimeMessage * _message);
+MU_API MU_MimePart * MU_CALL muMimeToPart(MU_MimeMessage * _message);
 
 /**
  * @brief Returns a count of parts in @a _part
  * @sa muMimeToPart
  * @ingroup mime
  */
-MU_API size_t MU_CALL muMimePartCount(const MU_MimePart * _part);
+MU_API size_t MU_CALL muMimePartCount(MU_MimePart * _part);
 
 /**
  * @brief Returns a part
@@ -135,7 +135,7 @@ MU_API size_t MU_CALL muMimePartCount(const MU_MimePart * _part);
  * @sa muMimeToPart
  * @ingroup mime
  */
-MU_API const MU_MimePart * MU_CALL muMimePart(const MU_MimePart * _part, size_t _index);
+MU_API MU_MimePart * MU_CALL muMimePart(MU_MimePart * _part, size_t _index);
 
 /**
  * @brief Returns MIME part's headers
@@ -149,7 +149,7 @@ MU_API const MU_MimePart * MU_CALL muMimePart(const MU_MimePart * _part, size_t 
  * @sa mail_header
  * @ingroup mime
  */
-MU_API const MU_MailHeaderList * MU_CALL muMimeHeaders(const MU_MimePart * _part);
+MU_API MU_MailHeaderList * MU_CALL muMimeHeaders(MU_MimePart * _part);
 
 /**
  * @brief Returns MIME part's content type
@@ -163,17 +163,17 @@ MU_API const MU_MailHeaderList * MU_CALL muMimeHeaders(const MU_MimePart * _part
  * @sa content_type
  * @ingroup mime
  */
-MU_API const MU_MailHeaderContentType * MU_CALL muMimeContentType(const MU_MimePart * _part);
+MU_API MU_MailHeaderContentType * MU_CALL muMimeContentType(MU_MimePart * _part);
 
 /**
  * @brief Returns content of @a _part or @a NULL
  * @sa muMimeToPart
  * @ingroup mime
  */
-MU_API const char * MU_CALL muMimeContent(const MU_MimePart * _part);
+MU_API const char * MU_CALL muMimeContent(MU_MimePart * _part);
 
 #ifdef __cplusplus
 } /* extern "C" */
 #endif
 
-#endif /* __LIBMU_MIME_H__ */
+#endif /* __LIBMU_PUBAPI_MIME_H__ */

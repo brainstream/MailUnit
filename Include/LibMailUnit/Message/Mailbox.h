@@ -23,8 +23,8 @@
  * @htmlinclude RFC/AddressSpec.html
 */
 
-#ifndef __LIBMU_MAILBOX_H__
-#define __LIBMU_MAILBOX_H__
+#ifndef __LIBMU_PUBAPI_MAILBOX_H__
+#define __LIBMU_PUBAPI_MAILBOX_H__
 
 #include "../Def.h"
 
@@ -47,13 +47,13 @@ MU_DECLARE_API_TYPE(MU_MailboxGroup)
  *     Returned potinter must be destroyed by calling the @ref muFree function.
  * @ingroup mailbox
  */
-MU_API const MU_MailboxGroup * MU_CALL muMailboxGroupParse(const char * _raw_address_group);
+MU_API MU_MailboxGroup * MU_CALL muMailboxGroupParse(const char * _raw_address_group);
 
 /**
  * @brief Returns a count of mailboxes in @a _mailbox_group.
  * @ingroup mailbox
  */
-MU_API size_t MU_CALL muMailboxCount(const MU_MailboxGroup * _mailbox_group);
+MU_API size_t MU_CALL muMailboxCount(MU_MailboxGroup * _mailbox_group);
 
 /**
  * @brief Returns a mailbox at @a _index position in @a _mailbox_group or @a NULL.
@@ -61,7 +61,7 @@ MU_API size_t MU_CALL muMailboxCount(const MU_MailboxGroup * _mailbox_group);
  *     Returned potinter must be destroyed by calling the @ref muFree function.
  * @ingroup mailbox
  */
-MU_API const MU_Mailbox * MU_CALL muMailbox(const MU_MailboxGroup * _mailbox_group, size_t _index);
+MU_API MU_Mailbox * MU_CALL muMailbox(MU_MailboxGroup * _mailbox_group, size_t _index);
 
 /**
  * @brief Returns the optional name of the mailbox group.
@@ -69,7 +69,7 @@ MU_API const MU_Mailbox * MU_CALL muMailbox(const MU_MailboxGroup * _mailbox_gro
  * If @a _mailbox_group does not contain a name, function returns @a NULL.
  * @ingroup mailbox
  */
-MU_API const char * MU_CALL muMailboxGroupName(const MU_MailboxGroup * _mailbox_group);
+MU_API const char * MU_CALL muMailboxGroupName(MU_MailboxGroup * _mailbox_group);
 
 /**
  * @brief Returns the optional name of the mailbox.
@@ -77,16 +77,16 @@ MU_API const char * MU_CALL muMailboxGroupName(const MU_MailboxGroup * _mailbox_
  * If @a _mailbox does not contain a name, function returns @a NULL.
  * @ingroup mailbox
  */
-MU_API const char * MU_CALL muMailboxName(const MU_Mailbox * _mailbox);
+MU_API const char * MU_CALL muMailboxName(MU_Mailbox * _mailbox);
 
 /**
  * @brief Returns an address from @a _mailbox or @a NULL.
  * @ingroup mailbox
  */
-MU_API const char * MU_CALL muMailboxAddress(const MU_Mailbox * _mailbox);
+MU_API const char * MU_CALL muMailboxAddress(MU_Mailbox * _mailbox);
 
 #ifdef __cplusplus
 } /* extern "C" */
 #endif
 
-#endif /* __LIBMU_MAILBOX_H__ */
+#endif /* __LIBMU_PUBAPI_MAILBOX_H__ */

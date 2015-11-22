@@ -23,8 +23,8 @@
  * @htmlinclude RFC/IdentificationFieldsSpec.html
 */
 
-#ifndef __LIBMU_MESSAGEID_H__
-#define __LIBMU_MESSAGEID_H__
+#ifndef __LIBMU_PUBAPI_MESSAGEID_H__
+#define __LIBMU_PUBAPI_MESSAGEID_H__
 
 #include "../Def.h"
 
@@ -47,7 +47,7 @@ MU_DECLARE_API_TYPE(MU_MailMessageId)
  * @sa muMessageIdRight
  * @ingroup message_id
  */
-MU_API const MU_MailMessageId * MU_CALL muMessageIdParse(const char * _raw_message_id);
+MU_API MU_MailMessageId * MU_CALL muMessageIdParse(const char * _raw_message_id);
 
 /**
  * @brief Returns source string passed to the @ref muMessageIdParse function.
@@ -58,7 +58,7 @@ MU_API const MU_MailMessageId * MU_CALL muMessageIdParse(const char * _raw_messa
  * @sa muMessageIdRight
  * @ingroup message_id
  */
-MU_API const char * MU_CALL muMessageIdString(const MU_MailMessageId * _msg_id);
+MU_API const char * MU_CALL muMessageIdString(MU_MailMessageId * _msg_id);
 
 /**
  * @brief Returns left part of message id.
@@ -69,7 +69,7 @@ MU_API const char * MU_CALL muMessageIdString(const MU_MailMessageId * _msg_id);
  * @sa muMessageIdRight
  * @ingroup message_id
  */
-MU_API const char * MU_CALL muMessageIdLeft(const MU_MailMessageId * _msg_id);
+MU_API const char * MU_CALL muMessageIdLeft(MU_MailMessageId * _msg_id);
 
 /**
  * @brief Returns right part of message id.
@@ -80,10 +80,10 @@ MU_API const char * MU_CALL muMessageIdLeft(const MU_MailMessageId * _msg_id);
  * @sa muMessageIdLeft
  * @ingroup message_id
  */
-MU_API const char * MU_CALL muMessageIdRight(const MU_MailMessageId * _msg_id);
+MU_API const char * MU_CALL muMessageIdRight(MU_MailMessageId * _msg_id);
 
 #ifdef __cplusplus
 } /* extern "C" */
 #endif
 
-#endif /* __LIBMU_MESSAGEID_H__ */
+#endif /* __LIBMU_PUBAPI_MESSAGEID_H__ */

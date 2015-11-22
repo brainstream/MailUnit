@@ -20,8 +20,8 @@
  * @brief API for working with e-mail messages.
 */
 
-#ifndef __LIBMU_MESSAGE_H__
-#define __LIBMU_MESSAGE_H__
+#ifndef __LIBMU_PUBAPI_MESSAGE_H__
+#define __LIBMU_PUBAPI_MESSAGE_H__
 
 #include "Message/Mime.h"
 #include "Message/MailHeader.h"
@@ -30,4 +30,4 @@
 #include "Message/DateTime.h"
 #include "Message/ContentType.h"
 
-#endif /* __LIBMU_MESSAGE_H__ */
+#endif /* __LIBMU_PUBAPI_MESSAGE_H__ */

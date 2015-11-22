@@ -20,8 +20,8 @@
  * @brief Main and auxiliary definitions
  */
 
-#ifndef __LIBMU_DEF_H__
-#define __LIBMU_DEF_H__
+#ifndef __LIBMU_PUBAPI_DEF_H__
+#define __LIBMU_PUBAPI_DEF_H__
 
 #include <stddef.h>
 #include <stdlib.h>
@@ -40,9 +40,13 @@
 #   endif
 #elif defined(__x86_64__) || defined(_M_X64)
 #   define MU_CALL
+#else
+#   error Curretn compiler is not supported yet
 #endif
 
 #ifdef _WIN32
+    typedef HANDLE MU_File;
+#   define MU_INVALID_FILE INVALID_HANDLE_VALUE
 #   if !defined(NOMINMAX) && defined(_MU_DISABLE_NOT_STANDARD_CPP_API)
 #       define NOMINMAX
 #   endif
@@ -52,12 +56,10 @@
 #   else
 #       define MU_API __declspec(dllimport)
 #   endif
-#   define MU_NATIVE_FILE HANDLE
-#   define MU_INVALID_NATIVE_FILE INVALID_HANDLE_VALUE
 #else
+    typedef int MU_File;
 #   define MU_API
-#   define MU_NATIVE_FILE int
-#   define MU_INVALID_NATIVE_FILE -1
+#   define MU_INVALID_FILE -1
 #endif
 
 #define MU_UNUSED(var) (void)var
@@ -75,13 +77,13 @@ typedef enum
     mu_true  = 1  /**< The @a true value */
 } MU_Bool;
 
-#define MU_DECLARE_API_TYPE(type) \
-    struct type;
-    //typedef struct type type;
+#define MU_DECLARE_API_TYPE(type)                \
+    struct __ ## type;              \
+    typedef struct __ ## type type;
 
 /**
  * @brief Releases an allocated memory.
  */
-MU_API void MU_CALL muFree(const void * _object);
+MU_API void MU_CALL muFree(void * _object);
 
-#endif /* __LIBMU_DEF_H__ */
+#endif /* __LIBMU_PUBAPI_DEF_H__ */

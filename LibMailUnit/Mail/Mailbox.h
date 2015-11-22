@@ -21,6 +21,8 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <LibMailUnit/ApiObject.h>
+#include <Include/LibMailUnit/Message/Mailbox.h>
 
 namespace LibMailUnit {
 namespace Mail {
@@ -101,5 +103,8 @@ private:
 
 } // namespace Mail
 } // namespace LibMailUnit
+
+MU_DEFINE_API_TYPE(MU_Mailbox, const LibMailUnit::Mail::Mailbox)
+MU_DEFINE_API_TYPE(MU_MailboxGroup, const LibMailUnit::Mail::MailboxGroup)
 
 #endif // __LIBMU_MAIL_MAILBOX_H__
