@@ -15,40 +15,27 @@
  *                                                                                             *
  ***********************************************************************************************/
 
-#ifndef __LIBMU_MQP_CLIENT_H__
-#define __LIBMU_MQP_CLIENT_H__
-
-#include <string>
-#include <vector>
-#include <map>
-#include <LibMailUnit/ApiObject.h>
-#include <LibMailUnit/Mqp/Command.h>
+#ifndef __LIBMU_MQP_RESPONSE_H__
+#define __LIBMU_MQP_RESPONSE_H__
 
 namespace LibMailUnit {
 namespace Mqp {
 
-class Client
+enum class ResponseType
 {
-private:
-    class Session; // TODO: Why is it here
-    struct CommandInfo;
+    error,
+    matched,
+    deleted
+}; // enum class ResponseType
 
-public:
-    Client(const std::string & _host, unsigned short _port);
-    virtual ~Client();
-    // TODO: copy constructor and so on...
-    void executeCommand(const Command & _command);
-    void abortCommand(const Command & _command);
-
-private:
-    std::string m_host;
-    unsigned short m_port;
-    std::map<const Command *, CommandInfo *> m_commands;
-};
+struct ResponseHeader
+{
+    ResponseType response_type;
+    unsigned int status_code;
+    unsigned int affected_count;
+}; // struct ResponseHeader
 
 } // namespace Mqp
 } // namespace LibMailUnit
 
-MU_DEFINE_API_TYPE(MU_MqpClient, LibMailUnit::Mqp::Client)
-
-#endif // __LIBMU_MQP_CLIENT_H__
+#endif // __LIBMU_MQP_RESPONSE_H__

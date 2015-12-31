@@ -15,40 +15,28 @@
  *                                                                                             *
  ***********************************************************************************************/
 
-#ifndef __LIBMU_MQP_CLIENT_H__
-#define __LIBMU_MQP_CLIENT_H__
+#ifndef __LIBMU_MQP_MESSAGE_H__
+#define __LIBMU_MQP_MESSAGE_H__
 
 #include <string>
 #include <vector>
-#include <map>
-#include <LibMailUnit/ApiObject.h>
-#include <LibMailUnit/Mqp/Command.h>
 
 namespace LibMailUnit {
 namespace Mqp {
 
-class Client
+struct Message // TODO: make a child to manipulate memory
 {
-private:
-    class Session; // TODO: Why is it here
-    struct CommandInfo;
-
-public:
-    Client(const std::string & _host, unsigned short _port);
-    virtual ~Client();
-    // TODO: copy constructor and so on...
-    void executeCommand(const Command & _command);
-    void abortCommand(const Command & _command);
-
-private:
-    std::string m_host;
-    unsigned short m_port;
-    std::map<const Command *, CommandInfo *> m_commands;
-};
+    unsigned int id;
+    std::string subject;
+    std::vector<std::string> from;
+    std::vector<std::string> to;
+    std::vector<std::string> cc;
+    std::vector<std::string> bcc;
+    size_t length;
+    char * body;
+}; // struct Message
 
 } // namespace Mqp
 } // namespace LibMailUnit
 
-MU_DEFINE_API_TYPE(MU_MqpClient, LibMailUnit::Mqp::Client)
-
-#endif // __LIBMU_MQP_CLIENT_H__
+#endif // __LIBMU_MQP_MESSAGE_H__

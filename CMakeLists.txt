@@ -189,6 +189,9 @@ set(SRC_LIB
     LibMailUnit/Mail/Mime.cpp
     LibMailUnit/Mqp/Client.h
     LibMailUnit/Mqp/Client.cpp
+    LibMailUnit/Mqp/Command.h
+    LibMailUnit/Mqp/Response.h
+    LibMailUnit/Mqp/Message.h
 )
 
 set(SRC_SERVER_LIB
