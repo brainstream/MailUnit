@@ -15,55 +15,48 @@
  *                                                                                             *
  ***********************************************************************************************/
 
-#include <boost/test/unit_test.hpp>
+#include <LibMailUnit/Api/Impl/Message/MessageId.h>
 
-// FIXME: uncomment
+using namespace LibMailUnit::Message;
 
-//#include <LibMailUnit/Memory.h>
-
-namespace LibMailUnit {
-namespace Test {
-
-BOOST_AUTO_TEST_SUITE(Memory)
-
-//struct Test
-//{
-//    Test(bool * _dtor_flag) :
-//        Test(0, std::string(), _dtor_flag)
-//    {
-//    }
-
-//    Test(int _num, const std::string & _str, bool * _dtor_flag) :
-//        num(_num),
-//        str(_str),
-//        dtor_flag(_dtor_flag)
-//    {
-//    }
-
-//    ~Test()
-//    {
-//        *dtor_flag = true;
-//    }
-
-//    int num;
-//    std::string str;
-//    bool * dtor_flag;
-//};
-
-BOOST_AUTO_TEST_CASE(handleTest)
+MU_MailMessageId * muMessageIdParse(const char * _raw_message_id)
 {
-//    bool destructor_called = false;
-//    Test * test = new Test(&destructor_called);
-//    MU_HANDLE handle = new ApiObject(test, false);
-//    BOOST_CHECK_EQUAL(test, handle->pointer<Test>());
-//    muFree(handle);
-//    BOOST_CHECK_EQUAL(false, destructor_called);
-//    handle = new ApiObject(test, true);
-//    muFree(handle);
-//    BOOST_CHECK_EQUAL(true, destructor_called);
+    MessageId * message_id = new MessageId();
+    message_id->id_string = _raw_message_id;
+    size_t at_pos = message_id->id_string.find("@");
+    size_t lt_pos = message_id->id_string.find("<");
+    size_t gt_pos = message_id->id_string.rfind(">");
+    if(std::string::npos == at_pos || std::string::npos == lt_pos || std::string::npos == gt_pos)
+    {
+        delete message_id;
+        return nullptr;
+    }
+    size_t left_pos = lt_pos + 1;
+    size_t left_len = left_pos ? at_pos - 1 : at_pos;
+    size_t right_pos = at_pos + 1;
+    size_t right_len = gt_pos - at_pos - 1;
+    message_id->left = message_id->id_string.substr(left_pos, left_len);
+    message_id->right = message_id->id_string.substr(right_pos, right_len);
+    return new MU_MailMessageId(message_id, true);
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+const char * MU_CALL muMessageIdString(MU_MailMessageId * _msg_id)
+{
+    if(nullptr == _msg_id)
+        return nullptr;
+    return _msg_id->pointer()->id_string.c_str();
+}
 
-} // namespace Test
-} // namespace LibMailUnit
+const char * MU_CALL muMessageIdLeft(MU_MailMessageId * _msg_id)
+{
+    if(nullptr == _msg_id)
+        return nullptr;
+    return _msg_id->pointer()->left.c_str();
+}
+
+const char * MU_CALL muMessageIdRight(MU_MailMessageId * _msg_id)
+{
+    if(nullptr == _msg_id)
+        return nullptr;
+    return _msg_id->pointer()->right.c_str();
+}

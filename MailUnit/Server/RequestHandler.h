@@ -21,7 +21,7 @@
 #include <memory>
 #include <boost/noncopyable.hpp>
 #include <boost/system/error_code.hpp>
-#include <Include/LibMailUnit/Def.h>
+#include <LibMailUnit/Api/Include/Def.h>
 #include <MailUnit/Server/Session.h>
 
 namespace MailUnit {

@@ -22,7 +22,7 @@
 #include <vector>
 #include <QObject>
 #include <QString>
-#include <Include/LibMailUnit/Message.h>
+#include <LibMailUnit/Api/Include/Message.h>
 
 namespace MailUnit {
 namespace Gui {

@@ -1,6 +1,6 @@
 /***********************************************************************************************
  *                                                                                             *
- * This file is part of MailUnit Library.                                                      *
+ * This file is part of the MailUnit Library.                                                  *
  *                                                                                             *
  * MailUnit Library is free software: you can redistribute it and/or modify it under the terms *
  * of the GNU Lesser General Public License as published by the Free Software Foundation,      *
@@ -16,7 +16,7 @@
  ***********************************************************************************************/
 
 #include <boost/test/unit_test.hpp>
-#include <Include/LibMailUnit/Message/Mailbox.h>
+#include <LibMailUnit/Api/Include/Message/Mailbox.h>
 
 namespace LibMailUnit {
 namespace Test {

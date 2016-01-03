@@ -23,7 +23,7 @@
 #include <boost/filesystem.hpp>
 #include <boost/iostreams/device/file_descriptor.hpp>
 #include <boost/locale/encoding.hpp>
-#include <Include/LibMailUnit/Def.h>
+#include <LibMailUnit/Api/Include/Def.h>
 
 #ifdef BOOST_WINDOWS_API
 #   define MU_PATHISWIDECHAR

@@ -1,6 +1,6 @@
 /***********************************************************************************************
  *                                                                                             *
- * This file is part of MailUnit Library.                                                      *
+ * This file is part of the MailUnit Library.                                                  *
  *                                                                                             *
  * MailUnit Library is free software: you can redistribute it and/or modify it under the terms *
  * of the GNU Lesser General Public License as published by the Free Software Foundation,      *
@@ -21,7 +21,6 @@
 #include <string>
 #include <vector>
 #include <map>
-#include <LibMailUnit/ApiObject.h>
 #include <LibMailUnit/Mqp/Command.h>
 
 namespace LibMailUnit {
@@ -48,7 +47,5 @@ private:
 
 } // namespace Mqp
 } // namespace LibMailUnit
-
-MU_DEFINE_API_TYPE(MU_MqpClient, LibMailUnit::Mqp::Client)
 
 #endif // __LIBMU_MQP_CLIENT_H__

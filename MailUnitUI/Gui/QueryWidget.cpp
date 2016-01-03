@@ -17,7 +17,7 @@
 
 #include <QNetworkReply>
 #include <MailUnitUI/Gui/QueryWidget.h>
-#include <LibMailUnit/Message/Mime.h>
+#include <LibMailUnit/Api/Include/Message/Mime.h>
 
 using namespace MailUnit::Gui;
 

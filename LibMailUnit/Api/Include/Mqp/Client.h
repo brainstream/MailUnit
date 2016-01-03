@@ -15,55 +15,60 @@
  *                                                                                             *
  ***********************************************************************************************/
 
-#include <boost/test/unit_test.hpp>
+#ifndef __LIBMU_PUBAPI_MQP_CLIENT_H__
+#define __LIBMU_PUBAPI_MQP_CLIENT_H__
 
-// FIXME: uncomment
+#include "../Def.h"
+#include "../StringList.h"
 
-//#include <LibMailUnit/Memory.h>
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-namespace LibMailUnit {
-namespace Test {
+MU_DECLARE_API_TYPE(MU_MqpClient)
+MU_DECLARE_API_TYPE(MU_MqpCommand)
 
-BOOST_AUTO_TEST_SUITE(Memory)
-
-//struct Test
-//{
-//    Test(bool * _dtor_flag) :
-//        Test(0, std::string(), _dtor_flag)
-//    {
-//    }
-
-//    Test(int _num, const std::string & _str, bool * _dtor_flag) :
-//        num(_num),
-//        str(_str),
-//        dtor_flag(_dtor_flag)
-//    {
-//    }
-
-//    ~Test()
-//    {
-//        *dtor_flag = true;
-//    }
-
-//    int num;
-//    std::string str;
-//    bool * dtor_flag;
-//};
-
-BOOST_AUTO_TEST_CASE(handleTest)
+typedef enum
 {
-//    bool destructor_called = false;
-//    Test * test = new Test(&destructor_called);
-//    MU_HANDLE handle = new ApiObject(test, false);
-//    BOOST_CHECK_EQUAL(test, handle->pointer<Test>());
-//    muFree(handle);
-//    BOOST_CHECK_EQUAL(false, destructor_called);
-//    handle = new ApiObject(test, true);
-//    muFree(handle);
-//    BOOST_CHECK_EQUAL(true, destructor_called);
-}
+    mu_mqp_matched,
+    mu_mqp_deleted,
+    mu_mqp_error
+} MU_MqpResponseType;
 
-BOOST_AUTO_TEST_SUITE_END()
+typedef struct
+{
+    MU_MqpResponseType response_type;
+    unsigned int status_code;
+    unsigned int affected_count;
+} MU_MqpResponseHeader;
 
-} // namespace Test
-} // namespace LibMailUnit
+typedef struct
+{
+    unsigned long id;
+    const char * subject;
+    MU_StringList * from;
+    MU_StringList * to;
+    MU_StringList * cc;
+    MU_StringList * bcc;
+} MU_MqpMessageHeader;
+
+typedef enum
+{
+    mu_mqp_evt_error,
+    mu_mqp_evt_response_header,
+    mu_mqp_evt_message_header,
+    mu_mqp_evt_message_body,
+    mu_mqp_evt_finish
+} MU_MqpEvent;
+
+typedef void MU_CALL (* MU_MqpProc)(MU_MqpEvent _event, const void * _arg, void * _user_data);
+
+MU_API MU_MqpClient * MU_CALL muMqpCreateClient(const char * _host, unsigned short _port);
+
+MU_API MU_MqpCommand * MU_CALL muMqpSendCommand(MU_MqpClient * _client, const char * _cmd, MU_MqpProc _proc, void * _user_data);
+
+#ifdef __cplusplus
+} /* extern "C" */
+#endif
+
+#endif /* __LIBMU_PUBAPI_MQP_CLIENT_H__ */

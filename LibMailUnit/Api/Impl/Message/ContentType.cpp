@@ -15,55 +15,43 @@
  *                                                                                             *
  ***********************************************************************************************/
 
-#include <boost/test/unit_test.hpp>
+#include <LibMailUnit/Message/ContentType.h>
+#include <LibMailUnit/Api/Impl/Message/ContentType.h>
 
-// FIXME: uncomment
+using namespace LibMailUnit::Message;
 
-//#include <LibMailUnit/Memory.h>
-
-namespace LibMailUnit {
-namespace Test {
-
-BOOST_AUTO_TEST_SUITE(Memory)
-
-//struct Test
-//{
-//    Test(bool * _dtor_flag) :
-//        Test(0, std::string(), _dtor_flag)
-//    {
-//    }
-
-//    Test(int _num, const std::string & _str, bool * _dtor_flag) :
-//        num(_num),
-//        str(_str),
-//        dtor_flag(_dtor_flag)
-//    {
-//    }
-
-//    ~Test()
-//    {
-//        *dtor_flag = true;
-//    }
-
-//    int num;
-//    std::string str;
-//    bool * dtor_flag;
-//};
-
-BOOST_AUTO_TEST_CASE(handleTest)
+MU_MailHeaderContentType * MU_CALL muContentTypeParse(const char * _raw_content_type)
 {
-//    bool destructor_called = false;
-//    Test * test = new Test(&destructor_called);
-//    MU_HANDLE handle = new ApiObject(test, false);
-//    BOOST_CHECK_EQUAL(test, handle->pointer<Test>());
-//    muFree(handle);
-//    BOOST_CHECK_EQUAL(false, destructor_called);
-//    handle = new ApiObject(test, true);
-//    muFree(handle);
-//    BOOST_CHECK_EQUAL(true, destructor_called);
+    const ContentType * content_type = parseContentType(_raw_content_type).release();
+    if(nullptr != content_type)
+        return new MU_MailHeaderContentType(content_type, true);
+    return nullptr;
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+MU_Bool MU_CALL muContentType(MU_MailHeaderContentType * _content_type, const char ** _type_out, const char ** _subtype_out)
+{
+    if(nullptr == _content_type)
+        return mu_false;
+    const ContentType * content_type = _content_type->pointer();
+    *_type_out = content_type->type.c_str();
+    *_subtype_out = content_type->subtype.c_str();
+    return mu_true;
+}
 
-} // namespace Test
-} // namespace LibMailUnit
+size_t MU_CALL muContentTypeParamsCount(MU_MailHeaderContentType * _content_type)
+{
+    if(nullptr == _content_type)
+        return 0;
+    return _content_type->pointer()->params.size();
+}
+
+MU_Bool MU_CALL muContentTypeParam(MU_MailHeaderContentType * _content_type, size_t _index,
+    const char ** _name_out, const char ** _value_out)
+{
+    if(nullptr == _content_type)
+        return mu_false;
+    const ContentTypeParam & param = _content_type->pointer()->params[_index];
+    *_name_out = param.name.c_str();
+    *_value_out = param.value.c_str();
+    return mu_true;
+}

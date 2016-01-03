@@ -15,55 +15,59 @@
  *                                                                                             *
  ***********************************************************************************************/
 
-#include <boost/test/unit_test.hpp>
+#ifndef __LIBMUIMPL_APIIMPL_APIOBJECT_H__
+#define __LIBMUIMPL_APIIMPL_APIOBJECT_H__
 
-// FIXME: uncomment
-
-//#include <LibMailUnit/Memory.h>
+#include <boost/noncopyable.hpp>
+#include <LibMailUnit/Api/Include/Def.h>
 
 namespace LibMailUnit {
-namespace Test {
 
-BOOST_AUTO_TEST_SUITE(Memory)
-
-//struct Test
-//{
-//    Test(bool * _dtor_flag) :
-//        Test(0, std::string(), _dtor_flag)
-//    {
-//    }
-
-//    Test(int _num, const std::string & _str, bool * _dtor_flag) :
-//        num(_num),
-//        str(_str),
-//        dtor_flag(_dtor_flag)
-//    {
-//    }
-
-//    ~Test()
-//    {
-//        *dtor_flag = true;
-//    }
-
-//    int num;
-//    std::string str;
-//    bool * dtor_flag;
-//};
-
-BOOST_AUTO_TEST_CASE(handleTest)
+class Object
 {
-//    bool destructor_called = false;
-//    Test * test = new Test(&destructor_called);
-//    MU_HANDLE handle = new ApiObject(test, false);
-//    BOOST_CHECK_EQUAL(test, handle->pointer<Test>());
-//    muFree(handle);
-//    BOOST_CHECK_EQUAL(false, destructor_called);
-//    handle = new ApiObject(test, true);
-//    muFree(handle);
-//    BOOST_CHECK_EQUAL(true, destructor_called);
-}
+protected:
+    Object() { }
 
-BOOST_AUTO_TEST_SUITE_END()
+public:
+    virtual ~Object() { }
+}; // class Object
 
-} // namespace Test
+template<typename PointerType>
+class ApiObject : public Object, private boost::noncopyable
+{
+public:
+    ApiObject(PointerType * _pointer, bool _destructible) :
+        mp_pointer(_pointer),
+        m_is_destructible(_destructible)
+    {
+    }
+
+    ~ApiObject() override
+    {
+        if(m_is_destructible)
+           delete mp_pointer;
+    }
+
+    PointerType * pointer() const
+    {
+        return mp_pointer;
+    }
+
+private:
+    PointerType * mp_pointer;
+    bool m_is_destructible;
+}; // class ApiObject
+
 } // namespace LibMailUnit
+
+#define MU_DEFINE_API_TYPE(type, ptr_type)                                         \
+    struct __ ## type : public LibMailUnit::ApiObject<ptr_type>                    \
+    {                                                                              \
+    public:                                                                        \
+        __ ## type(ptr_type * _pointer, bool _destructible) :                      \
+            ApiObject(_pointer, _destructible)                                     \
+        {                                                                          \
+        }                                                                          \
+    };
+
+#endif // __LIBMUIMPL_APIIMPL_APIOBJECT_H__

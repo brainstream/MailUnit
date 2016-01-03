@@ -15,55 +15,58 @@
  *                                                                                             *
  ***********************************************************************************************/
 
-#include <boost/test/unit_test.hpp>
+#ifndef __LIBMU_MESSAGE_HEADERS_H__
+#define __LIBMU_MESSAGE_HEADERS_H__
 
-// FIXME: uncomment
-
-//#include <LibMailUnit/Memory.h>
+#include <string>
+#include <vector>
+#include <istream>
+#include <memory>
 
 namespace LibMailUnit {
-namespace Test {
+namespace Message {
 
-BOOST_AUTO_TEST_SUITE(Memory)
-
-//struct Test
-//{
-//    Test(bool * _dtor_flag) :
-//        Test(0, std::string(), _dtor_flag)
-//    {
-//    }
-
-//    Test(int _num, const std::string & _str, bool * _dtor_flag) :
-//        num(_num),
-//        str(_str),
-//        dtor_flag(_dtor_flag)
-//    {
-//    }
-
-//    ~Test()
-//    {
-//        *dtor_flag = true;
-//    }
-
-//    int num;
-//    std::string str;
-//    bool * dtor_flag;
-//};
-
-BOOST_AUTO_TEST_CASE(handleTest)
+struct Header
 {
-//    bool destructor_called = false;
-//    Test * test = new Test(&destructor_called);
-//    MU_HANDLE handle = new ApiObject(test, false);
-//    BOOST_CHECK_EQUAL(test, handle->pointer<Test>());
-//    muFree(handle);
-//    BOOST_CHECK_EQUAL(false, destructor_called);
-//    handle = new ApiObject(test, true);
-//    muFree(handle);
-//    BOOST_CHECK_EQUAL(true, destructor_called);
-}
+    Header(const std::string & _name) :
+        name(_name)
+    {
+    }
 
-BOOST_AUTO_TEST_SUITE_END()
+    const std::string name;
+    std::vector<std::string> values;
+}; // struct Header
 
-} // namespace Test
+class HeaderMap : public std::vector<Header *>
+{
+public:
+    ~HeaderMap();
+    Header * find(const std::string & _name) const;
+}; // class HeaderMap
+
+class HeaderParser
+{
+private:
+    HeaderParser(std::istream & _input, HeaderMap & _output);
+
+public:
+    static void parse(std::istream & _input, HeaderMap &_output);
+
+private:
+    void parse();
+    bool parseLine(const std::string & _line);
+    bool isWhiteSpaceSymbol(char _symbol) const;
+    void pushPair();
+    void cleanUp();
+
+private:
+    std::istream & mr_input;
+    HeaderMap & mr_output;
+    std::string m_current_key;
+    std::string m_current_value;
+}; // class HeaderParser
+
+} // namespace Message
 } // namespace LibMailUnit
+
+#endif // __LIBMU_MESSAGE_HEADERS_H__

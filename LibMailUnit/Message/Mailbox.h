@@ -15,55 +15,91 @@
  *                                                                                             *
  ***********************************************************************************************/
 
-#include <boost/test/unit_test.hpp>
+#ifndef __LIBMU_MESSAGE_MAILBOX_H__
+#define __LIBMU_MESSAGE_MAILBOX_H__
 
-// FIXME: uncomment
-
-//#include <LibMailUnit/Memory.h>
+#include <memory>
+#include <string>
+#include <vector>
 
 namespace LibMailUnit {
-namespace Test {
+namespace Message {
 
-BOOST_AUTO_TEST_SUITE(Memory)
-
-//struct Test
-//{
-//    Test(bool * _dtor_flag) :
-//        Test(0, std::string(), _dtor_flag)
-//    {
-//    }
-
-//    Test(int _num, const std::string & _str, bool * _dtor_flag) :
-//        num(_num),
-//        str(_str),
-//        dtor_flag(_dtor_flag)
-//    {
-//    }
-
-//    ~Test()
-//    {
-//        *dtor_flag = true;
-//    }
-
-//    int num;
-//    std::string str;
-//    bool * dtor_flag;
-//};
-
-BOOST_AUTO_TEST_CASE(handleTest)
+class Mailbox final
 {
-//    bool destructor_called = false;
-//    Test * test = new Test(&destructor_called);
-//    MU_HANDLE handle = new ApiObject(test, false);
-//    BOOST_CHECK_EQUAL(test, handle->pointer<Test>());
-//    muFree(handle);
-//    BOOST_CHECK_EQUAL(false, destructor_called);
-//    handle = new ApiObject(test, true);
-//    muFree(handle);
-//    BOOST_CHECK_EQUAL(true, destructor_called);
-}
+public:
+    explicit Mailbox(const std::string & _address, const std::string & _name = std::string()) :
+        m_name(_name),
+        m_address(_address)
+    {
+    }
 
-BOOST_AUTO_TEST_SUITE_END()
+    Mailbox(const Mailbox &) = default;
 
-} // namespace Test
+    Mailbox & operator = (const Mailbox &) = default;
+
+    const std::string & name() const
+    {
+        return m_name;
+    }
+
+    const std::string & address() const
+    {
+        return m_address;
+    }
+
+    static std::unique_ptr<Mailbox> parse(const std::string & _input);
+
+private:
+    std::string m_name;
+    std::string m_address;
+}; // class Mailbox
+
+
+class MailboxGroup final
+{
+public:
+    MailboxGroup(const std::string & _input);
+
+    MailboxGroup(const MailboxGroup & _group);
+
+    MailboxGroup(MailboxGroup && _group);
+
+    ~MailboxGroup();
+
+    MailboxGroup & operator = (const MailboxGroup & _group);
+
+    MailboxGroup & operator = (MailboxGroup && _group);
+
+    const std::string & name() const
+    {
+        return m_name;
+    }
+
+    size_t mailboxCount() const
+    {
+        return m_mailboxes.size();
+    }
+
+    bool empty() const
+    {
+        return m_mailboxes.empty();
+    }
+
+    const Mailbox & operator [](size_t _index) const
+    {
+        return *m_mailboxes[_index];
+    }
+
+private:
+    void release();
+
+private:
+    std::string m_name;
+    std::vector<Mailbox *> m_mailboxes;
+}; // class MailboxGroup
+
+} // namespace Message
 } // namespace LibMailUnit
+
+#endif // __LIBMU_MESSAGE_MAILBOX_H__

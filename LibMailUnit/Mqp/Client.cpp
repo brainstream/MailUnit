@@ -1,6 +1,6 @@
 /***********************************************************************************************
  *                                                                                             *
- * This file is part of MailUnit Library.                                                      *
+ * This file is part of the MailUnit Library.                                                  *
  *                                                                                             *
  * MailUnit Library is free software: you can redistribute it and/or modify it under the terms *
  * of the GNU Lesser General Public License as published by the Free Software Foundation,      *
@@ -253,7 +253,7 @@ void Client::Session::readMessages(unsigned int _remained_count)
     auto on_body_read = [self, _remained_count](const boost::system::error_code & error, size_t readad) {
         std::istream body_stream(&self->m_streambuff);
         body_stream.read(self->mp_current_message->body, self->mp_current_message->length);
-        std::cout << ">>> Saved: " << readad << std::endl;
+        std::cout << ">>> Saved: " << readad << std::endl;  // FIXME: DELETE IT!
         std::cout << "BODY\n" << self->mp_current_message->body << "\nEND BODY\n" << std::flush; // FIXME: DELETE IT!
         if(error)
         {

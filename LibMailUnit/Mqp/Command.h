@@ -1,6 +1,6 @@
 /***********************************************************************************************
  *                                                                                             *
- * This file is part of MailUnit Library.                                                      *
+ * This file is part of the MailUnit Library.                                                  *
  *                                                                                             *
  * MailUnit Library is free software: you can redistribute it and/or modify it under the terms *
  * of the GNU Lesser General Public License as published by the Free Software Foundation,      *
@@ -40,7 +40,7 @@ public:
     virtual void onFinished(const Command & _command) = 0;
 }; // class CommandExecutionObserver
 
-class Command
+class Command : private boost::noncopyable
 {
 public:
     enum MqpOption : unsigned short
@@ -50,9 +50,13 @@ public:
     };
 
 public:
-    explicit Command(const std::string & _query, unsigned short _options) :
+    Command(const std::string & _query, unsigned short _options) :
         m_query(_query),
         m_options(_options)
+    {
+    }
+
+    virtual ~Command()
     {
     }
 

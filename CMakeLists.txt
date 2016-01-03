@@ -161,32 +161,44 @@ add_definitions(
 #                                                     #
 #######################################################
 
-set(LIB_PUBIC_INCLUDE_DIR ${CMAKE_CURRENT_LIST_DIR}/Include)
-
 set(SRC_LIB
-    ${LIB_PUBIC_INCLUDE_DIR}/LibMailUnit/Def.h
-    ${LIB_PUBIC_INCLUDE_DIR}/LibMailUnit/IO.h
-    ${LIB_PUBIC_INCLUDE_DIR}/LibMailUnit/Message.h
-    ${LIB_PUBIC_INCLUDE_DIR}/LibMailUnit/Message/Mime.h
-    ${LIB_PUBIC_INCLUDE_DIR}/LibMailUnit/Message/MailHeader.h
-    ${LIB_PUBIC_INCLUDE_DIR}/LibMailUnit/Message/Mailbox.h
-    ${LIB_PUBIC_INCLUDE_DIR}/LibMailUnit/Message/DateTime.h
-    ${LIB_PUBIC_INCLUDE_DIR}/LibMailUnit/Message/MessageId.h
-    ${LIB_PUBIC_INCLUDE_DIR}/LibMailUnit/Message/ContentType.h
-    ${LIB_PUBIC_INCLUDE_DIR}/LibMailUnit/Mqp/Client.h
-    LibMailUnit/ApiObject.h
-    LibMailUnit/ApiObject.cpp
-    LibMailUnit/Mail/DateTime.cpp
-    LibMailUnit/Mail/Headers.h
-    LibMailUnit/Mail/Headers.cpp
-    LibMailUnit/Mail/ContentType.h
-    LibMailUnit/Mail/ContentType.cpp
-    LibMailUnit/Mail/Mailbox.h
-    LibMailUnit/Mail/Mailbox.cpp
-    LibMailUnit/Mail/MessageId.h
-    LibMailUnit/Mail/MessageId.cpp
-    LibMailUnit/Mail/Mime.h
-    LibMailUnit/Mail/Mime.cpp
+    LibMailUnit/Api/Include/Def.h
+    LibMailUnit/Api/Include/StringList.h
+    LibMailUnit/Api/Include/Message.h
+    LibMailUnit/Api/Include/Message/Mime.h
+    LibMailUnit/Api/Include/Message/MailHeader.h
+    LibMailUnit/Api/Include/Message/Mailbox.h
+    LibMailUnit/Api/Include/Message/DateTime.h
+    LibMailUnit/Api/Include/Message/MessageId.h
+    LibMailUnit/Api/Include/Message/ContentType.h
+    LibMailUnit/Api/Include/Mqp/Client.h
+    ####
+    LibMailUnit/Api/Impl/ApiObject.h
+    LibMailUnit/Api/Impl/ApiObject.cpp
+    LibMailUnit/Api/Impl/StringList.h
+    LibMailUnit/Api/Impl/StringList.cpp
+    LibMailUnit/Api/Impl/Message/Mime.h
+    LibMailUnit/Api/Impl/Message/Mime.cpp
+    LibMailUnit/Api/Impl/Message/Headers.h
+    LibMailUnit/Api/Impl/Message/Headers.cpp
+    LibMailUnit/Api/Impl/Message/Mailbox.h
+    LibMailUnit/Api/Impl/Message/Mailbox.cpp
+    LibMailUnit/Api/Impl/Message/DateTime.cpp
+    LibMailUnit/Api/Impl/Message/MessageId.h
+    LibMailUnit/Api/Impl/Message/MessageId.cpp
+    LibMailUnit/Api/Impl/Message/ContentType.h
+    LibMailUnit/Api/Impl/Message/ContentType.cpp
+    LibMailUnit/Api/Impl/Mqp/Client.h
+    LibMailUnit/Api/Impl/Mqp/Client.cpp
+    ####
+    LibMailUnit/Message/Headers.h
+    LibMailUnit/Message/Headers.cpp
+    LibMailUnit/Message/ContentType.h
+    LibMailUnit/Message/ContentType.cpp
+    LibMailUnit/Message/Mailbox.h
+    LibMailUnit/Message/Mailbox.cpp
+    LibMailUnit/Message/Mime.h
+    LibMailUnit/Message/Mime.cpp
     LibMailUnit/Mqp/Client.h
     LibMailUnit/Mqp/Client.cpp
     LibMailUnit/Mqp/Command.h
@@ -447,7 +459,6 @@ if(ENABLE_GUI)
     target_include_directories(${TARGET_GUI} PRIVATE
         ${COMMON_INCLUDE_DIRS}
         ${CMAKE_BINARY_DIR}
-        ${LIB_PUBIC_INCLUDE_DIR}
     )
     target_compile_definitions(${TARGET_GUI} PRIVATE
         -D_MU_GUI

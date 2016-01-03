@@ -2,9 +2,9 @@
 #include <algorithm>
 #include <MailUnit/OS/FileSystem.h>
 #include <MailUnit/Storage/Email.h>
-#include <Include/LibMailUnit/Message/MailHeader.h>
-#include <Include/LibMailUnit/Message/Mailbox.h>
-#include <Include/LibMailUnit/Message/DateTime.h>
+#include <LibMailUnit/Api/Include/Message/MailHeader.h>
+#include <LibMailUnit/Api/Include/Message/Mailbox.h>
+#include <LibMailUnit/Api/Include/Message/DateTime.h>
 
 using namespace MailUnit::Storage;
 namespace fs = boost::filesystem;
