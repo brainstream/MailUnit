@@ -173,8 +173,11 @@ void Client::Session::run(const asio::ip::tcp::endpoint & _endpoint)
 
 void Client::Session::writeQuery()
 {
+    std::string query = boost::trim_copy(mp_command->query());
+    if(!boost::ends_with(query, ";"))
+        query += ';';
     std::shared_ptr<Client::Session> self = shared_from_this();
-    mp_socket->async_write_some(asio::buffer(mp_command->query()), [self](boost::system::error_code error, size_t) {
+    mp_socket->async_write_some(asio::buffer(query), [self](boost::system::error_code error, size_t) {
         if(error)
         {
             self->raiseError(error);
@@ -362,6 +365,9 @@ void Client::Session::writeQuit()
             return;
         }
         self->mp_socket->close();
+        self->mp_command->callObservers([self](CommandExecutionObserver & observer) {
+            observer.onFinished(*self->mp_command);
+        });
     });
 }
 

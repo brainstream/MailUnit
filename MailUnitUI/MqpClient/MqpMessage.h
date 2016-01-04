@@ -27,6 +27,16 @@ namespace Gui {
 
 struct MqpMessageHeader
 {
+    MqpMessageHeader()
+    {
+        static bool registered = false;
+        if(!registered)
+        {
+            registered = true;
+            qRegisterMetaType<MqpMessageHeader>("MqpMessageHeader");
+        }
+    }
+
     quint32 id;
     QStringList from;
     QStringList to;
@@ -37,6 +47,16 @@ struct MqpMessageHeader
 
 struct MqpRawMessage : MqpMessageHeader
 {
+    MqpRawMessage()
+    {
+        static bool registered = false;
+        if(!registered)
+        {
+            registered = true;
+            qRegisterMetaType<MqpRawMessage>("MqpRawMessage");
+        }
+    }
+
     QByteArray body;
 }; // class MqpRawMessage
 
@@ -59,8 +79,5 @@ private:
 
 } // namespace Gui
 } // namespace MailUnit
-
-Q_DECLARE_METATYPE(MailUnit::Gui::MqpMessageHeader)
-Q_DECLARE_METATYPE(MailUnit::Gui::MqpRawMessage)
 
 #endif // __MUGUI_MQPCLIENT_MQPRESPONSE_H__

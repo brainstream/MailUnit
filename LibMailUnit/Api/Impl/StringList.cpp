@@ -27,5 +27,5 @@ const char * MU_CALL muStringListString(const MU_StringList * _string_list, size
     if(nullptr == _string_list)
         return nullptr;
     const std::vector<std::string> * ptr = _string_list->pointer();
-    return ptr->size() < _index ? ptr->at(_index).c_str() : nullptr;
+    return _index < ptr->size() ? ptr->at(_index).c_str() : nullptr;
 }

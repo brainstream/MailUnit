@@ -89,7 +89,7 @@ public:
     }
 
 private:
-    const std::string & m_query;
+    const std::string m_query;
     const unsigned short m_options;
     std::set<CommandExecutionObserver *> m_observers;
 }; // class Command

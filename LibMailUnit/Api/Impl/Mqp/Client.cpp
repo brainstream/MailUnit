@@ -85,7 +85,7 @@ void CallbackProxy::onMessageReceived(const Command & _command, const Message & 
     MU_UNUSED(_command);
     if(m_proc)
     {
-        MU_MqpMessageHeader api_msg_header = { };
+        MU_MqpMessage api_msg_header = { };
         api_msg_header.id = _message.id;
         api_msg_header.subject = _message.subject.c_str();
         MU_StringList from(&_message.from, false);
@@ -96,10 +96,8 @@ void CallbackProxy::onMessageReceived(const Command & _command, const Message & 
         api_msg_header.to = &to;
         api_msg_header.cc = &cc;
         api_msg_header.bcc = &bcc;
-        m_proc(mu_mqp_evt_message_header, &api_msg_header, mp_user_data);
-
-        // TODO: separate event
-        m_proc(mu_mqp_evt_message_body, _message.body, mp_user_data);
+        api_msg_header.body = _message.body;
+        m_proc(mu_mqp_evt_message, &api_msg_header, mp_user_data);
     }
 }
 
@@ -138,7 +136,7 @@ MU_MqpClient * MU_CALL muMqpCreateClient(const char * _host, unsigned short _por
     return new MU_MqpClient(new Client(_host, _port), true);
 }
 
-MU_MqpCommand * muMqpSendCommand(MU_MqpClient * _client, const char * _cmd, MU_MqpProc _proc, void * _user_data)
+MU_MqpCommand * MU_CALL muMqpSendCommand(MU_MqpClient * _client, const char * _cmd, MU_MqpProc _proc, void * _user_data)
 {
     if(nullptr == _client)
         return nullptr;

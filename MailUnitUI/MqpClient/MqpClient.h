@@ -21,6 +21,7 @@
 #include <QTcpSocket>
 #include <MailUnitUI/MqpClient/ServerConfig.h>
 #include <MailUnitUI/MqpClient/MqpMessage.h>
+#include <LibMailUnit/Api/Include/Mqp/Client.h>
 
 namespace MailUnit {
 namespace Gui {
@@ -55,6 +56,7 @@ class MqpClient : public QObject
 
 public:
     explicit MqpClient(const ServerConfig & _server, QObject * _parent = nullptr);
+    ~MqpClient() override;
     void executeRequest(const QString & _request);
 
 signals:
@@ -63,11 +65,16 @@ signals:
     void finished();
 
 private:
-    quint32 readHeader(QTcpSocket &_socket);
-    void readMessage(QTcpSocket &_socket);
+    static void mqpProc(MU_MqpEvent _event, const void * _arg, void * _user_data);
+    void onResponseHeaderReceived(const MU_MqpResponseHeader * _header);
+    void onMessageReceived(const MU_MqpMessage * _message);
+    void onError(unsigned int _error_code);
+    void onFinished();
 
 private:
     ServerConfig m_server;
+    MU_MqpClient * mp_client;
+    MU_MqpCommand * mp_command;
 }; // class MqpClient
 
 } // namespace Gui

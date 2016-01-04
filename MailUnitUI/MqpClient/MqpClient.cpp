@@ -23,131 +23,89 @@ MqpClient::MqpClient(const ServerConfig & _server, QObject * _parent /*= nullptr
     QObject(_parent),
     m_server(_server)
 {
+    mp_client = muMqpCreateClient(_server.host().toLatin1(), _server.port());
+}
+
+MqpClient::~MqpClient()
+{
+    muFree(mp_command);
+    muFree(mp_client);
 }
 
 void MqpClient::executeRequest(const QString & _request)
 {
-    QString request = _request.trimmed();
-    if(!request.endsWith(';'))
-        request += ';';
-    QTcpSocket * socket = new QTcpSocket();
-    connect(socket, &QTcpSocket::connected, [socket, request]() {
-        socket->write(request.toUtf8());
-    });
-    connect(socket, &QTcpSocket::readyRead, [this, socket]() {
-        quint32 message_count = readHeader(*socket);
-        for(quint32 i = 0; i < message_count; ++i)
-            readMessage(*socket);
-        socket->write("quit;");
-    });
-    connect(socket, static_cast<void (QTcpSocket::*)(QAbstractSocket::SocketError)>(&QAbstractSocket::error),
-        [this](QAbstractSocket::SocketError) {
-        // TODO: handle
-    });
-    connect(socket, SIGNAL(disconnected()), socket, SLOT(deleteLater()));
-    connect(socket, SIGNAL(disconnected()), SIGNAL(finished()));
-    socket->connectToHost(m_server.host(), m_server.port());
+    muMqpSendCommand(mp_client, _request.toLatin1(), &mqpProc, this);
 }
 
-quint32 MqpClient::readHeader(QTcpSocket & _socket)
+void MqpClient::mqpProc(MU_MqpEvent _event, const void * _arg, void * _user_data)
 {
-    static const QString hdr_status  = "STATUS: ";
-    static const QString hdr_matched = "MATCHED: ";
-    static const QString hdr_deleted = "DELETED: ";
-    MqpResponseHeader header = { };
-    header.response_type = MqpResponseType::error;
-    bool has_messages = false;
-    for(;;)
+    MqpClient * client = static_cast<MqpClient *>(_user_data);
+    switch(_event)
     {
-        if(!_socket.canReadLine()) {
-            _socket.waitForReadyRead();
-            continue;
-        }
-        QString line(_socket.readLine());
-        line = line.trimmed();
-        if(line.isEmpty()) break;
-        if(line.startsWith(hdr_status))
-        {
-            header.status_code = line.mid(hdr_status.length()).toUInt();
-        }
-        else if(line.startsWith(hdr_matched))
-        {
-            has_messages = true;
-            header.affected_count = line.mid(hdr_matched.length()).toUInt();
-            header.response_type = MqpResponseType::matched;
-        }
-        else if(line.startsWith(hdr_deleted))
-        {
-            header.affected_count = line.mid(hdr_matched.length()).toUInt();
-            header.response_type = MqpResponseType::deleted;
-        }
+    case mu_mqp_evt_error:
+        client->onError(*static_cast<const unsigned int *>(_arg));
+        break;
+    case mu_mqp_evt_response_header:
+        client->onResponseHeaderReceived(static_cast<const MU_MqpResponseHeader *>(_arg));
+        break;
+    case mu_mqp_evt_message:
+        client->onMessageReceived(static_cast<const MU_MqpMessage *>(_arg));
+        break;
+    case mu_mqp_evt_finish:
+        client->onFinished();
+        break;
     }
-    emit connected(header);
-    return has_messages ? header.affected_count : 0;
 }
 
-void MqpClient::readMessage(QTcpSocket & _socket)
+void MqpClient::onResponseHeaderReceived(const MU_MqpResponseHeader * _header)
 {
-    static const QString hdr_item    = "ITEM: ";
-    static const QString hdr_size    = "SIZE: ";
-    static const QString hdr_id      = "ID: ";
-    static const QString hdr_subject = "SUBJECT: ";
-    static const QString hdr_from    = "FROM: ";
-    static const QString hdr_to      = "TO: ";
-    static const QString hdr_cc      = "CC: ";
-    static const QString hdr_bcc     = "BCC: ";
-    MqpRawMessage message =  { };
-    size_t size = 0;
-    for(;;)
+    MqpResponseHeader qheader;
+    qheader.affected_count = _header->affected_count;
+    qheader.status_code = _header->status_code;
+    switch(_header->response_type)
     {
-        if(!_socket.canReadLine()) {
-            _socket.waitForReadyRead();
-            continue;
-        }
-        QString line(_socket.readLine());
-        line = line.trimmed();
-        if(line.isEmpty()) break;
-        if(line.startsWith(hdr_item))
-        {
-            // TODO: parse
-        }
-        else if(line.startsWith(hdr_size))
-        {
-            size = line.mid(hdr_size.length()).toULong();
-        }
-        else if(line.startsWith(hdr_id))
-        {
-            message.id = line.mid(hdr_id.length()).toUInt();
-        }
-        else if(line.startsWith(hdr_from))
-        {
-            message.from.append(line.mid(hdr_from.length()));
-        }
-        else if(line.startsWith(hdr_to))
-        {
-            message.to.append(line.mid(hdr_to.length()));
-        }
-        else if(line.startsWith(hdr_cc))
-        {
-            message.cc.append(line.mid(hdr_cc.length()));
-        }
-        else if(line.startsWith(hdr_bcc))
-        {
-            message.bcc.append(line.mid(hdr_bcc.length()));
-        }
-        else if(line.startsWith(hdr_subject))
-        {
-            message.subject = line.mid(hdr_subject.length());
-        }
+    case mu_mqp_error:
+        qheader.response_type = MqpResponseType::error;
+        break;
+    case mu_mqp_matched:
+        qheader.response_type = MqpResponseType::matched;
+        break;
+    case mu_mqp_deleted:
+        qheader.response_type = MqpResponseType::deleted;
+        break;
+    default:
+        break;
     }
-    for(size_t size_left = size; size_left > 0;)
-    {
-        if(_socket.atEnd()) {
-            _socket.waitForReadyRead();
-        }
-        QByteArray data = _socket.read(size_left);
-        message.body.append(data);
-        size_left -= data.length();
-    }
-    emit messageReceived(message);
+    emit connected(qheader);
+}
+
+void MqpClient::onMessageReceived(const MU_MqpMessage * _message)
+{
+    MqpRawMessage qmessage;
+    qmessage.body = _message->body;
+    qmessage.subject = _message->subject;
+    qmessage.id = _message->id;
+    size_t count = muStringListLength(_message->from);
+    for(size_t i = 0; i < count; ++i)
+        qmessage.from.append(muStringListString(_message->from, i));
+    count = muStringListLength(_message->to);
+    for(size_t i = 0; i < count; ++i)
+        qmessage.to.append(muStringListString(_message->to, i));
+    count = muStringListLength(_message->cc);
+    for(size_t i = 0; i < count; ++i)
+        qmessage.cc.append(muStringListString(_message->cc, i));
+    count = muStringListLength(_message->bcc);
+    for(size_t i = 0; i < count; ++i)
+        qmessage.bcc.append(muStringListString(_message->bcc, i));
+    emit messageReceived(qmessage);
+}
+
+void MqpClient::onError(unsigned int _error_code)
+{
+    qDebug() << "MQP Error: " << _error_code;
+}
+
+void MqpClient::onFinished()
+{
+    emit finished();
 }

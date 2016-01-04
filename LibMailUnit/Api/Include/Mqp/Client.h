@@ -50,14 +50,14 @@ typedef struct
     MU_StringList * to;
     MU_StringList * cc;
     MU_StringList * bcc;
-} MU_MqpMessageHeader;
+    char * body;
+} MU_MqpMessage;
 
 typedef enum
 {
     mu_mqp_evt_error,
     mu_mqp_evt_response_header,
-    mu_mqp_evt_message_header,
-    mu_mqp_evt_message_body,
+    mu_mqp_evt_message,
     mu_mqp_evt_finish
 } MU_MqpEvent;
 
