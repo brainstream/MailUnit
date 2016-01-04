@@ -322,7 +322,7 @@ void MqpSession::startDeadlineTimer()
             // TODO: error
             // TODO: handle boost::asio::error::operation_aborted
         }
-        delete timer;
+        delete self->m_deadline_timer.exchange(nullptr);
         std::stringstream message;
         message << MQP_STATUS << StatusCode::Timeout << MQP_ENDHDR;
         self->write(message.str(), [self] {
