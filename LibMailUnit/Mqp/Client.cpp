@@ -22,8 +22,6 @@
 #include <boost/asio.hpp>
 #include <LibMailUnit/Mqp/Client.h>
 
-#include <iostream> // TODO: DELETE IT!
-
 using namespace LibMailUnit::Mqp;
 namespace asio = boost::asio;
 
@@ -118,7 +116,9 @@ public:
 private:
     void writeQuery();
     void readResponseHeader();
-    void readMessages(unsigned int _remained_count);
+    void readMessages();
+    void readMessageHeader();
+    void readMessageBody();
     void writeQuit();
     void raiseError(const boost::system::error_code & _error);
 
@@ -129,6 +129,8 @@ private:
     const Command * mp_command;
     ResponseHeader * mp_response_header; // TODO: must not be a pointer (?)
     Message * mp_current_message;
+    size_t m_total_message_count;
+    size_t m_current_message_number;
 }; // class Client::Session
 
 
@@ -142,7 +144,9 @@ Client::Session::Session(const Command & _command) :
     mp_socket(nullptr),
     mp_command(&_command),
     mp_response_header(new ResponseHeader),
-    mp_current_message(nullptr)
+    mp_current_message(nullptr),
+    m_total_message_count(0),
+    m_current_message_number(0)
 {
     memset(mp_response_header, 0, sizeof(ResponseHeader));
 }
@@ -235,7 +239,9 @@ void Client::Session::readResponseHeader()
             });
             if(ResponseType::matched == self->mp_response_header->response_type)
             {
-               self->readMessages(self->mp_response_header->affected_count);
+                self->m_total_message_count = self->mp_response_header->affected_count;
+                self->m_current_message_number = 0;
+                self->readMessages();
             }
             else
             {
@@ -244,115 +250,112 @@ void Client::Session::readResponseHeader()
         });
 }
 
-void Client::Session::readMessages(unsigned int _remained_count)
+void Client::Session::readMessages()
 {
     static const char mqp_header_body_delemiter[] = "\r\n\r\n";
-    if(0 == _remained_count)
+    if(m_current_message_number == m_total_message_count)
     {
         writeQuit();
         return;
     }
+    ++m_current_message_number;
     std::shared_ptr<Session> self = shared_from_this();
-    auto on_body_read = [self, _remained_count](const boost::system::error_code & error, size_t readad) {
-        std::istream body_stream(&self->m_streambuff);
-        body_stream.read(self->mp_current_message->body, self->mp_current_message->length);
-        std::cout << ">>> Saved: " << readad << std::endl;  // FIXME: DELETE IT!
-        std::cout << "BODY\n" << self->mp_current_message->body << "\nEND BODY\n" << std::flush; // FIXME: DELETE IT!
+    asio::async_read_until(*mp_socket, m_streambuff, mqp_header_body_delemiter, [self](const boost::system::error_code & error, size_t) {
         if(error)
         {
             self->raiseError(error);
             return;
         }
-        self->mp_command->callObservers([self](CommandExecutionObserver & observer) {
-            observer.onMessageReceived(*self->mp_command, *self->mp_current_message);
-        });
-        self->readMessages(_remained_count - 1);
-        delete [] self->mp_current_message->body;
-        delete self->mp_current_message;
-        self->mp_current_message = nullptr;
-    };
-    auto on_header_read = [self, on_body_read](const boost::system::error_code & error, size_t header_bytes) {
-        if(error)
-        {
-            self->raiseError(error);
-            return;
-        }
-        static const char hdr_item[]    = "ITEM: ";
-        static const char hdr_size[]    = "SIZE: ";
-        static const char hdr_id[]      = "ID: ";
-        static const char hdr_subject[] = "SUBJECT: ";
-        static const char hdr_from[]    = "FROM: ";
-        static const char hdr_to[]      = "TO: ";
-        static const char hdr_cc[]      = "CC: ";
-        static const char hdr_bcc[]     = "BCC: ";
-        self->mp_current_message = new Message();
-        std::istream header_stream(&self->m_streambuff);
-        std::string line;
-        // TODO: BEGIN DELETE
-        std::cout << "===========================================================" << std::endl <<
-            "Header readed: " << header_bytes << std::endl <<
-            "===========================================================" << std::endl;
-        // TODO: END DELETE
-        for(int i = 0; std::getline(header_stream, line); ++i)
-        {
-            boost::trim(line);
-            std::cout << line << std::endl; // TODO: DELETE IT!
-            if(line.empty() && i)
-            {
-                break;
-            }
-            if(boost::starts_with(line, hdr_item))
-            {
-                // TODO: parse
-            }
-            else if(boost::starts_with(line, hdr_size))
-            {
-                self->mp_current_message->length = boost::lexical_cast<size_t>(line.substr(sizeof(hdr_size) - 1));
-            }
-            else if(boost::starts_with(line, hdr_id))
-            {
-                self->mp_current_message->id = boost::lexical_cast<size_t>(line.substr(sizeof(hdr_id) - 1));
-            }
-            else if(boost::starts_with(line, hdr_from))
-            {
-                self->mp_current_message->from.push_back(line.substr(sizeof(hdr_from) - 1));
-            }
-            else if(boost::starts_with(line, hdr_to))
-            {
-                self->mp_current_message->to.push_back(line.substr(sizeof(hdr_to) - 1));
-            }
-            else if(boost::starts_with(line, hdr_cc))
-            {
-                self->mp_current_message->cc.push_back(line.substr(sizeof(hdr_cc) - 1));
-            }
-            else if(boost::starts_with(line, hdr_bcc))
-            {
-                self->mp_current_message->bcc.push_back(line.substr(sizeof(hdr_bcc) - 1));
-            }
-            else if(boost::starts_with(line, hdr_subject))
-            {
-                self->mp_current_message->subject = line.substr(sizeof(hdr_subject) - 1);
-            }
-        }
-        if(0 == self->mp_current_message->length)
-        {
-            // TODO: error
-            return;
-        }
-        self->mp_current_message->body = new char[self->mp_current_message->length + 1];
-        memset(self->mp_current_message->body, 0, self->mp_current_message->length + 1);
-        asio::async_read(*self->mp_socket, self->m_streambuff, [self](const boost::system::error_code & error, size_t) {
-            if(error)
-            {
-                self->raiseError(error);
-                return size_t(0);
-            }
-            std::ptrdiff_t remining_bytes = self->mp_current_message->length - asio::buffer_size(self->m_streambuff.data());
-            return size_t(remining_bytes > 0 ? remining_bytes : 0);
-        }, on_body_read);
+        self->readMessageHeader();
+    });
+}
 
-    };
-    asio::async_read_until(*mp_socket, m_streambuff, mqp_header_body_delemiter, on_header_read);
+void Client::Session::readMessageHeader()
+{
+    static const char hdr_size[]    = "SIZE: ";
+    static const char hdr_id[]      = "ID: ";
+    static const char hdr_subject[] = "SUBJECT: ";
+    static const char hdr_from[]    = "FROM: ";
+    static const char hdr_to[]      = "TO: ";
+    static const char hdr_cc[]      = "CC: ";
+    static const char hdr_bcc[]     = "BCC: ";
+    mp_current_message = new Message { };
+    mp_current_message->number = m_current_message_number;
+    std::istream header_stream(&m_streambuff);
+    std::string line;
+    for(int i = 0; std::getline(header_stream, line); ++i)
+    {
+        boost::trim(line);
+        if(line.empty() && i)
+        {
+            break;
+        }
+        else if(boost::starts_with(line, hdr_size))
+        {
+            mp_current_message->length = boost::lexical_cast<size_t>(line.substr(sizeof(hdr_size) - 1));
+        }
+        else if(boost::starts_with(line, hdr_id))
+        {
+            mp_current_message->id = boost::lexical_cast<size_t>(line.substr(sizeof(hdr_id) - 1));
+        }
+        else if(boost::starts_with(line, hdr_from))
+        {
+            mp_current_message->from.push_back(line.substr(sizeof(hdr_from) - 1));
+        }
+        else if(boost::starts_with(line, hdr_to))
+        {
+            mp_current_message->to.push_back(line.substr(sizeof(hdr_to) - 1));
+        }
+        else if(boost::starts_with(line, hdr_cc))
+        {
+            mp_current_message->cc.push_back(line.substr(sizeof(hdr_cc) - 1));
+        }
+        else if(boost::starts_with(line, hdr_bcc))
+        {
+            mp_current_message->bcc.push_back(line.substr(sizeof(hdr_bcc) - 1));
+        }
+        else if(boost::starts_with(line, hdr_subject))
+        {
+            mp_current_message->subject = line.substr(sizeof(hdr_subject) - 1);
+        }
+    }
+    if(0 == mp_current_message->length)
+    {
+        // TODO: error
+        return;
+    }
+    mp_current_message->body = new char[mp_current_message->length + 1];
+    memset(mp_current_message->body, 0, mp_current_message->length + 1);
+    auto self = shared_from_this();
+    asio::async_read(*mp_socket, m_streambuff, [self](const boost::system::error_code & error, size_t) {
+        if(error)
+        {
+            self->raiseError(error);
+            return size_t(0);
+        }
+        std::ptrdiff_t remining_bytes = self->mp_current_message->length - asio::buffer_size(self->m_streambuff.data());
+        return size_t(remining_bytes > 0 ? remining_bytes : 0);
+    }, [self](const boost::system::error_code & error, size_t) {
+        if(error)
+        {
+            self->raiseError(error);
+            return;
+        }
+        self->readMessageBody();
+    });
+}
+
+void Client::Session::readMessageBody()
+{
+    std::istream body_stream(&m_streambuff);
+    body_stream.read(mp_current_message->body, mp_current_message->length);
+    mp_command->callObservers([this](CommandExecutionObserver & observer) {
+        observer.onMessageReceived(*mp_command, *mp_current_message);
+    });
+    readMessages();
+    delete [] mp_current_message->body;
+    delete mp_current_message;
+    mp_current_message = nullptr;
 }
 
 void Client::Session::writeQuit()

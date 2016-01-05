@@ -27,6 +27,7 @@ namespace Mqp {
 struct Message // TODO: make a child to manipulate memory
 {
     unsigned int id;
+    unsigned int number;
     std::string subject;
     std::vector<std::string> from;
     std::vector<std::string> to;
