@@ -175,7 +175,16 @@ void Client::Session::run(const std::string _host, unsigned short _port)
             self->raiseError(error);
             return;
         }
-        self->connect(*iterator);
+        asio::ip::tcp::resolver::iterator end_it;
+        for(asio::ip::tcp::resolver::iterator ep_it = iterator; ep_it != end_it; ++ep_it)
+        {
+            if(ep_it->endpoint().address().is_v4())
+            {
+                self->connect(ep_it->endpoint());
+                return;
+            }
+        }
+        self->connect(iterator->endpoint());
     });
 }
 
