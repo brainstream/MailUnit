@@ -37,7 +37,7 @@ void MqpClient::executeRequest(const QString & _request)
     muMqpSendCommand(mp_client, _request.toLatin1(), &mqpProc, this);
 }
 
-void MqpClient::mqpProc(MU_MqpEvent _event, const void * _arg, void * _user_data)
+void MU_CALL MqpClient::mqpProc(MU_MqpEvent _event, const void * _arg, void * _user_data)
 {
     MqpClient * client = static_cast<MqpClient *>(_user_data);
     switch(_event)

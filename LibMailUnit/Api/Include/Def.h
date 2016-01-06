@@ -45,12 +45,12 @@
 #endif
 
 #ifdef _WIN32
+#   include <windows.h>
     typedef HANDLE MU_File;
 #   define MU_INVALID_FILE INVALID_HANDLE_VALUE
 #   if !defined(NOMINMAX) && defined(_MU_DISABLE_NOT_STANDARD_CPP_API)
 #       define NOMINMAX
 #   endif
-#   include <windows.h>
 #   ifdef _MU_LIB
 #       define MU_API __declspec(dllexport)
 #   else

@@ -65,7 +65,7 @@ signals:
     void finished();
 
 private:
-    static void mqpProc(MU_MqpEvent _event, const void * _arg, void * _user_data);
+    static void MU_CALL mqpProc(MU_MqpEvent _event, const void * _arg, void * _user_data);
     void onResponseHeaderReceived(const MU_MqpResponseHeader * _header);
     void onMessageReceived(const MU_MqpMessage * _message);
     void onError(unsigned int _error_code);

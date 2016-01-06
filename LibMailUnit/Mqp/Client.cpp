@@ -110,10 +110,11 @@ class Client::Session final : public std::enable_shared_from_this<Client::Sessio
 public:
     explicit Session(const Command & _command);
     ~Session();
-    void run(const asio::ip::tcp::endpoint & _endpoint);
+    void run(const std::string _host, unsigned short _port);
     void abort();
 
 private:
+    void connect(const asio::ip::tcp::endpoint & _endpoint);
     void writeQuery();
     void readResponseHeader();
     void readMessages();
@@ -125,6 +126,7 @@ private:
 private:
     SharedIOService m_shared_io_service;
     asio::ip::tcp::socket * mp_socket;
+    asio::ip::tcp::resolver m_name_resolver;
     asio::streambuf m_streambuff;
     const Command * mp_command;
     ResponseHeader * mp_response_header; // TODO: must not be a pointer (?)
@@ -142,6 +144,7 @@ struct Client::CommandInfo
 
 Client::Session::Session(const Command & _command) :
     mp_socket(nullptr),
+    m_name_resolver(m_shared_io_service.service()),
     mp_command(&_command),
     mp_response_header(new ResponseHeader),
     mp_current_message(nullptr),
@@ -160,9 +163,24 @@ Client::Session::~Session()
     delete mp_current_message;
 }
 
-void Client::Session::run(const asio::ip::tcp::endpoint & _endpoint)
+void Client::Session::run(const std::string _host, unsigned short _port)
 {
-    assert(mp_socket == nullptr);
+    std::shared_ptr<Client::Session> self = shared_from_this();
+    auto query = asio::ip::tcp::resolver::query(_host, boost::lexical_cast<std::string>(_port));
+    m_name_resolver.async_resolve(query, [self](const boost::system::error_code& error,
+        asio::ip::tcp::resolver::iterator iterator)
+    {
+        if(error)
+        {
+            self->raiseError(error);
+            return;
+        }
+        self->connect(*iterator);
+    });
+}
+
+void Client::Session::connect(const asio::ip::tcp::endpoint & _endpoint)
+{
     mp_socket = new asio::ip::tcp::socket(m_shared_io_service.service());
     std::shared_ptr<Client::Session> self = shared_from_this();
     mp_socket->async_connect(_endpoint, [self](const boost::system::error_code & error) {
@@ -408,8 +426,7 @@ void Client::executeCommand(const Command & _command)
     CommandInfo * command_info = new CommandInfo;
     command_info->session.reset(session);
     m_commands[&_command] = command_info;
-    asio::ip::tcp::endpoint endpoint(asio::ip::address::from_string(m_host), m_port);
-    session->run(endpoint);
+    session->run(m_host, m_port);
 }
 
 void Client::abortCommand(const Command & _command)
