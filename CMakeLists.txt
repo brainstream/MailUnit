@@ -441,13 +441,18 @@ if(ENABLE_GUI)
     qt5_wrap_cpp(GUI_MOC ${SRC_GUI_MOC})
     qt5_wrap_ui(GUI_UI ${SRC_GUI_UI})
     qt5_add_resources(GUI_RSC ${SRC_GUI_RSC})
-    add_executable(${TARGET_GUI}
+    set(GUI_ALL_SRC
         ${SRC_GUI}
         ${GUI_MOC}
         ${GUI_UI}
         ${GUI_RSC}
         ${SRC_GUI_BIN}
     )
+    if(WIN32)
+        add_executable(${TARGET_GUI} WIN32 ${GUI_ALL_SRC})
+    else()
+        add_executable(${TARGET_GUI} ${GUI_ALL_SRC})
+    endif()
     qt5_use_modules(${TARGET_GUI}
         Widgets
         Network
